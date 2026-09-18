@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shrey Valia — Machine learning research</title>
+<meta name="description" content="Shrey Valia builds physics-informed and graph neural networks that predict how molecules organize themselves. Machine learning research at Oak Ridge National Laboratory; CS + CE at Northeastern University.">
+<meta name="author" content="Shrey Valia">
+<meta name="theme-color" content="#05070f">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shrey Valia — Machine learning research">
+<meta property="og:description" content="Physics-informed and graph neural networks for polymer growth and molecular self-assembly.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- motion is opt-in: without JS every section stays visible -->
+<script>document.documentElement.classList.add('js');</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip" href="#experience">Skip to content</a>
+
+<!-- one fixed canvas; the figure it draws matches whatever section you're in -->
+<div class="field" aria-hidden="true">
+  <canvas id="sim"></canvas>
+</div>
+<div class="vignette" aria-hidden="true"></div>
+
+<figure class="readout" id="readout">
+  <figcaption>
+    <span class="readout__id">Fig. 1</span>
+    <span class="readout__name">Branched polymer chain, self-assembling</span>
+  </figcaption>
+</figure>
+
+<header class="topbar">
+  <a class="topbar__mark" href="#top">SV</a>
+  <a class="topbar__link" href="#contact">Contact</a>
+</header>
+
+<nav class="rail" aria-label="Sections">
+  <ul>
+    <li><a href="#top"        data-rail="top"><span>Top</span></a></li>
+    <li><a href="#experience" data-rail="experience"><span>Experience</span></a></li>
+    <li><a href="#work"       data-rail="work"><span>Work</span></a></li>
+    <li><a href="#record"     data-rail="record"><span>Record</span></a></li>
+    <li><a href="#toolkit"    data-rail="toolkit"><span>Toolkit</span></a></li>
+    <li><a href="#contact"    data-rail="contact"><span>Contact</span></a></li>
+  </ul>
+</nav>
+
+<main id="top">
+
+  <!-- ─── HERO ─────────────────────────────────────────────── -->
+  <section class="hero" data-figure="chain">
+    <p class="hero__eyebrow load" data-load="1">
+      Northeastern CS&nbsp;+&nbsp;CE&nbsp;’29 <i>/</i> Oak Ridge National Laboratory
+    </p>
+
+    <h1 class="hero__name" data-load="2">Shrey Valia</h1>
+
+    <p class="hero__thesis load" data-load="3">
+      I build physics-informed and graph neural networks that
+      predict how molecules organize themselves.
+    </p>
+
+    <p class="hero__fig load" data-load="4">
+      The figure behind this page is live, and it changes to match whatever
+      you’re reading — a polymer chain for the molecular work, an equity curve
+      for the trading agent, an agent graph for the video editor.
+    </p>
+
+    <p class="hero__cue load" data-load="4"><span>Scroll</span></p>
+  </section>
+
+  <!-- ─── EXPERIENCE ───────────────────────────────────────── -->
+  <section class="band" id="experience" data-accent="teal">
+    <header class="head">
+      <p class="label" data-anim="rise">Experience</p>
+      <h2 class="head__title" data-anim="head">Two research roles</h2>
+    </header>
+
+    <div class="stack">
+      <article class="entry" data-figure="chain" data-anim="rise" style="--i:0">
+        <p class="marker">2026.01 <i>→</i> 2026.05</p>
+        <h3 class="entry__org">Oak Ridge National Laboratory</h3>
+        <p class="entry__role">Machine Learning Research Assistant <span>· Remote</span></p>
+        <ul class="bullets">
+          <li>Engineered physics-informed and graph neural networks in PyTorch and TensorFlow to model polymer growth and molecular self-assembly, working with Dr.&nbsp;Rajeev Kumar.</li>
+          <li>Built the front end of an internal web tool deployed on Vercel that let scientists configure, train, and run the group’s models from the browser instead of editing scripts by hand.</li>
+          <li>Developed an inverse prediction model with the team to estimate polymer design inputs from target properties.</li>
+          <li>Automated preprocessing pipelines in pandas and NumPy and parallelized GPU training, cutting experiment turnaround.</li>
+        </ul>
+      </article>
+
+      <article class="entry" data-figure="diffusion" data-anim="rise" style="--i:1">
+        <p class="marker">2026.01 <i>→</i> 2026.05</p>
+        <h3 class="entry__org">Handshake&nbsp;AI</h3>
+        <p class="entry__role">AI Training Specialist, Handshake AI Fellow <span>· Part-time, remote</span></p>
+        <ul class="bullets">
+          <li>Labeled and audited training data for generative AI models against strict quality and safety rubrics.</li>
+          <li>Evaluated text-to-image model outputs and fine-tuned diffusion models on the resulting annotations.</li>
+          <li>Diagnosed recurring model failure cases and delivered corrective feedback to improve prompt adherence.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─── WORK ─────────────────────────────────────────────── -->
+  <section class="band" id="work" data-accent="green">
+    <header class="head">
+      <p class="label" data-anim="rise">Work</p>
+      <h2 class="head__title" data-anim="head">Selected projects</h2>
+    </header>
+
+    <div class="stack">
+      <article class="entry" data-figure="agents" data-anim="rise">
+        <p class="marker">2026.01 <i>→</i> 2026.08</p>
+        <h3 class="entry__org">Vincio — AI Video Editor</h3>
+        <p class="entry__stack">Multi-agent AI · LLM orchestration · Full-stack web app</p>
+        <ul class="bullets">
+          <li>Built an AI video editor that turns raw clips and a written vision into a finished cut using coordinated agents.</li>
+          <li>Implemented agent capabilities for B-roll selection, motion graphics, transitions, and on-screen text.</li>
+          <li>Developed the front end and the agent layer, and contributed to database management, authentication, and agent memory.</li>
+        </ul>
+      </article>
+
+      <article class="entry" data-figure="series" data-anim="rise">
+        <p class="marker">2024.04 <i>→</i> 2024.08</p>
+        <h3 class="entry__org">Algorithmic Trading Bot</h3>
+        <p class="entry__stack">Python · QuantConnect · TensorFlow · pandas · Deep RL</p>
+        <ul class="bullets">
+          <li>Built a deep reinforcement learning agent in Python on the QuantConnect LEAN engine to trade a simulated $50,000 portfolio across multiple asset classes without manual input.</li>
+          <li>Organized the project’s market data in pandas and NumPy, cleaning and time-aligning Level&nbsp;II order-flow and microstructure feeds into one consistent dataset for every backtest.</li>
+          <li>Engineered entry and exit signals from that dataset and trained policies in TensorFlow with Q-learning and PPO.</li>
+        </ul>
+        <dl class="metrics">
+          <div><dt>Win rate</dt><dd data-count-to="43" data-suffix="%">43%</dd></div>
+          <div><dt>Profit factor</dt><dd data-count-to="2.76" data-decimals="2">2.76</dd></div>
+          <div><dt>Validation</dt><dd class="is-prose">Walk-forward, custom event-driven framework</dd></div>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─── RECORD ───────────────────────────────────────────── -->
+  <section class="band" id="record" data-accent="lime">
+    <header class="head">
+      <p class="label" data-anim="rise">Record</p>
+      <h2 class="head__title" data-anim="head">Honors and education</h2>
+    </header>
+
+    <div class="stack">
+      <article class="entry" data-figure="ladder" data-anim="rise" style="--i:0">
+        <p class="marker">2024.10</p>
+        <h3 class="entry__org">EduLearn Hackathon <span>· 1st place</span></h3>
+        <p class="entry__role">Financial-education technology</p>
+        <dl class="metrics">
+          <div class="is-award">
+            <dt>Placed</dt>
+            <dd data-count-to="700" data-prefix="1st of " data-suffix="+">1st of 700+</dd>
+          </div>
+          <div><dt>Field</dt><dd class="is-prose">Financial-education technology</dd></div>
+        </dl>
+      </article>
+
+      <article class="entry" data-anim="rise" style="--i:1">
+        <p class="marker">2025.09 <i>→</i> 2029.05</p>
+        <h3 class="entry__org">Northeastern University <span>· Boston, MA</span></h3>
+        <p class="entry__role">Bachelor of Science, Computer Science and Computer Engineering</p>
+        <p class="entry__note">Relevant coursework</p>
+        <ul class="chips chips--tight">
+          <li>Object-Oriented Programming 1 &amp; 2</li>
+          <li>Data Structures and Algorithms</li>
+          <li>Discrete Structures</li>
+          <li>Cornerstone of Engineering 1 &amp; 2</li>
+          <li>Calculus 1 &amp; 2</li>
+          <li>Physics 1</li>
+          <li>Chemistry 1</li>
+        </ul>
+      </article>
+
+      <article class="entry" data-anim="rise" style="--i:2">
+        <p class="marker">2021.08 <i>→</i> 2025.06</p>
+        <h3 class="entry__org">Dublin High School <span>· Dublin, CA</span></h3>
+        <p class="entry__role">High School Diploma</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─── TOOLKIT ──────────────────────────────────────────── -->
+  <section class="band" id="toolkit" data-accent="chartreuse" data-figure="lattice">
+    <header class="head">
+      <p class="label" data-anim="rise">Toolkit</p>
+      <h2 class="head__title" data-anim="head">What I work in</h2>
+    </header>
+
+    <div class="tools">
+      <div class="tool" data-anim="rise" style="--i:0">
+        <h3 class="tool__label">Languages</h3>
+        <ul class="chips"><li>Python</li><li>Java</li><li>C / C++</li><li>JavaScript</li><li>SQL</li><li>HTML / CSS</li></ul>
+      </div>
+      <div class="tool" data-anim="rise" style="--i:1">
+        <h3 class="tool__label">Machine learning &amp; AI</h3>
+        <ul class="chips"><li>PyTorch</li><li>TensorFlow</li><li>Keras</li><li>Scikit-learn</li><li>Graph neural networks</li><li>Deep reinforcement learning</li><li>Multi-agent systems</li><li>RAG</li></ul>
+      </div>
+      <div class="tool" data-anim="rise" style="--i:2">
+        <h3 class="tool__label">Data &amp; scientific computing</h3>
+        <ul class="chips"><li>pandas</li><li>NumPy</li><li>SciPy</li><li>Matplotlib</li><li>OpenCV</li><li>NLTK</li></ul>
+      </div>
+      <div class="tool" data-anim="rise" style="--i:3">
+        <h3 class="tool__label">Web &amp; backend</h3>
+        <ul class="chips"><li>React</li><li>Node.js</li><li>Express.js</li><li>Flask</li><li>Django</li><li>FastAPI</li><li>Spring Boot</li><li>Redux</li><li>Socket.io</li><li>Vercel</li></ul>
+      </div>
+      <div class="tool" data-anim="rise" style="--i:4">
+        <h3 class="tool__label">Tools &amp; infrastructure</h3>
+        <ul class="chips"><li>Git</li><li>Docker</li><li>AWS (S3, EC2)</li><li>PostgreSQL</li><li>MongoDB</li><li>QuantConnect</li><li>JUnit</li><li>VS Code</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CONTACT ──────────────────────────────────────────── -->
+  <section class="closing" id="contact" data-accent="yellow" data-figure="converge">
+    <h2 class="closing__head" data-anim="head">Open to summer 2027 internships in machine learning and software engineering.</h2>
+
+    <ul class="links" data-anim="rise">
+      <li>
+        <a href="mailto:valia.s@northeastern.edu">
+          <span class="links__label">Email</span>
+          <span class="links__value">valia.s@northeastern.edu</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.linkedin.com/in/shrey-valia" rel="me">
+          <span class="links__label">LinkedIn</span>
+          <span class="links__value">in/shrey-valia</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/Shrey-Valia" rel="me">
+          <span class="links__label">GitHub</span>
+          <span class="links__value">Shrey-Valia</span>
+        </a>
+      </li>
+    </ul>
+
+    <p class="closing__foot">
+      <span>Boston, MA &amp; Dublin, CA</span>
+      <i aria-hidden="true">·</i>
+      <span>Built from scratch — no framework, no build step.</span>
+    </p>
+  </section>
+
+</main>
+
+<script src="main.js"></script>
+</body>
+</html>
