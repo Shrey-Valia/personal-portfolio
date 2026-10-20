@@ -1,10 +1,11 @@
-// Player progress: facts found, levels cleared, bits, settings.
+// Player progress: facts found, skills collected, levels cleared, bits, settings.
 // Lives are per session and never saved, so every visit starts with 5.
 
 export function createProgress(save) {
   const d = save.load() || {};
   const s = {
     facts: new Set(d.facts || []),
+    skills: new Set(d.skills || []),        // skill names from [data-skill]
     cleared: new Set(d.cleared || []),
     warped: new Set(d.warped || []),
     bits: d.bits || 0,
@@ -18,6 +19,7 @@ export function createProgress(save) {
   const p = {
     lives: 5,
     get facts() { return s.facts; },
+    get skills() { return s.skills; },
     get cleared() { return s.cleared; },
     get warped() { return s.warped; },
     get bits() { return s.bits; },
@@ -32,6 +34,14 @@ export function createProgress(save) {
     addFact(id) {
       if (s.facts.has(id)) return false;
       s.facts.add(id);
+      persist();
+      return true;
+    },
+
+    hasSkill(name) { return s.skills.has(name); },
+    addSkill(name) {
+      if (s.skills.has(name)) return false;
+      s.skills.add(name);
       persist();
       return true;
     },
@@ -54,7 +64,7 @@ export function createProgress(save) {
 
     reset() {
       save.reset();
-      s.facts.clear(); s.cleared.clear(); s.warped.clear();
+      s.facts.clear(); s.skills.clear(); s.cleared.clear(); s.warped.clear();
       s.bits = 0; s.lastNode = 'home'; s.started = false;
       s.stats = { bugs: 0, deaths: 0 }; s.gameOvers = {};
       p.lives = 5;
@@ -63,7 +73,7 @@ export function createProgress(save) {
 
   function persist() {
     save.store({
-      facts: [...s.facts], cleared: [...s.cleared], warped: [...s.warped],
+      facts: [...s.facts], skills: [...s.skills], cleared: [...s.cleared], warped: [...s.warped],
       bits: s.bits, lastNode: s.lastNode, started: s.started,
       settings: s.settings, stats: s.stats, gameOvers: s.gameOvers,
     });
