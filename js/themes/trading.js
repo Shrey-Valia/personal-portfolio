@@ -197,7 +197,7 @@ class BadTick extends Hopper {
     for (let j = 0; j < 3; j++) { ctx.fillRect(x + 4 + j, y + 8 + j , 1, 1); ctx.fillRect(x + 6 - j, y + 8 + j, 1, 1); }
   }
 }
-registerEnemy('z', BadTick);
+registerEnemy('u', BadTick);
 
 // ─── set pieces ─────────────────────────────────────────────────────
 
