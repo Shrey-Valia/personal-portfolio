@@ -12,7 +12,7 @@
 //                  checkpoints.
 //   hazards        floor vents that glow and smoke for 2/3 s before they
 //                  flare, a fire wall, burnt planks that crack before they
-//                  drop. Ember hoppers (j) and smoke puffs (y).
+//                  drop. Ember hoppers (j) and smoke puffs (w).
 
 import { TILE, H } from '../config.js';
 import { col } from '../art/palette.js';
@@ -113,7 +113,7 @@ function fireKit() {
     animated() {},
   };
 }
-registerKit('droidFire', fireKit());
+registerKit('droid', fireKit());
 
 // ─── backdrop: San Francisco at night, fog, the glow of the fire ─────
 
@@ -180,7 +180,7 @@ function nightCity(W) {
     },
   };
 }
-registerBackground('droidFire', nightCity);
+registerBackground('droid', nightCity);
 
 // ─── the building: back wall, windows, strobes, smoke; the street ────
 
@@ -886,13 +886,13 @@ class Trophy {
   }
 }
 
-registerSetpiece('droidScene', Scene);
-registerSetpiece('droidRobot', Robot);
-registerSetpiece('droidPad', Pad);
-registerSetpiece('droidFireWall', FireWall);
-registerSetpiece('droidVent', Vent);
-registerSetpiece('droidPlanks', Planks);
-registerSetpiece('droidTrophy', Trophy);
+registerSetpiece('droid.scene', Scene);
+registerSetpiece('droid.robot', Robot);
+registerSetpiece('droid.pad', Pad);
+registerSetpiece('droid.fireWall', FireWall);
+registerSetpiece('droid.vent', Vent);
+registerSetpiece('droid.planks', Planks);
+registerSetpiece('droid.trophy', Trophy);
 
 // ─── enemies: embers that hop, smoke that drifts ─────────────────────
 
@@ -987,11 +987,11 @@ class Smoke extends Enemy {
 }
 
 registerEnemy('j', Ember);
-registerEnemy('y', Smoke);
+registerEnemy('w', Smoke);
 
 // ─── music: urgent, minor, driving ───────────────────────────────────
 
-registerSong('droidFire', {
+registerSong('droid', {
   bpm: 144,
   lead: steps('E5 . G5 . B5 . A5 G5 | F#5 . D5 . E5 . . . | C5 . E5 . G5 . F#5 E5 | D#5 . F#5 . B4 . . . | E5 . G5 . B5 . D6 B5 | C6 . A5 . E5 . . . | A5 . G5 . F#5 . E5 D#5 | E5 . B4 . E5 . . .'),
   bass: steps('E2 E3 E2 E3 E2 E3 E2 E3 | D2 D3 D2 D3 D2 D3 D2 D3 | C2 C3 C2 C3 C2 C3 C2 C3 | B1 B2 B1 B2 B1 B2 B1 B2 | E2 E3 E2 E3 E2 E3 E2 E3 | A1 A2 A1 A2 A1 A2 A1 A2 | C2 C3 C2 C3 B1 B2 B1 B2 | E2 E3 E2 E3 E2 . E2 .'),

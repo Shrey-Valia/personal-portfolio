@@ -221,8 +221,8 @@ function galleryKit() {
   };
 }
 
-registerKit('labelFactory', factoryKit());
-registerKit('labelGallery', galleryKit());
+registerKit('handshake', factoryKit());
+registerKit('handshake.gallery', galleryKit());
 
 // ─── backdrops ───────────────────────────────────────────────────────
 
@@ -342,8 +342,8 @@ function galleryRoom(W) {
   return { draw(ctx, camX) { blitStrip(ctx, bg, camX, 1); } };
 }
 
-registerBackground('labelFactory', factorySky);
-registerBackground('labelGallery', galleryRoom);
+registerBackground('handshake', factorySky);
+registerBackground('handshake.gallery', galleryRoom);
 
 // ─── image cards: tiny pictures that training data is made of ────────
 
@@ -1099,15 +1099,15 @@ class WallText {
   }
 }
 
-registerSetpiece('hsGate', Gate);
-registerSetpiece('hsAudit', Audit);
-registerSetpiece('hsDenoise', Denoise);
-registerSetpiece('hsFrame', GalleryFrame);
-registerSetpiece('hsWallText', WallText);
+registerSetpiece('handshake.gate', Gate);
+registerSetpiece('handshake.audit', Audit);
+registerSetpiece('handshake.denoise', Denoise);
+registerSetpiece('handshake.frame', GalleryFrame);
+registerSetpiece('handshake.wallText', WallText);
 
 // ─── music: a bright, busy loop for the line ─────────────────────────
 
-registerSong('labelFactory', {
+registerSong('handshake', {
   bpm: 126,
   lead: steps('D5 . F#5 A5 . F#5 E5 . | D5 . A4 . B4 . D5 . | G5 . F#5 E5 . D5 E5 . | F#5 . E5 . C#5 . A4 . | D5 . F#5 A5 . B5 A5 . | G5 . E5 . F#5 . D5 . | B4 . D5 . G5 . F#5 E5 | E5 . C#5 . D5 . . .'),
   bass: steps('D3 . A2 . D3 . A2 . | B2 . F#2 . B2 . F#2 . | G2 . D3 . G2 . D3 . | A2 . E3 . A2 . C#3 . | D3 . A2 . D3 . A2 . | E3 . B2 . E3 . B2 . | G2 . D3 . G2 . D3 . | A2 . E3 . A2 . A2 .'),
