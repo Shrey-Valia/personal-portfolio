@@ -202,8 +202,8 @@ export function decoratePage(game) {
   landmark('lighthouse', wrap);
 
   // ─── the bar: Shrey's head as the mark, links from the headings ────
-  const [mk, kctx] = makeCanvas(16, 13);
-  kctx.drawImage(A.hero.idle[0].c, 0, 0, 16, 13, 0, 0, 16, 13);
+  const [mk, kctx] = makeCanvas(18, 15);                        // the head, with outline and rim
+  kctx.drawImage(A.hero.idle[0].c, 0, 0, 18, 15, 0, 0, 18, 15);
   mk.className = 'pagebar__mark';
   mk.setAttribute('aria-hidden', 'true');
   $('pagebar-brand').prepend(mk);

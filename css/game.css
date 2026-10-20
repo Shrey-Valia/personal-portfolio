@@ -104,7 +104,7 @@
 .node-banner {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--px) * 6);
+  top: calc(var(--px) * 19);              /* under the HUD, clear of the bottom-row labels */
   max-width: calc(100% - var(--px) * 20);
   margin: 0;
   padding: calc(var(--px) * 3) calc(var(--px) * 6);
@@ -367,3 +367,6 @@
 .rotate__icon { margin: 0; color: var(--gold); font-size: 64px; line-height: 1; }
 .rotate__text { margin: 0; font-family: var(--display); font-weight: 600; font-size: 22px; }
 .rotate__actions { display: grid; gap: 14px; margin-top: 8px; }
+
+/* touch: HUD buttons get full-size tap targets */
+.touch-on .hud__btn { min-height: 44px; }

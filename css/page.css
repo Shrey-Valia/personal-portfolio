@@ -100,18 +100,18 @@
 .progress__runner {
   position: absolute;
   bottom: 3px;
-  left: calc(var(--p) * (100% - 16px));
-  width: 16px;
-  height: 24px;
-  background-size: 96px 24px;
+  left: calc(var(--p) * (100% - var(--fw, 18px)));
+  width: var(--fw, 18px);
+  height: var(--fh, 26px);
+  background-size: calc(var(--fw, 18px) * 6) var(--fh, 26px);
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
 .progress.is-running .progress__runner { animation: runner 0.36s steps(4) infinite; }
-.progress.is-done .progress__runner { background-position: -80px 0; }
+.progress.is-done .progress__runner { background-position: calc(var(--fw, 18px) * -5) 0; }
 .progress.is-back .progress__runner { transform: scaleX(-1); }
 .progress.is-top .progress__runner { visibility: hidden; }
-@keyframes runner { from { background-position: -16px 0; } to { background-position: -80px 0; } }
+@keyframes runner { from { background-position: calc(var(--fw, 18px) * -1) 0; } to { background-position: calc(var(--fw, 18px) * -5) 0; } }
 
 /* ─── the split hero ───────────────────────────────────────── */
 

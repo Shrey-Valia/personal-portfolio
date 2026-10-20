@@ -13,10 +13,11 @@ export function startFx({ game, landmarks, isOn }) {
   const reduced = game.reduced;
 
   // ─── Shrey on the progress line ────────────────────────────────────
-  // one strip: idle, four run frames, victory (16×24 each)
+  // one strip: idle, four run frames, victory, at the hero's real frame size
   const frames = [A.hero.idle[0], ...A.hero.run, A.hero.victory[0]];
-  const [strip, sctx] = makeCanvas(16 * frames.length, 24);
-  frames.forEach((f, i) => sctx.drawImage(f.c, i * 16, 0));
+  const fw = frames[0].w, fh = frames[0].h;
+  const [strip, sctx] = makeCanvas(fw * frames.length, fh);
+  frames.forEach((f, i) => sctx.drawImage(f.c, i * fw, 0));
   const track = document.createElement('div');
   track.className = 'progress is-top';
   track.setAttribute('aria-hidden', 'true');
@@ -25,6 +26,8 @@ export function startFx({ game, landmarks, isOn }) {
   const runner = document.createElement('span');
   runner.className = 'progress__runner';
   runner.style.backgroundImage = `url(${strip.toDataURL()})`;
+  track.style.setProperty('--fw', fw + 'px');
+  track.style.setProperty('--fh', fh + 'px');
   track.append(fill, runner);
   $('pagebar').appendChild(track);
 

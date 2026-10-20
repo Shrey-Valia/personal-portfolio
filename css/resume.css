@@ -482,6 +482,9 @@ body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
   border-radius: 50%;
 }
 .resume-dialog li[data-fact]::before { left: -40px; }
+/* contact links sit in one row: keep each marker inside its own item */
+.resume-dialog .resume__contact li[data-fact] { padding-left: 16px; }
+.resume-dialog .resume__contact li[data-fact]::before { left: 0; }
 .resume-dialog [data-fact].is-found::before {
   background: var(--gold);
   border-color: #8a6516;
