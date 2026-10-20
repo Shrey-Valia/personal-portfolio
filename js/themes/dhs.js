@@ -309,6 +309,7 @@ function dhsBackdrop(W) {
       blitStrip(ctx, hills, camX, 0.06 * k, -camY * 0.1);
       blitStrip(ctx, campus, camX, 0.2 * k, -camY * 0.2);
       blitStrip(ctx, oaks, camX, 0.45 * k, -camY * 0.4);
+      ctx.fillStyle = col('#141019'); ctx.fillRect(0, H - 4, ctx.W, 4);      // the strip rides up a few px with the camera
     },
   };
 }
