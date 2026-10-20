@@ -2,6 +2,7 @@
 > - Each stop's action is **scroll-scrubbed** in its act phase (0.15–0.55 of the stop's p), not a timed beat. The seconds below become fractions of the act phase.
 > - "More" is a JS-built button over `li.is-more`, not `<details>`.
 > - Scene size and scale come from the engine (100 game px tall, 160–240 wide; keep everything that matters in the centred 160).
+> - **More decisions (2026-10-20):** intro one-liner = the résumé tagline ("Computer Science + Computer Engineering at Northeastern University. Machine learning research, AI tools, and hackathon builds."); Droid shows the burning building inside a simulation window (digital robot); Skills card shows all 38 chips; year markers yes (2026 above Vincio, 2025 above Droid, 2024 above EduLearn).
 > - **Shrey's decisions:** Droid comes BEFORE Northeastern. No Northeastern start date (keep "Expected May 2029"; drop the 2025 year-marker placement that assumed otherwise). Lead bullets as proposed. Contact ends at the lighthouse beacon.
 
 # Scroll-timeline choreography and art direction for Shrey Valia's portfolio
