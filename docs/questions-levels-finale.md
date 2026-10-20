@@ -6,9 +6,9 @@ All four are now decided; the outcome is under each question.
 ## 1. Where should "Open to work" appear?
 
 The line is `c-open` ("Open to summer 2027 internships in machine learning
-and software engineering"), already flagged as an inference. Right now it is
+and software engineering"), which was flagged as an inference. It was
 the brass plaque on the lighthouse lantern: its card opens just before the
-beacon lights, and it doesn't appear on the end screen.
+beacon lights. It didn't appear on the end screen.
 
 - **A.** Plaque only (current).
 - **B.** Plaque, plus one line on the end screen under "Thanks for playing",
@@ -19,10 +19,10 @@ beacon lights, and it doesn't appear on the end screen.
 where a recruiter decides to write to you, so that's where this line helps
 most. If it isn't accurate, C.
 
-**Decided: B, once the wording is confirmed.** The end screen now shows the
-`c-open` text (read from index.html) only when the element has no
-`data-flag="inference"`. Removing that attribute, after Shrey confirms
-the sentence, is the one edit that turns it on.
+**Decided: B.** Shrey confirmed the sentence as written, so the
+`data-flag="inference"` attribute is gone from index.html and the end screen
+shows the `c-open` text above the contact buttons. (It only shows when that
+flag is absent, so re-flagging the line hides it again.)
 
 ## 2. Should the skill bricks be required?
 
@@ -79,6 +79,9 @@ the point.
 - The end screen reads the email, LinkedIn and GitHub links from the
   `c-email` / `c-linkedin` / `c-github` items in index.html, so it already
   uses the fixed LinkedIn URL from game-v2 (checked against that markup).
+- README's "Before you publish" list still asks Shrey to confirm this line.
+  It's confirmed now, so a merger can drop that item. I left the README
+  alone because game-v2 rewrote the same list and an edit here would conflict.
 - The end screen's time stat is "This visit": time since the page opened.
   The game doesn't track total play time yet. If you want real play time,
   that's a small addition to progress.js.
