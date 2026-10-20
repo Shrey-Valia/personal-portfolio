@@ -100,8 +100,8 @@ const box = (ctx, x, y, w, h, c, hi, lo) => {
   if (lo) R(ctx, x, y + h - 1, w, 1, lo);
 };
 
-// each draws centred on (x, bottom)
-const LANDMARK = {
+// each draws centred on (x, bottom); the website's placeholder scenes reuse them
+export const LANDMARK = {
   home(ctx, x, b) {
     box(ctx, x - 9, b - 10, 18, 10, '#efe2c4', '#fff4dc', '#c7b48e');
     for (let i = 0; i < 7; i++) R(ctx, x - 11 + i, b - 11 - i, 22 - i * 2, 1, i ? 'indigo.2' : 'ink.0');

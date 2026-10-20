@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shrey Valia · CS + CE @ Northeastern · ML research</title>
-<meta name="description" content="Shrey Valia: Computer Science + Computer Engineering at Northeastern. Machine learning research at Oak Ridge National Laboratory, AI tools, and hackathon wins. The résumé is also a playable 16-bit game.">
+<meta name="description" content="Shrey Valia: Computer Science + Computer Engineering at Northeastern. Machine learning research at Oak Ridge National Laboratory, AI tools, and hackathon wins, as a scrolling pixel-art timeline. The résumé is also a playable 16-bit game.">
 <meta name="author" content="Shrey Valia">
 <meta name="theme-color" content="#0b0d17">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%232c3570'/%3E%3Crect x='1' y='1' width='14' height='14' fill='%230f1430'/%3E%3Cpath d='M4 5h1v1h1v1h1v1H6v1H5v1H4V9h1V8h1V7H5V6H4z M8 10h4v1H8z' fill='%236fd6c8'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Shrey Valia · Playable portfolio">
-<meta property="og:description" content="A 16-bit platformer you play to learn about Shrey Valia: ML research at Oak Ridge National Laboratory, AI projects, hackathon wins.">
+<meta property="og:title" content="Shrey Valia · Portfolio">
+<meta property="og:description" content="Shrey Valia's work as a scrolling pixel-art timeline: ML research at Oak Ridge National Laboratory, AI projects, hackathon wins. Also playable as a 16-bit game.">
 
 <!-- Boot guard. The page is a plain résumé until the game proves it can run:
      `js` is added only where ES modules work and we're served over http(s);
@@ -37,6 +37,7 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/resume.css">
 <link rel="stylesheet" href="css/page.css">
+<link rel="stylesheet" href="css/timeline.css">
 <link rel="stylesheet" href="css/game.css">
 
 <script type="application/ld+json">
@@ -192,21 +193,19 @@
      Every fact the game shows is an element here with data-fact="id".
      Level files reference these ids; cards clone these nodes.
      data-skill and data-credit children become bricks and textbooks.
-     On its own (no JS, file://, or the page view) it is the portfolio page.
+     On its own (no JS, file://, print) it is the portfolio page; the website
+     view moves its entries into the scroll timeline (js/site/timeline.js).
      ════════════════════════════════════════════════════════════════════ -->
 
-<!-- the website's bar (page view only); links are built from the section headings.
-     "Résumé PDF" prints this page through the print styles, so the PDF is always
-     current and never carries the phone number. -->
+<!-- the website's bar (page view only); its section links come from the timeline's
+     stops (js/ui/page-art.js). "Résumé PDF" prints this page through the print
+     styles, so the PDF is always current and never carries the phone number. -->
 <nav class="pagebar" id="pagebar" aria-label="Sections">
   <a class="pagebar__brand" href="#resume" id="pagebar-brand">Shrey Valia</a>
   <span class="pagebar__links" id="pagebar-links"></span>
   <span class="pagebar__end">
     <button class="pbtn pbtn--small pagebar__pdf" type="button" id="pagebar-pdf" title="Opens the print dialog: choose Save as PDF">Résumé PDF</button>
-    <span class="viewswitch" role="group" aria-label="View">
-      <a href="#page" aria-current="page">Website</a>
-      <a href="#play">Game ▶</a>
-    </span>
+    <a class="pagebar__play" href="#play">Play the game ▶</a>
   </span>
 </nav>
 
@@ -217,8 +216,6 @@
       <h1 class="resume__name">Shrey Valia</h1>
       <p class="resume__tag">Computer Science + Computer Engineering at Northeastern University. Machine learning research, AI tools, and hackathon builds. Based in <span data-snap="Based in">Dublin, CA</span>.</p>
     </div>
-    <!-- the pixel portrait, drawn by js/ui/page-art.js (empty without JS) -->
-    <div class="portrait" id="portrait"></div>
     <ul class="resume__contact" id="contact" data-node="lighthouse">
       <li data-fact="c-email" data-title="Email" data-kicker="Contact"><a href="mailto:valia.s@northeastern.edu">valia.s@northeastern.edu</a></li>
       <li data-fact="c-linkedin" data-title="LinkedIn" data-kicker="Contact"><a href="https://www.linkedin.com/in/shrey-valia-7a0041267/" rel="me">linkedin.com/in/shrey-valia-7a0041267</a></li>
