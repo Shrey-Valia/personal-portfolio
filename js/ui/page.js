@@ -19,8 +19,8 @@ export function createPage({ game, display, defaultView }) {
   const titleEl = $('title');
   let on = false;
 
-  const { badges } = decoratePage(game);
-  const fx = startFx({ game, badges, isOn: () => on });
+  const { landmarks } = decoratePage(game);
+  const fx = startFx({ game, landmarks, isOn: () => on });
 
   // the game must not read keys while the page is up: arrows and space scroll
   document.addEventListener('keydown', (e) => { if (on) e.stopPropagation(); }, true);

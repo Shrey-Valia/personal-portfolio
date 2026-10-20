@@ -85,20 +85,22 @@ body > .resume {
 .view-page body > .resume { padding-top: 56px; }
 .view-page { scroll-padding-top: 84px; }          /* clear the sticky bar */
 
-/* hero: who, what, how to reach him; portrait and snapshot when JS is on */
+/* hero: who, what, how to reach him. With JS it splits in two equal
+   halves: Shrey on the left, the game's island on the right (page.css) */
 body > .resume .resume__head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "name portrait" "contact portrait" "play portrait" "open portrait" "snap snap";
-  column-gap: 72px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "portrait" "name" "contact" "links" "open" "game" "snap";
 }
 body > .resume .resume__head > [data-fact="p-name"] { grid-area: name; }
 body > .resume .resume__head > .resume__contact { grid-area: contact; }
-body > .resume .resume__head > .hero-play { grid-area: play; }
+body > .resume .resume__head > .hero-links { grid-area: links; }
 body > .resume .resume__head > .resume__open { grid-area: open; }
-body > .resume .resume__head > .portrait { grid-area: portrait; align-self: center; }
+body > .resume .resume__head > .portrait { grid-area: portrait; }
+body > .resume .resume__head > .hero-game { grid-area: game; }
 body > .resume .resume__head > .snapshot { grid-area: snap; }
-body > .resume .resume__head > .play-chip { display: none; }   /* the bar's Play button covers Home */
+body > .resume .resume__head > .play-chip { display: none; }   /* the game half covers Home */
+body > .resume.has-art .resume__head > .resume__contact { display: none; }   /* shown in full at the end */
 
 body > .resume .resume__name {
   font-size: clamp(46px, 7vw, 76px);
@@ -114,8 +116,10 @@ body > .resume .resume__tag {
 }
 
 /* contact links as pills, each with its icon */
-body > .resume .resume__contact { gap: 10px; margin-top: 30px; }
+body > .resume .resume__contact,
+body > .resume .hero-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 30px 0 0; padding: 0; list-style: none; }
 body > .resume .resume__contact a,
+body > .resume .hero-links a,
 .contactend__links a {
   display: inline-flex;
   align-items: center;
@@ -130,8 +134,10 @@ body > .resume .resume__contact a,
   overflow-wrap: anywhere;
 }
 body > .resume .resume__contact a:hover,
+body > .resume .hero-links a:hover,
 .contactend__links a:hover { box-shadow: inset 0 0 0 1.5px var(--sea); }
 body > .resume .resume__contact a::before,
+body > .resume .hero-links a::before,
 .contactend__links a::before {
   content: "";
   flex: none;
@@ -308,7 +314,7 @@ body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
 }
 
 @media (min-width: 760px) {
-  body > .resume.has-art { --gutter: 136px; }
+  body > .resume.has-art { --gutter: 176px; }
   /* role and dates share the title row */
   body > .resume .entry__head {
     display: grid;
@@ -329,11 +335,6 @@ body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
 
 @media (max-width: 759px) {
   body > .resume { padding-top: 40px; }
-  body > .resume .resume__head {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "portrait" "name" "contact" "play" "open" "snap";
-  }
-  body > .resume .resume__head > .portrait { align-self: start; }
   body > .resume .resume__section { margin-top: 80px; }
   body > .resume .resume__section > h2 { font-size: 29px; margin-bottom: 28px; }
   body > .resume .resume__section > h2::before { font-size: 15px; }
@@ -342,21 +343,68 @@ body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
   body > .resume .resume__section--cards > .entry { padding: 0 20px 22px; }
 }
 
+/* print, and "Résumé PDF": a plain black-on-white résumé of the same markup */
 @media print {
-  body, body > .resume { background: #fff; color: #000; }
-  body > .resume { width: auto; padding: 0; }
-  body > .resume .resume__name { color: #000; font-size: 40px; }
-  body > .resume a, body > .resume .entry__role, body > .resume .entry__meta,
-  body > .resume .skillset h3, body > .resume .resume__section > h2 { color: #000; }
-  body > .resume .skillset, body > .resume .resume__section--cards > .entry,
-  body > .resume .resume__contact a { box-shadow: none; background: none; padding: 0; }
-  body > .resume .resume__section--cards { display: block; }
-  body > .resume .chips li { background: none; }
-  body > .resume .resume__section { margin-top: 28px; }
-  body > .resume .resume__section > h2::after { display: none; }
-  body > .resume .resume__foot { background: none; }
+  @page { margin: 14mm 16mm; }
+  html, body { background: #fff !important; }
+  body { color: #111; font-size: 10.5pt; line-height: 1.4; }
   .banner, .skip, .play-chip, .page-only { display: none !important; }
-  body > .resume .has-tile { padding-left: 0; }
+  body > .resume { width: auto; padding: 0; }
+  body > .resume a { color: #000; text-decoration: none; }
+
+  body > .resume .resume__head { display: block; }
+  body > .resume.has-art .resume__head > .resume__contact { display: flex; }
+  body > .resume .resume__name { color: #000; font-size: 24pt; letter-spacing: 0; }
+  body > .resume .resume__tag { max-width: none; margin-top: 4pt; color: #222; font-size: 11pt; }
+  body > .resume .resume__contact { gap: 2pt 16pt; margin-top: 6pt; }
+  body > .resume .resume__contact a { padding: 0; background: none; box-shadow: none; color: #000; font-size: 10pt; font-weight: 400; }
+  body > .resume .resume__contact a::before { width: 9pt; height: 9pt; background: #000; }
+  body > .resume .resume__open { margin-top: 5pt; font-size: 10pt; }
+  body > .resume .resume__open::before { background: #000; box-shadow: none; width: 5pt; height: 5pt; }
+
+  body > .resume .resume__section { margin-top: 14pt; }
+  body > .resume .resume__section > h2 {
+    display: block;
+    margin: 0 0 6pt;
+    padding-bottom: 2pt;
+    border-bottom: 1px solid #000;
+    color: #000;
+    font-size: 13pt;
+  }
+  body > .resume .resume__section > h2::before, body > .resume .resume__section > h2::after { display: none; }
+  body > .resume .resume__section--cards { display: block; }
+  body > .resume .resume__section--cards > .entry,
+  body > .resume .entry.has-tile { display: block; }
+  body > .resume .has-tile, body > .resume .resume__section--cards > .entry {
+    padding: 0; background: none; box-shadow: none; border-radius: 0;
+  }
+  body > .resume .entry { margin: 0 0 9pt; break-inside: avoid; }
+  body > .resume .entry__head,
+  body > .resume .resume__section--cards .entry__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12pt;
+    align-items: baseline;
+  }
+  body > .resume .entry__head > h3 { grid-row: 1; grid-column: 1; font-size: 11.5pt; }
+  body > .resume .entry__head > .entry__meta,
+  body > .resume .resume__section--cards .entry__head > .entry__meta { grid-row: 1; grid-column: 2; margin: 0; text-align: right; white-space: nowrap; }
+  body > .resume .entry__head > .entry__role { grid-column: 1 / -1; }
+  body > .resume .entry__role { margin-top: 1pt; color: #000; font-size: 10.5pt; }
+  body > .resume .entry__meta { color: #333; font-size: 9.5pt; }
+  body > .resume .entry__list { max-width: none; margin-top: 3pt; }
+  body > .resume .entry__list li { margin: 2pt 0 0; padding-left: 11pt; line-height: 1.35; }
+  body > .resume .entry__list li::before { top: 0.55em; width: 3.5pt; height: 3.5pt; background: #000; box-shadow: none; }
+  body > .resume .entry__text { max-width: none; margin-top: 3pt; line-height: 1.35; }
+  body > .resume .entry__block { margin-top: 4pt; }
+  body > .resume .entry__label, body > .resume .skillset h3 { margin: 0 0 2pt; color: #000; font-size: 9pt; }
+
+  body > .resume .skills { columns: 2; column-gap: 18pt; }
+  body > .resume .skillset { margin: 0 0 6pt; padding: 0; background: none; box-shadow: none; }
+  body > .resume .chips { gap: 0; }
+  body > .resume .chips li { padding: 0; border: 0; background: none; font-size: 10pt; }
+  body > .resume .chips li:not(:last-child)::after { content: ",\00a0"; }
+  body > .resume .resume__foot { display: none; }
 }
 
 /* ─── as a dialog (in-game) ────────────────────────────────── */

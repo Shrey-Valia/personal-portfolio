@@ -196,14 +196,17 @@
      ════════════════════════════════════════════════════════════════════ -->
 
 <!-- the website's bar (page view only); links are built from the section headings.
-     Résumé PDF: point href at a PDF without the phone number, then remove `hidden`. -->
+     "Résumé PDF" prints this page through the print styles, so the PDF is always
+     current and never carries the phone number. -->
 <nav class="pagebar" id="pagebar" aria-label="Sections">
   <a class="pagebar__brand" href="#resume" id="pagebar-brand">Shrey Valia</a>
   <span class="pagebar__links" id="pagebar-links"></span>
   <span class="pagebar__end">
-    <span class="pagebar__facts" id="pagebar-facts" hidden></span>
-    <a class="pbtn pbtn--small pagebar__cv" href="" hidden>Résumé</a>
-    <a class="pbtn pbtn--primary pbtn--small pagebar__play" href="#play">Play<span class="pagebar__long"> the game</span> ▶</a>
+    <button class="pbtn pbtn--small pagebar__pdf" type="button" id="pagebar-pdf" title="Opens the print dialog: choose Save as PDF">Résumé PDF</button>
+    <span class="viewswitch" role="group" aria-label="View">
+      <a href="#page" aria-current="page">Website</a>
+      <a href="#play">Game ▶</a>
+    </span>
   </span>
 </nav>
 
@@ -214,9 +217,7 @@
       <h1 class="resume__name">Shrey Valia</h1>
       <p class="resume__tag">Computer Science + Computer Engineering at Northeastern University. Machine learning research, AI tools, and hackathon builds. Based in <span data-snap="Based in">Dublin, CA</span>.</p>
     </div>
-    <!-- Photo: put <img src="img/shrey.jpg" alt="Shrey Valia"> in here and the
-         pixel portrait steps aside. Empty, the slot shows the pixel hero (or
-         nothing without JS). -->
+    <!-- the pixel portrait, drawn by js/ui/page-art.js (empty without JS) -->
     <div class="portrait" id="portrait"></div>
     <ul class="resume__contact" id="contact" data-node="lighthouse">
       <li data-fact="c-email" data-title="Email" data-kicker="Contact"><a href="mailto:valia.s@northeastern.edu">valia.s@northeastern.edu</a></li>
