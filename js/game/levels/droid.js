@@ -22,7 +22,7 @@ const STREET = [
   '',
   '',
   '',
-  '..@.S.N....2...1',
+  '..@.S.N.....2...1',
   '########################',
   '########################',
   '########################',
@@ -98,7 +98,7 @@ export default {
     main: {
       map: joinSegments([STREET, GROUND, UPPER, EXIT]),
       facts: { S: ['a-droid-build'], trophy: ['a-droid'] },
-      duck: ['Stand on a voice pad. Omi hears the command, and the robot carries it out.'],
+      duck: ['Stand on a voice pad: Omi hears you, and the robot acts.'],
       marks: {
         0: { type: 'banner', text: 'Droid Strike Back', sub: 'Hackathon · San Francisco', post: 118 },
         1: { type: 'droid.robot', gap: 34, spray: 38, shaft: 76, liftTo: 5, end: 153, handoff: [110, 127] },
