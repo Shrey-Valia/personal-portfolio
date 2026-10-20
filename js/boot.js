@@ -21,9 +21,10 @@ import { createDialogs } from './ui/dialogs.js';
 import { createResume } from './ui/resume.js';
 import { createPage } from './ui/page.js';
 
-// What a visit with no hash lands on: 'game' (the title screen) or 'page'
-// (the scrollable portfolio). #play and #page always pick one explicitly.
-const DEFAULT_VIEW = 'game';
+// What a plain visit lands on: 'page' (the website) or 'game' (the title
+// screen). #play / ?play and #page always pick one explicitly. The head
+// script in index.html makes the same call for the first paint; change both.
+const DEFAULT_VIEW = 'page';
 
 const root = document.documentElement;
 const $ = (id) => document.getElementById(id);

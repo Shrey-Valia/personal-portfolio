@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Shrey Valia · CS + CE @ Northeastern · ML research · Playable portfolio</title>
-<meta name="description" content="Shrey Valia builds physics-informed and graph neural networks and AI tools. Play through his résumé as a 16-bit platformer, or read it as text.">
+<title>Shrey Valia · CS + CE @ Northeastern · ML research</title>
+<meta name="description" content="Shrey Valia: Computer Science + Computer Engineering at Northeastern. Machine learning research at Oak Ridge National Laboratory, AI tools, and hackathon wins. The résumé is also a playable 16-bit game.">
 <meta name="author" content="Shrey Valia">
 <meta name="theme-color" content="#0b0d17">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%232c3570'/%3E%3Crect x='1' y='1' width='14' height='14' fill='%230f1430'/%3E%3Cpath d='M4 5h1v1h1v1h1v1H6v1H5v1H4V9h1V8h1V7H5V6H4z M8 10h4v1H8z' fill='%236fd6c8'/%3E%3C/svg%3E">
@@ -15,15 +15,16 @@
 <!-- Boot guard. The page is a plain résumé until the game proves it can run:
      `js` is added only where ES modules work and we're served over http(s);
      if the game hasn't reported ready in 8 s, the résumé comes back.
-     Any hash but #play (#page, #ornl, ...) opens the page view, set here so
-     the first paint is already right; js/ui/page.js applies the same rule. -->
+     The website is the landing view; #play, ?play or ?level= open the game.
+     Set here so the first paint is already right; js/ui/page.js applies the
+     same rule (mirror DEFAULT_VIEW in js/boot.js if that ever changes). -->
 <script>
   (function () {
     var root = document.documentElement;
     if (location.protocol === 'file:') { root.classList.add('file-proto'); return; }
     if (!('noModule' in HTMLScriptElement.prototype)) return;
     root.classList.add('js');
-    if (location.hash.length > 1 && location.hash !== '#play') root.classList.add('view-page');
+    if (location.hash !== '#play' && !/[?&](play|level)\b/.test(location.search)) root.classList.add('view-page');
     setTimeout(function () {
       if (!root.classList.contains('game-ready')) root.classList.remove('js');
     }, 8000);
@@ -52,7 +53,7 @@
 </head>
 <body>
 
-<a class="skip" id="skip" href="#resume">Skip to text résumé</a>
+<a class="skip" id="skip" href="#resume">Skip to content</a>
 
 <noscript>
   <p class="banner">This portfolio is also a playable game. Turn on JavaScript to play; the full résumé is below.</p>
@@ -92,7 +93,7 @@
           <p class="title__pitch">CS + CE @ Northeastern · ML research @ Oak Ridge National Lab</p>
           <div class="title__actions">
             <button class="pbtn pbtn--primary" type="button" id="title-play">▶ Play</button>
-            <a class="pbtn" href="#page" id="title-page">View as page</a>
+            <a class="pbtn" href="#page" id="title-page">View as website</a>
           </div>
           <p class="title__links">
             <a href="mailto:valia.s@northeastern.edu">Email</a> ·
@@ -122,7 +123,7 @@
       <p class="rotate__icon" aria-hidden="true">⟲</p>
       <p class="rotate__text">Turn your phone sideways to play.</p>
       <div class="rotate__actions">
-        <a class="pbtn pbtn--primary" href="#page">View as page</a>
+        <a class="pbtn pbtn--primary" href="#page">View as website</a>
         <button class="pbtn" type="button" id="rotate-play">Play anyway</button>
       </div>
     </div>
@@ -179,7 +180,7 @@
   <div class="resume-dialog__bar">
     <h2 class="resume-dialog__title" id="resume-dialog-title">Résumé</h2>
     <span class="resume-dialog__found" id="resume-found"></span>
-    <a class="pbtn pbtn--small" href="#page">View as page</a>
+    <a class="pbtn pbtn--small" href="#page">View as website</a>
     <button class="pbtn pbtn--small" type="button" id="resume-close">Close <kbd>Esc</kbd></button>
   </div>
   <nav class="warp" id="warp" aria-label="Fast travel"></nav>
@@ -194,11 +195,16 @@
      On its own (no JS, file://, or the page view) it is the portfolio page.
      ════════════════════════════════════════════════════════════════════ -->
 
-<!-- page view only: links are built from the section headings -->
+<!-- the website's bar (page view only); links are built from the section headings.
+     Résumé PDF: point href at a PDF without the phone number, then remove `hidden`. -->
 <nav class="pagebar" id="pagebar" aria-label="Sections">
   <a class="pagebar__brand" href="#resume" id="pagebar-brand">Shrey Valia</a>
   <span class="pagebar__links" id="pagebar-links"></span>
-  <a class="pbtn pbtn--primary pbtn--small pagebar__play" href="#play">Play the game ▶</a>
+  <span class="pagebar__end">
+    <span class="pagebar__facts" id="pagebar-facts" hidden></span>
+    <a class="pbtn pbtn--small pagebar__cv" href="" hidden>Résumé</a>
+    <a class="pbtn pbtn--primary pbtn--small pagebar__play" href="#play">Play<span class="pagebar__long"> the game</span> ▶</a>
+  </span>
 </nav>
 
 <main class="resume" id="resume" tabindex="-1">
@@ -206,8 +212,12 @@
   <header class="resume__head" data-node="home">
     <div data-fact="p-name" data-title="Shrey Valia" data-kicker="Player one">
       <h1 class="resume__name">Shrey Valia</h1>
-      <p class="resume__tag">Computer Science + Computer Engineering at Northeastern University. Machine learning research, AI tools, and hackathon builds. Based in Dublin, CA.</p>
+      <p class="resume__tag">Computer Science + Computer Engineering at Northeastern University. Machine learning research, AI tools, and hackathon builds. Based in <span data-snap="Based in">Dublin, CA</span>.</p>
     </div>
+    <!-- Photo: put <img src="img/shrey.jpg" alt="Shrey Valia"> in here and the
+         pixel portrait steps aside. Empty, the slot shows the pixel hero (or
+         nothing without JS). -->
+    <div class="portrait" id="portrait"></div>
     <ul class="resume__contact" id="contact" data-node="lighthouse">
       <li data-fact="c-email" data-title="Email" data-kicker="Contact"><a href="mailto:valia.s@northeastern.edu">valia.s@northeastern.edu</a></li>
       <li data-fact="c-linkedin" data-title="LinkedIn" data-kicker="Contact"><a href="https://www.linkedin.com/in/shrey-valia-7a0041267/" rel="me">linkedin.com/in/shrey-valia-7a0041267</a></li>
@@ -221,7 +231,7 @@
 
     <article class="entry" id="ornl" data-node="ornl" data-kicker="Oak Ridge National Laboratory · ML Research Assistant">
       <header class="entry__head" data-fact="x-ornl" data-title="Oak Ridge National Laboratory">
-        <h3>Oak Ridge National Laboratory</h3>
+        <h3 data-snap="Research">Oak Ridge National Laboratory</h3>
         <p class="entry__role">Machine Learning Research Assistant</p>
         <p class="entry__meta">Remote · Jan 2026 – May 2026</p>
       </header>
@@ -247,7 +257,7 @@
     </article>
   </section>
 
-  <section class="resume__section" aria-labelledby="h-projects">
+  <section class="resume__section resume__section--cards" aria-labelledby="h-projects">
     <h2 id="h-projects">Projects</h2>
 
     <article class="entry" id="vincio" data-node="vincio" data-kicker="Project · Vincio">
@@ -270,22 +280,22 @@
         <p class="entry__meta">Apr 2024 – Aug 2024</p>
       </header>
       <ul class="entry__list">
-        <li data-fact="p-trade-1" data-title="Deep RL agent">Built a deep reinforcement learning agent in Python on the QuantConnect LEAN engine to trade a simulated $50,000 portfolio across multiple asset classes without manual input.</li>
+        <li data-fact="p-trade-1" data-title="Deep RL agent">Built a deep reinforcement learning agent in Python on the QuantConnect LEAN engine to trade a simulated <span data-stat="simulated portfolio traded by the deep RL agent">$50,000</span> portfolio across multiple asset classes without manual input.</li>
         <li data-fact="p-trade-2" data-title="One clean dataset">Organized the project’s market data in pandas and NumPy, cleaning and time-aligning Level II order-flow and microstructure feeds into one consistent dataset for every backtest.</li>
         <li data-fact="p-trade-3" data-title="Q-learning and PPO">Engineered entry and exit signals from that dataset and trained policies in TensorFlow with Q-learning and PPO.</li>
-        <li data-fact="p-trade-4" data-title="Walk-forward results">Achieved a 43% win rate and 2.76 profit factor in walk-forward backtests on a custom event-driven framework.</li>
+        <li data-fact="p-trade-4" data-title="Walk-forward results">Achieved a <span data-stat="win rate in walk-forward backtests">43%</span> win rate and <span data-stat="profit factor in the same backtests">2.76</span> profit factor in walk-forward backtests on a custom event-driven framework.</li>
       </ul>
     </article>
   </section>
 
   <section class="resume__section" aria-labelledby="h-education">
-    <h2 id="h-education">Education &amp; honors</h2>
+    <h2 id="h-education" data-nav="Education">Education &amp; honors</h2>
 
     <article class="entry" id="neu" data-node="neu" data-kicker="Northeastern University">
       <header class="entry__head" data-fact="e-neu" data-title="Northeastern University">
-        <h3>Northeastern University</h3>
-        <p class="entry__role">Bachelor of Science in Computer Science and Computer Engineering</p>
-        <p class="entry__meta">Boston, MA · Expected graduation May 2029</p>
+        <h3 data-snap="University">Northeastern University</h3>
+        <p class="entry__role" data-snap="Degree">Bachelor of Science in Computer Science and Computer Engineering</p>
+        <p class="entry__meta">Boston, MA · Expected graduation <span data-snap="Graduating">May 2029</span></p>
       </header>
       <div class="entry__block" data-fact="e-neu-courses" data-title="Relevant coursework">
         <p class="entry__label">Relevant coursework</p>
@@ -303,7 +313,7 @@
 
     <article class="entry" id="droid" data-node="droid" data-kicker="Award · Droid Strike Back Hackathon">
       <header class="entry__head" data-fact="a-droid" data-title="1st Place, Omi Category">
-        <h3>1st Place, Omi Category · Droid Strike Back Hackathon</h3>
+        <h3><span data-stat="Omi category, Droid Strike Back Hackathon">1st</span> Place, Omi Category · Droid Strike Back Hackathon</h3>
         <p class="entry__meta">San Francisco · Nov 2025</p>
       </header>
       <p class="entry__text" data-fact="a-droid-build" data-title="The build">Built a voice-controlled robot that converted spoken commands from Omi, an AI wearable, into instructions for a digital robot navigating a burning building.</p>
@@ -315,12 +325,12 @@
         <p class="entry__role">High School Diploma</p>
         <p class="entry__meta">Dublin, CA · Aug 2021 – Jun 2025</p>
       </header>
-      <p class="entry__text" data-fact="a-edulearn" data-title="1st of 700+">Award: 1st Place of 700+ participants, EduLearn Hackathon (Oct 2024).</p>
+      <p class="entry__text" data-fact="a-edulearn" data-title="1st of 700+">Award: <span data-stat="of 700+ participants, EduLearn Hackathon">1st</span> Place of 700+ participants, EduLearn Hackathon (Oct 2024).</p>
     </article>
   </section>
 
   <section class="resume__section" id="skills" aria-labelledby="h-skills" data-kicker="Skills">
-    <h2 id="h-skills">Technical skills</h2>
+    <h2 id="h-skills" data-nav="Skills">Technical skills</h2>
     <div class="skills" data-node="tree">
       <div class="skillset" data-fact="s-lang" data-title="Languages">
         <h3>Languages</h3>
