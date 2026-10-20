@@ -191,6 +191,7 @@ class Scene {
     this.cx0 = spec.collapse[0] * TILE; this.cx1 = spec.collapse[1] * TILE;
     this.streets = spec.street.map(([a, b]) => [a * TILE, b * TILE]);
     this.exit = spec.exit ? { x: spec.exit[0] * TILE, y: spec.exit[1] * TILE } : null;
+    this.holes = (spec.holes || []).map(([a, b]) => [a * TILE, b * TILE]);
     this.wall = this.paint(level.map.h);
     this.lamps = [];
     for (let x = this.x0 + 72; x < this.x1 - 24; x += 208) this.lamps.push([x, 30], [x + 104, 118]);
@@ -254,6 +255,17 @@ class Scene {
         if (sx < -20 || sx > ctx.W + 20) continue;
         flames(ctx, sx, L.map.h - cam.y, 14, h + 8, reduced ? 0 : t, s);
       }
+    }
+    // fire down in the holes in the floor
+    for (const [a, b] of this.holes) {
+      const sx = a - cam.x, w = b - a;
+      if (sx > ctx.W || sx + w < 0) continue;
+      for (let y = 176; y < L.map.h; y += 2) {
+        const k = (y - 176) / (L.map.h - 176);
+        ctx.fillStyle = `rgba(255,${Math.round(90 + 40 * k)},40,${(0.15 + 0.45 * k).toFixed(2)})`;
+        ctx.fillRect(sx, y - cam.y, w, 2);
+      }
+      flames(ctx, sx + 4, L.map.h - cam.y, w - 8, 14, reduced ? 0 : t, a);
     }
     // smoke rolling along the ceilings
     if (!reduced) {
@@ -425,7 +437,7 @@ class Robot {
       if (this.where === 'house' && hero.x > this.handoff[1]) { this.where = 'street'; this.x = this.endX; this.lift = 0; this.wings = 0; }
       else if (this.where === 'street' && hero.x < this.handoff[0] && !this.escape) { this.where = 'house'; this.x = this.shaftX; this.lift = this.liftH; this.wings = 16; }
       if (this.where === 'street' && hero.state === 'victory') this.escape++;
-      if (this.escape) { this.x += Math.min(2.2, this.escape / 20); this.tread = (this.tread || 0) + 1; }
+      if (this.escape && this.x < level.map.w + 64) { this.x += Math.min(2.2, this.escape / 20); this.tread = (this.tread || 0) + 1; }
     }
 
     if (this.voice) {
@@ -579,10 +591,9 @@ class Robot {
     const blink = !this.escape && (this.t % 210) < 6;
     if (blink) { ctx.fillStyle = C('orange.2'); ctx.fillRect(ex - 5, ey - 5, 11, 11); ctx.fillStyle = INK; ctx.fillRect(ex - 4, ey, 9, 1); }
     else if (this.where === 'street') {
-      // happy: an upturned arc
-      disc(ctx, ex, ey, 3, 'cyan.2');
-      ctx.fillStyle = C('white.1'); ctx.fillRect(ex - 3, ey, 7, 4);
-      ctx.fillStyle = INK; ctx.fillRect(ex - 3, ey, 1, 1); ctx.fillRect(ex + 3, ey, 1, 1); ctx.fillRect(ex - 2, ey - 1, 5, 1);
+      // happy: the eye squints into an arch
+      ctx.fillStyle = C('cyan.2');
+      ctx.fillRect(ex - 2, ey - 2, 5, 2); ctx.fillRect(ex - 3, ey - 1, 2, 3); ctx.fillRect(ex + 2, ey - 1, 2, 3);
     } else {
       const lookX = clamp(Math.round((L.hero.x - (this.x + 36)) / 40), -1, 1);
       disc(ctx, ex + lookX, ey, 3, 'cyan.2');
@@ -597,12 +608,18 @@ class Robot {
     ctx.fillStyle = C('steel.3'); ctx.fillRect(x + 4, top - 8, 1, 8);
     ctx.fillStyle = INK; ctx.fillRect(x + 3, top - 11, 4, 4);
     ctx.fillStyle = heard ? C('cyan.3') : ((t >> 5) & 1 ? C('green.2') : C('green.1')); ctx.fillRect(x + 4, top - 10, 2, 2);
-    // the instruction it is running, over its head
-    const tagY = top - 26;
-    if (this.task) tagPill(ctx, x + RW / 2, tagY, DOING[this.task.step], '#12456a', '#e3f6ff');
-    else if (this.voice && this.voice.t > 30) tagPill(ctx, x + RW / 2, tagY, 'Heard: ' + STEPS[this.voice.step].toLowerCase(), '#12456a', '#e3f6ff');
-    else if (parked && L.hero.ground !== this.plat) tagPill(ctx, x + RW / 2, tagY, 'Hop on: “Lift”', '#1d6b43', '#e9fbe9');
-    else if (this.done === 2 && this.where === 'house' && Math.abs(this.x - this.parkX) > 1) tagPill(ctx, x + RW / 2, tagY, 'To the lift', '#12456a', '#e3f6ff');
+    // the instruction it is running: over its head, or beside it while
+    // the hero rides the deck
+    let tag = null, bg = '#12456a', fg = '#e3f6ff';
+    if (this.task) tag = DOING[this.task.step];
+    else if (this.voice && this.voice.t > 30) tag = 'Heard: ' + STEPS[this.voice.step].toLowerCase();
+    else if (parked && L.hero.ground !== this.plat) { tag = 'Hop on: “Lift”'; bg = '#1d6b43'; fg = '#e9fbe9'; }
+    else if (this.done === 2 && this.where === 'house' && Math.abs(this.x - this.parkX) > 1) tag = 'To the lift';
+    if (tag) {
+      const riding = L.hero.ground === this.plat;
+      const tx = riding ? x + RW + 12 + textWidth(tag, 6.5, 700) / 2 : x + RW / 2;
+      tagPill(ctx, tx, riding ? top + 2 : top - 26, tag, bg, fg);
+    }
   }
 
   icon(ctx, x, y, t) {
@@ -722,9 +739,10 @@ class Vent {
     this.level = level;
     this.x = tx * TILE; this.w = 2 * TILE;
     this.floor = floorBelow(level.map, tx, ty);
-    // under a ceiling the flame fills the room; in the open it can be jumped
+    // under a ceiling the flame fills the room; in the open it stands well
+    // over head height, so the rule is the same everywhere: wait for it
     const ceil = ceilingAbove(level.map, tx, ty);
-    this.maxH = ceil > 0 ? this.floor - ceil : (spec.max || 40);
+    this.maxH = ceil > 0 ? this.floor - ceil : (spec.max || 48);
     this.P = spec.period || 200;
     this.ph = { warn: 90, burn: 130, out: 196 };
     // each vent fires a little later than the one before it, so walking at a
@@ -886,8 +904,10 @@ class Ember extends Enemy {
     if (this.grounded) {
       this.vx = 0;
       if (--this.wait <= 0) {
+        // hop at the hero, but never stray more than three tiles from home
         const hx = level.hero.x + level.hero.w / 2;
-        this.vx = Math.sign(hx - (this.x + 6)) * 0.8;
+        const away = this.x - this.spawnX;
+        this.vx = (Math.abs(away) > 48 ? -Math.sign(away) : Math.sign(hx - (this.x + 6))) * 0.8;
         this.vy = -4.2;
         this.wait = 80 + ((this.spawnX * 7) % 30);
       }

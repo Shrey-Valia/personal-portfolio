@@ -5,6 +5,7 @@
 //                   a stomp audits the card and flips the tag (x-hs-1)
 //   audit line      a stamp press checks each card on the belt against a
 //                   quality and safety rubric, then stamps Pass or Flag
+//                   (the belt carries cards only, never the hero)
 //   denoise         platforms start as pure noise and resolve over 20
 //                   diffusion steps into what the prompt asked for; once
 //                   rated, a fine-tuned model denoises as you go (x-hs-2)
@@ -22,11 +23,10 @@ import { compileMap } from '../art/sprite.js';
 import { registerSetpiece, platform } from '../game/setpieces.js';
 import { registerEnemy, Enemy } from '../game/enemies.js';
 import { Floater } from '../game/objects.js';
-import { TUNING } from '../game/tuning.js';
 import { registerSong, steps } from '../engine/audio.js';
 import { moveBody } from '../engine/physics.js';
 import { SOLID, ONEWAY } from '../engine/tilemap.js';
-import { clamp, lerp, ease, rng, hash2, makeCanvas, overlaps } from '../engine/util.js';
+import { lerp, ease, rng, hash2, makeCanvas, overlaps } from '../engine/util.js';
 
 const C = (r) => col(r);
 const INK = '#0b0d17';
@@ -569,11 +569,6 @@ class Gate {
     drawText(ctx, this.text, x + w / 2, y + 4, '#1b1e2b', { align: 'center', size: 10, weight: 700 });
     drawText(ctx, this.sub, x + w / 2, y + 4 + l1, '#b2470f', { align: 'center', size: 7, weight: 600 });
     ctx.fillStyle = C('orange.2'); ctx.fillRect(x + 3, y + h - 5, w - 6, 2);
-    // running lights along the top
-    for (let i = 8; i < w - 8; i += 8) {
-      ctx.fillStyle = ((i / 8 + (t >> 3)) & 3) === 0 ? C('cyan.3') : C('cyan.1');
-      ctx.fillRect(x + i, y - 2, 2, 2);
-    }
   }
 }
 
@@ -599,7 +594,7 @@ class Audit {
     this.t = 0;
     this.cards = [];
     this.n = 0;
-    this.speed = TUNING.conveyor;
+    this.speed = 0.75;
     this.cx = this.x + 16;
     const travel = Math.round((this.cx - (this.belt0 + 8)) / this.speed);
     this.spawnAt = (((this.ph.hold - travel) % this.P) + this.P) % this.P;
@@ -701,6 +696,12 @@ class Audit {
   }
 
   draw(ctx, cam, t) {
+    // the belt itself is decor (it moves the cards, never the hero), so a
+    // player waiting for the press can stand anywhere and stay put
+    if (onScreen(this.belt0, this.belt1 - this.belt0, cam, ctx)) {
+      const kit = this.level.map.kit, y = this.floor - cam.y;
+      for (let bx = this.belt0; bx < this.belt1; bx += TILE) kit.animated(ctx, '>', bx - cam.x, y, t);
+    }
     if (!onScreen(this.x - 10, 52, cam, ctx)) return;
     const p = this.phase(), hb = this.headBottom();
     const warn = p >= this.ph.warn && p < this.ph.slam;

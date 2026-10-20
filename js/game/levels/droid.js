@@ -3,8 +3,8 @@
 // "Forward", and the rescue robot drives into a collapsed floor so you can
 // cross on its back → "Extinguish": it foams a wall of fire away → vents
 // that flare in a rolling pattern → stand on its deck: "Lift", and its
-// scissor lift raises you to the upper floor → smoke, burnt planks and a
-// vent over the collapse → out the window and down the fire escape, where
+// scissor lift raises you to the upper floor → smoke, burnt planks, a vent
+// and an ember over the collapse → out the window and down the fire escape, where
 // the robot waits with the 1st-place trophy (a-droid) → EXIT.
 
 import { joinSegments } from '../../engine/tilemap.js';
@@ -35,26 +35,26 @@ const GROUND = [
   '',
   '',
   '',
-  '',
+  '.........................................................C',
   '###################################################.....##',
   '###################################################.....##',
   '.......................4................................##',
   '........................................................##',
-  '...c.c.c................................................##',
-  '...................3.......C...5....5....5....j.........##',
+  '...c.c.c....................................c.c.c.......##',
+  '...................3.......C...5....5....5..............##',
   '##########....############################################',
   '##########....############################################',
   '##########....############################################',
 ];
 
 // the upper floor, over the collapsed half of the building: smoke, a gap,
-// burnt planks, a vent you can jump, an ember, the window out
+// burnt planks, another vent, a gap, an ember, the window out
 const UPPER = [
   '...........................................................##',
   '...........................................................##',
-  '..........y.................................y',
+  '........y',
   '.................c.c.............c..............c.c.c',
-  '..C...............................5....j',
+  '..................................5.................j',
   '##############..#####6.........############..################',
   '##############..#####..........############..################',
   '.....#....#.........................#...............#......##',
@@ -107,7 +107,7 @@ export default {
         4: { type: 'droidFireWall', w: 2, h: 4 },
         5: { type: 'droidVent' },
         6: { type: 'droidPlanks', n: 5, w: 2 },
-        8: { type: 'droidScene', building: [22, 143], collapse: [82, 141], street: [[0, 22], [143, 173]], exit: [137, 2.2] },
+        8: { type: 'droidScene', building: [22, 143], collapse: [82, 141], holes: [[34, 38]], street: [[0, 22], [143, 173]], exit: [137, 2.2] },
         9: { type: 'droidTrophy', fact: 'a-droid' },
       },
     },
