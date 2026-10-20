@@ -81,9 +81,12 @@ export class OverworldScene {
     if (this.queue.length) { this.startStep(this.queue.shift()); return; }
 
     if (input.pressed.confirm) { this.enterNode(); return; }
-    const dx = (input.pressed.right ? 1 : 0) - (input.pressed.left ? 1 : 0);
-    const dy = (input.pressed.down ? 1 : 0) - (input.pressed.up ? 1 : 0);
-    if (dx || dy) this.tryDirection(dx, dy);
+    // a new press reads every held direction, so ↓ then → makes a diagonal
+    if (input.pressed.right || input.pressed.left || input.pressed.down || input.pressed.up) {
+      const dx = (input.held.right ? 1 : 0) - (input.held.left ? 1 : 0);
+      const dy = (input.held.down ? 1 : 0) - (input.held.up ? 1 : 0);
+      if (dx || dy) this.tryDirection(dx, dy);
+    }
   }
 
   tryDirection(dx, dy) {
@@ -93,8 +96,11 @@ export class OverworldScene {
       if (e.a !== this.node && e.b !== this.node) continue;
       const forward = e.a === this.node;
       const pts = forward ? e.pts : [...e.pts].reverse();
+      // score the first leg and the road's overall heading together
       const vx = pts[1][0] - pts[0][0], vy = pts[1][1] - pts[0][1];
-      const dot = (vx * dx + vy * dy) / (Math.hypot(vx, vy) * m);
+      const ox = pts[pts.length - 1][0] - pts[0][0], oy = pts[pts.length - 1][1] - pts[0][1];
+      const dot = 0.6 * (vx * dx + vy * dy) / (Math.hypot(vx, vy) * m)
+                + 0.4 * (ox * dx + oy * dy) / (Math.hypot(ox, oy) * m);
       if (dot > bestDot) { bestDot = dot; best = { edge: e, forward }; }
     }
     if (!best) return;
@@ -140,14 +146,25 @@ export class OverworldScene {
     else this.game.openResume(this.node);
   }
 
+  // the landmark, the pad and the label all count as the node
+  hitNode(n, x, gy) {
+    const labelTop = n.y > 100 ? n.y + 8 : n.y + 14;
+    return (Math.abs(n.x - x) < 16 && gy > n.y - 30 && gy < n.y + 8) ||
+           (Math.abs(n.x - x) < 36 && gy >= labelTop - 2 && gy < labelTop + 14);
+  }
+
+  hover(gx, gy) {
+    if (this.attract) return false;
+    const x = gx - this.ox;
+    return Object.values(NODES).some((n) => this.hitNode(n, x, gy));
+  }
+
   // tap/click a node: walk there over open roads, or enter if already there
   pointer(gx, gy) {
     if (this.attract) return;
     const x = gx - this.ox;
     let hit = null;
-    for (const [id, n] of Object.entries(NODES)) {
-      if (Math.abs(n.x - x) < 16 && gy > n.y - 30 && gy < n.y + 14) hit = id;
-    }
+    for (const [id, n] of Object.entries(NODES)) if (this.hitNode(n, x, gy)) hit = id;
     if (!hit) return;
     if (hit === this.node && !this.walk) { this.enterNode(); return; }
     const steps = route(this.walk ? this.walk.to : this.node, hit, this.game.progress.cleared, this.game.progress.warped);

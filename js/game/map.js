@@ -21,6 +21,7 @@ export const EDGES = [
   { a: 'home', b: 'ornl',       pts: [[232, 140], [336, 140]] },
   { a: 'home', b: 'dhs',        pts: [[232, 140], [214, 160], [196, 178]] },
   { a: 'home', b: 'lighthouse', pts: [[232, 140], [262, 158], [360, 160], [410, 170]] },
+  { a: 'ornl', b: 'lighthouse', pts: [[336, 140], [384, 150], [410, 170]] },
   { a: 'tree', b: 'vincio',     pts: [[128, 140], [128, 58]], beam: true },
   { a: 'vincio', b: 'trading',  pts: [[128, 58], [232, 58]], needs: ['vincio'] },
   { a: 'ornl', b: 'handshake',  pts: [[336, 140], [336, 58]], beam: true, needs: ['ornl'] },

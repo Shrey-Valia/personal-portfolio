@@ -27,7 +27,11 @@ const SONGS = {
 };
 
 // themes add loops: { bpm, lead: steps('…'), bass: steps('…'), drums: steps('k . h . s …') }
-export function registerSong(name, song) { SONGS[name] = song; }
+export function registerSong(name, song) {
+  if (SONGS[name]) console.error('[portfolio] song "' + name + '" is registered twice; rename one.');
+  SONGS[name] = song;
+}
+export const hasSong = (name) => !!SONGS[name];
 
 export function createAudio() {
   let ctx = null, master = null, sfxBus = null, musicBus = null, noiseBuf = null;

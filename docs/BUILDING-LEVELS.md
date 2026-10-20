@@ -29,9 +29,16 @@ The map node lights up and becomes enterable automatically.
   logos (company names as text are fine). Enemies are software bugs.
 - **Fair.** Main-path gaps ≤ 2 tiles. Pits are the only instant death, and
   their far edge must be on screen. No enemy within 5 tiles of a fact block,
-  checkpoint or port exit. 1 checkpoint per short level, 2 per long one.
-  At most one signature mechanic and two enemy types per level. A side room
-  reached by port is a one-screen "reading room": no enemies, no pits.
+  checkpoint or port exit. 1 checkpoint per short level, 2 per long one,
+  and one before the first pit. At most one signature mechanic and two enemy
+  types per level (Oak Ridge, the flagship, is the one exception). A side
+  room reached by port is a one-screen "reading room": no enemies, no pits,
+  `camera: 'fixed'`, at most 30 columns, with everything that matters in
+  the middle 24 (screens show 384–480 px).
+- **Unique names.** Registries are global. Prefix everything you register
+  with your node: set pieces `'trading.candles'`, kits/backdrops/songs/skins
+  `'trading'`. Duplicate or reserved names log an error. Enemy chars `z`
+  (Label Factory) and `y` (Trading) are taken.
 - **Readable.** Canvas text goes through `drawText()` (real type with an
   outline). Use sentence case. Keep labels short.
 - **Length.** 50–110 seconds for a first-time player.
@@ -75,6 +82,8 @@ export default {
 | `G` | goal (SHIP-IT button) | `P` | port: top-left of a 2-wide conduit, depth runs to the ground |
 | `e` | walker bug | `h` | hopper |
 | `1`–`9`, other letters | set piece from `marks`, or an enemy you registered |
+
+Reserved (never register these as enemies): `. # = ^ < > @ F K c C G S N P` and digits.
 
 The hero is 10×20. Ground top at row 11 means the hero stands at y = 156.
 A block 4 rows above the ground (row 7) is a comfortable bump. A walking jump
@@ -123,6 +132,9 @@ python3 tools/serve.py 4173        # no-cache dev server; pick your own port
 - `?debug=1&fresh=1&level=<node>`: boot straight into your level with
   clean progress (fresh runs never write to the real save).
 - `?god=1`: no damage.
+- With `?debug=1`, entering a level runs a data check (block/sign/duck/port
+  counts vs their lists, fact ids, kits, backdrops, songs, port exits) and
+  prints `level check: <id> OK` or each problem.
 - With `?debug=1`, `window.__game` is exposed. Background tabs don't run
   `requestAnimationFrame`, so step frames by hand:
   `for (let i = 0; i < 60; i++) __game.update(); __game.render(1);`

@@ -3,7 +3,7 @@
 
 import { TILE } from '../config.js';
 import { col } from '../art/palette.js';
-import { drawText, textWidth, wrap, lineHeight } from '../art/font.js';
+import { drawText, textWidth, wrap, lineHeight, textGrowth } from '../art/font.js';
 import { drawFrame } from '../art/sprite.js';
 import { overlaps } from '../engine/util.js';
 import { disc, pill } from '../art/draw.js';
@@ -38,7 +38,8 @@ export class InfoBlock {
     } else if (!this.used) {
       this.used = true;
       level.state.used.add(this.key());
-      level.spawn(new Coffee(this.x + 2, this.y));
+      level.spawn(new Coffee(this.x + 2, this.y, true));
+      level.drinkCoffee(this.x + 8, this.y - 10);
     }
   }
 
@@ -88,11 +89,18 @@ export class Bit {
 
 // ─── coffee: a one-hit shield ────────────────────────────────────────
 
+// a coffee cup: collectable, or (popped) a short rise-and-vanish flourish
 export class Coffee {
-  constructor(x, y) { this.x = x; this.y = y; this.w = 12; this.h = 11; this.alive = true; this.rise = 16; this.baseY = y - 12; }
-  update() { if (this.rise > 0) { this.rise--; this.y = this.baseY + this.rise * 0.75; } }
+  constructor(x, y, popped = false) {
+    this.x = x; this.y = y; this.w = 12; this.h = 11; this.alive = true;
+    this.rise = 16; this.baseY = y - 12; this.popped = popped; this.life = 34;
+  }
+  update() {
+    if (this.rise > 0) { this.rise--; this.y = this.baseY + this.rise * 0.75; }
+    if (this.popped && --this.life <= 0) this.alive = false;
+  }
   touch(hero, level) {
-    if (this.rise > 0) return;
+    if (this.rise > 0 || this.popped) return;
     this.alive = false;
     level.drinkCoffee(this.x + 6, this.y);
   }
@@ -214,6 +222,7 @@ export class Duck {
 
 export function bubble(ctx, text, cx, bottom, maxW = 120) {
   const SIZE = 7;
+  maxW = Math.min(ctx.W - 16, maxW * Math.min(1.8, textGrowth(SIZE)));   // bigger floor, wider bubble
   const lines = wrap(text, maxW, SIZE);
   const lh = lineHeight(SIZE);
   const w = Math.ceil(Math.max(...lines.map((l) => textWidth(l, SIZE)))) + 12;
@@ -239,8 +248,8 @@ export class Port {
     this.glow = 0;
   }
   standingOn(hero) {
-    const cx = hero.x + hero.w / 2;
-    return hero.grounded && Math.abs(hero.y + hero.h - this.y) < 1 && cx > this.x + 6 && cx < this.x + 26;
+    return hero.grounded && Math.abs(hero.y + hero.h - this.y) < 1 &&
+      hero.x + hero.w > this.x + 4 && hero.x < this.x + this.w - 4;
   }
   draw(ctx, cam, t, A, level) {
     const x = this.x - cam.x, y = this.y - cam.y;
@@ -268,7 +277,7 @@ export class Port {
     // ▼ when the hero stands on it
     if (level && this.standingOn(level.hero) && level.hero.state === 'normal') {
       const bob = (t >> 3) & 1;
-      drawText(ctx, '▼', x + 16, y - 30 - bob, '#5ce1e6', { align: 'center', shadow: '#0b0d17', size: 9 });
+      drawText(ctx, '▼', x + 16, Math.max(18, y - 30 - bob), '#5ce1e6', { align: 'center', shadow: '#0b0d17', size: 9 });
     }
   }
 }
@@ -282,7 +291,7 @@ export class Floater {
   update() { this.y -= this.life > this.max - 20 ? 0.6 : 0.15; if (--this.life <= 0) this.alive = false; }
   draw(ctx, cam) {
     if (this.life < 10 && (this.life & 1)) return;
-    drawText(ctx, this.text, this.x - cam.x, this.y - cam.y, this.color, { align: 'center', shadow: '#0b0d17', size: 7, weight: 700 });
+    drawText(ctx, this.text, this.x - cam.x, Math.max(22, this.y - cam.y), this.color, { align: 'center', shadow: '#0b0d17', size: 7, weight: 700 });
   }
 }
 
@@ -291,7 +300,7 @@ export class FactToken {
   constructor(x, y) { this.x = x; this.y = y; this.vy = -3.6; this.life = 34; this.alive = true; }
   update() { this.y += this.vy; this.vy += 0.16; if (--this.life <= 0) this.alive = false; }
   draw(ctx, cam) {
-    const x = Math.round(this.x - cam.x), y = Math.round(this.y - cam.y);
+    const x = Math.round(this.x - cam.x), y = Math.max(24, Math.round(this.y - cam.y));
     pill(ctx, x - 7, y - 6, 14, 12, C('indigo.2'), '#0b0d17', 2);
     drawText(ctx, '>_', x, y - 5, '#6fd6c8', { align: 'center', size: 7, weight: 700 });
   }

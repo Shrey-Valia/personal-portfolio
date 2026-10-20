@@ -17,7 +17,24 @@ export class Game {
     this.autoRun = false;
     this.scene = null;
     this.fps = { n: 0, t: performance.now(), v: 0 };
-    this.loop = createLoop(() => this.update(), (a) => this.render(a));
+    this.queued = [];
+    this.loop = createLoop(() => this.update(), (a) => this.render(a), (err) => this.crash(err));
+    // pointer cursor over clickable map nodes
+    this.display.canvas.addEventListener('pointermove', (e) => {
+      const s = this.scene;
+      const p = this.display.toGame(e.clientX, e.clientY);
+      this.display.canvas.style.cursor = s && s.hover && s.hover(p.x, p.y) ? 'pointer' : '';
+    });
+  }
+
+  // a runtime error must never strand a visitor on a dead canvas:
+  // put the plain résumé back, exactly like a failed boot
+  crash(err) {
+    console.error('[portfolio] the game stopped; showing the résumé instead.', err);
+    const resume = document.getElementById('resume');
+    document.querySelectorAll('dialog[open]').forEach((d) => d.close());
+    if (resume && resume.parentElement !== document.body) document.body.appendChild(resume);
+    document.documentElement.classList.remove('js', 'game-ready');
   }
 
   get W() { return this.display.W; }
@@ -38,11 +55,15 @@ export class Game {
   update() {
     if (this.paused.size) return;
     this.input.beginStep();
+    this.autoRun = document.documentElement.classList.contains('touch-on');   // one thumb can't hold run + jump
     if (this.trans) {
       const tr = this.trans;
       tr.t++;
-      if (tr.t === tr.dur) { tr.mid(); tr.mid = () => {}; }
-      if (tr.t >= tr.dur * 2 + (tr.hold || 0)) this.trans = null;
+      if (tr.t === tr.dur) { tr.mid(); tr.mid = null; }
+      if (tr.t >= tr.dur * 2 + (tr.hold || 0)) {
+        this.trans = null;
+        if (this.queued.length) { const [m, text] = this.queued.shift(); this.transition(m, text); }
+      }
       if (tr.t < tr.dur * 2) return;
     }
     if (this.scene) this.scene.update();
@@ -73,8 +94,13 @@ export class Game {
   pause(reason) { this.paused.add(reason); }
   resume(reason) { this.paused.delete(reason); }
 
+  // a request during a fade-out joins it; one during the fade-in waits its turn
   transition(mid, text) {
-    if (this.trans) { const prev = this.trans.mid; this.trans.mid = () => { prev(); mid(); }; return; }
+    if (this.trans) {
+      if (this.trans.mid) { const prev = this.trans.mid; this.trans.mid = () => { prev(); mid(); }; }
+      else this.queued.push([mid, text]);
+      return;
+    }
     this.trans = { t: 0, dur: this.reduced ? 10 : 16, mid, text, hold: text ? 30 : 0 };
   }
 
@@ -188,6 +214,7 @@ export class Game {
 
   openPause(focus) {
     if (!(this.scene instanceof LevelScene)) return false;
+    if (focus === 'map') { this.leaveToMap(); return true; }      // the Map button means the map
     this.ui.dialogs.openPause(focus);
     return true;
   }

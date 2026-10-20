@@ -122,4 +122,7 @@ function homeKit() {
 export const KITS = { lab: labKit(false), labInterior: labKit(true), home: homeKit() };
 
 // themes add their own kits: { terrain(ctx,x,y,mask,tx,ty), oneway(ctx,x,y,joinL,joinR), animated(ctx,ch,x,y,t) }
-export function registerKit(name, kit) { KITS[name] = kit; }
+export function registerKit(name, kit) {
+  if (KITS[name]) console.error('[portfolio] kit "' + name + '" is registered twice; rename one.');
+  KITS[name] = kit;
+}

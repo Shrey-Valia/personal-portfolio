@@ -129,4 +129,10 @@ export class Hopper extends Enemy {
 
 // map character → enemy class. Constructed as new Ctor(tx, ty, skin, level).
 export const ENEMIES = { e: Walker, h: Hopper };
-export function registerEnemy(ch, Ctor) { ENEMIES[ch] = Ctor; }
+// characters the level loader already owns; digits are for set-piece marks
+export const RESERVED_CHARS = '.#=^<>@FKcCGSNP0123456789';
+export function registerEnemy(ch, Ctor) {
+  if (RESERVED_CHARS.includes(ch)) console.error('[portfolio] enemy char "' + ch + '" is reserved by the level loader; pick another.');
+  else if (ENEMIES[ch]) console.error('[portfolio] enemy char "' + ch + '" is registered twice; the last one wins. Pick another.');
+  ENEMIES[ch] = Ctor;
+}

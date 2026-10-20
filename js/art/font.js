@@ -8,7 +8,7 @@ import { makeCanvas } from '../engine/util.js';
 
 const FAMILY = '"Fredoka", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif';
 export const TEXT = 8;              // default size, game px
-const MIN_CSS = 11;                 // smallest on-screen size, CSS px
+const MIN_CSS = 13;                 // smallest on-screen size, CSS px
 
 let RS = 1, CSS_PER_PX = 3;
 export function setTextMetrics(renderScale, cssPerGamePx) { RS = renderScale; CSS_PER_PX = cssPerGamePx; }
@@ -60,6 +60,9 @@ export function wrap(str, maxW, size = TEXT) {
   if (line) lines.push(line);
   return lines;
 }
+
+// how much the on-screen floor enlarged this size (1 = not at all)
+export const textGrowth = (size = TEXT) => eff(size) / size;
 
 // line height for a given size, in game px
 export const lineHeight = (size = TEXT) => Math.ceil(eff(size) * 1.25);

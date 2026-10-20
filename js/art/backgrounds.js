@@ -165,7 +165,11 @@ function homeRoom() {
 const BUILDERS = { lab: labDawn, labInterior: labInside, home: () => homeRoom() };
 
 // themes add backdrops: build(W) → { draw(ctx, camX, camY, t, reduced) }
-export function registerBackground(name, build) { BUILDERS[name] = build; }
+export function registerBackground(name, build) {
+  if (BUILDERS[name]) console.error('[portfolio] backdrop "' + name + '" is registered twice; rename one.');
+  BUILDERS[name] = build;
+}
+export const hasBackground = (name) => !!BUILDERS[name];
 
 const cache = new Map();
 export function getBackground(theme, W) {
