@@ -1,5 +1,5 @@
-// The HUD strip (DOM): lives, coffee, bits, facts, node name, and the
-// always-visible RÉSUMÉ button. Counters only touch the DOM on change.
+// The HUD strip (DOM): lives, coffee, bits, facts, skills, node name, and
+// the always-visible RÉSUMÉ button. Counters only touch the DOM on change.
 
 import { iconURL } from '../art/sprite.js';
 import { makeCanvas } from '../engine/util.js';
@@ -12,6 +12,15 @@ export function createHud(game) {
     banner: $('node-banner'), toasts: $('toasts'), sr: $('sr-status'),
   };
   const last = {};
+
+  // skills counter: built here so index.html stays content-only. Shown in
+  // the Tech Tree, and everywhere once a skill has been collected.
+  const skillsItem = document.createElement('span');
+  skillsItem.className = 'hud__item hud__skills';
+  skillsItem.title = 'Skills collected';
+  skillsItem.innerHTML = '<span class="hud__label">Skills</span> <b id="hud-skills"></b>';
+  el.facts.closest('.hud__item').after(skillsItem);
+  el.skills = skillsItem.querySelector('b');
 
   // icons come from the same sprite art as the game
   const A = game.art;
@@ -45,6 +54,15 @@ export function createHud(game) {
       set('lives', el.lives, String(p.lives), bump);
       set('bits', el.bits, String(p.bits).padStart(3, '0'), bump);
       set('facts', el.facts, p.facts.size + '/' + game.content.total, bump);
+      const skills = game.content.skills;
+      const have = skills.filter((k) => p.hasSkill(k.name)).length;
+      if (last.skillCount !== have) {
+        last.skillCount = have;
+        for (const k of skills) k.el.classList.toggle('is-found', p.hasSkill(k.name));
+      }
+      set('skills', el.skills, have + '/' + skills.length, bump);
+      const inTree = !!(game.scene && game.scene.def && game.scene.def.node === 'tree');
+      skillsItem.style.display = have > 0 || inTree ? '' : 'none';
       const hero = game.scene && game.scene.hero;
       const coffee = !hero || hero.coffee;
       if (last.coffee !== coffee) { last.coffee = coffee; el.coffee.classList.toggle('is-empty', !coffee); }

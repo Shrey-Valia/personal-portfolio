@@ -1,6 +1,7 @@
 // Side-scroller camera: horizontal dead zone with lookahead, SMW-style
 // vertical snap (re-targets when the hero lands at a new height or nears
-// an edge), clamped to room bounds, with trauma-based shake.
+// an edge), a looser band for vertical climbs, clamped to room bounds,
+// with trauma-based shake.
 
 import { clamp, lerp } from './util.js';
 
@@ -41,7 +42,11 @@ export function createCamera() {
 
       const feet = hero.y + hero.h;
       if (cam.mode === 'vertical') {
-        cam.targetY = feet - H * 0.6;
+        // climbs: settle the feet at 60% on landing, follow in the air only
+        // past a band around it, so hops under bricks don't bob the screen
+        if (hero.grounded) cam.targetY = feet - H * 0.6;
+        else if (feet < cam.y + H * 0.42) cam.targetY = feet - H * 0.42;
+        else if (feet > cam.y + H * 0.72) cam.targetY = feet - H * 0.72;
       } else if (hero.grounded) {
         cam.targetY = feet - H * 0.74;
       } else if (feet < cam.y + H * 0.3 || feet > cam.y + H * 0.86) {
