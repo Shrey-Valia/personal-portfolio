@@ -1,6 +1,7 @@
 # Questions for Shrey: Tech Tree and Lighthouse
 
 Branch `claude/levels-finale-9cd67c`. Four decisions, each with my pick.
+All four are now decided; the outcome is under each question.
 
 ## 1. Where should "Open to work" appear?
 
@@ -18,6 +19,11 @@ beacon lights, and it doesn't appear on the end screen.
 where a recruiter decides to write to you, so that's where this line helps
 most. If it isn't accurate, C.
 
+**Decided: B, once the wording is confirmed.** The end screen now shows the
+`c-open` text (read from index.html) only when the element has no
+`data-flag="inference"`. Removing that attribute, after Shrey confirms
+the sentence, is the one edit that turns it on.
+
 ## 2. Should the skill bricks be required?
 
 All 38 bricks are optional now. Reaching the tree top clears the level with
@@ -31,6 +37,8 @@ that is fully collected shows "Maxed ✓".
 **Pick: A.** Hitting 38 bricks takes about a minute. A recruiter who just
 wants the five category cards shouldn't have to grind, and every skill is
 also in the résumé.
+
+**Decided: A.** No change.
 
 ## 3. Is a git graph the right picture for "Tools and infrastructure"?
 
@@ -48,6 +56,8 @@ reaches into clouds.
 **Pick: A.** Every reader recognizes git, and the clouds stand in for AWS
 without using a logo.
 
+**Decided: A.** No change.
+
 ## 4. Is the Lighthouse long enough?
 
 A first visit takes about 35–45 s with its four cards: dock, three signal
@@ -61,6 +71,8 @@ quickly.
 
 **Pick: A.** It's the contact level and it's open from the start. Short is
 the point.
+
+**Decided: A.** No change.
 
 ## Notes, no decision needed
 

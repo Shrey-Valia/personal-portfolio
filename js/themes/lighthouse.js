@@ -581,6 +581,9 @@ function buildFinale() {
 .finale__stats div { padding: 8px 12px; border-radius: 12px; background: var(--panel-2); }
 .finale__stats dt { color: var(--muted); font-family: var(--display); font-size: 14px; }
 .finale__stats dd { margin: 0; color: var(--gold); font-family: var(--display); font-weight: 700; font-size: 20px; }
+.finale__open { display: flex; gap: 10px; align-items: baseline; margin: 12px 0 0; color: var(--text); font-family: var(--display); font-weight: 600; font-size: 18px; line-height: 1.35; }
+.finale__open::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(126, 224, 138, 0.2); }
+.finale__open[hidden] { display: none; }
 @media (max-width: 540px) { .finale__pair, .finale__stats { grid-template-columns: 1fr 1fr; } .finale__mail { flex-direction: column; } }`;
   document.head.appendChild(style);
 
@@ -591,6 +594,7 @@ function buildFinale() {
   d.innerHTML = `
     <p class="menu__kicker">Beacon lit</p>
     <h2 class="menu__title" id="finale-title">Thanks for playing</h2>
+    <p class="finale__open" id="finale-open" hidden></p>
     <p class="menu__sub" id="finale-sub"></p>
     <div class="finale__links" id="finale-links"></div>
     <dl class="finale__stats" id="finale-stats"></dl>
@@ -620,6 +624,11 @@ function openFinale(game, level) {
     (mail ? `<div class="finale__mail">${ext(mail, true)}<button class="pbtn finale__copy" type="button" data-finale="copy">Copy email</button></div>` : '') +
     `<div class="finale__pair">${[li, gh].filter(Boolean).map((l) => ext(l, false)).join('')}</div>`;
   d.querySelector('#finale-sub').textContent = 'The quickest ways to reach Shrey:';
+  // the open-to-work line, once its wording is confirmed (no data-flag="inference")
+  const open = C.get('c-open'), openEl = d.querySelector('#finale-open');
+  const confirmed = open && !open.el.matches('[data-flag="inference"]');
+  openEl.textContent = confirmed ? open.el.textContent.trim() : '';
+  openEl.hidden = !confirmed;
 
   const found = factsFound(game);
   const skills = C.skills.filter((s) => P.hasSkill(s.name)).length;
