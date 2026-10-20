@@ -174,8 +174,8 @@ function backstageKit() {
   };
 }
 
-registerKit('studio', studioKit());
-registerKit('studioDark', backstageKit());
+registerKit('vincio', studioKit());
+registerKit('vincioBackstage', backstageKit());
 
 // ─── backdrop: the editor UI, its timeline, and a sweeping playhead ──
 
@@ -289,12 +289,12 @@ function backstageBackdrop(W) {
   return { draw(ctx) { ctx.drawImage(bg, 0, 0); } };
 }
 
-registerBackground('studio', studioBackdrop);
-registerBackground('studioDark', backstageBackdrop);
+registerBackground('vincio', studioBackdrop);
+registerBackground('vincioBackstage', backstageBackdrop);
 
 // ─── bugs: an orange glitch beetle and a hopping dropped frame ───────
 
-registerSkin('studio', { d: 'orange.1', b: 'orange.2', c: 'orange.3', t: 'white.2', e: 'white.2', o: 'ink.0', l: 'slate.3' });
+registerSkin('vincio', { d: 'orange.1', b: 'orange.2', c: 'orange.3', t: 'white.2', e: 'white.2', o: 'ink.0', l: 'slate.3' });
 
 // a dropped frame: a blank film frame with a red slash where the picture should be
 class DroppedFrame extends Hopper {
@@ -894,7 +894,7 @@ registerSetpiece('vincio.render', Render);
 
 // ─── music: a laid-back edit-suite loop in D minor ──────────────────
 
-registerSong('studio', {
+registerSong('vincio', {
   bpm: 112,
   lead: steps('D5 . F5 A5 . G5 F5 . | E5 . C5 . D5 . A4 . | D5 . F5 A5 . C6 A5 . | G5 . E5 . F5 . D5 . | ' +
     'A5 . G5 F5 . E5 D5 . | C5 . E5 . G5 . E5 . | F5 . E5 D5 . C5 A4 . | D5 . . . A4 . D5 .'),

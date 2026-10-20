@@ -3,7 +3,7 @@
 // grid with a ticker tape. No invented numbers: the only figures on screen
 // are read from the résumé text in index.html at runtime.
 //
-// Set pieces (all prefixed trade.):
+// Set pieces (all prefixed trading.):
 //   banner      the simulated-portfolio sign ($ amount read from p-trade-1)
 //   autopilot   the RL agent's cart: rides a price line across asset-class
 //               panels with the controls locked, no manual input (p-trade-1)
@@ -655,16 +655,16 @@ class Results {
   }
 }
 
-registerSetpiece('trade.label', Label);
-registerSetpiece('trade.banner', PortfolioBanner);
-registerSetpiece('trade.autopilot', Autopilot);
-registerSetpiece('trade.align', Align);
-registerSetpiece('trade.qtable', QTable);
-registerSetpiece('trade.spring', Spring);
-registerSetpiece('trade.models', Models);
-registerSetpiece('trade.candles', Candles);
-registerSetpiece('trade.walkforward', WalkForward);
-registerSetpiece('trade.results', Results);
+registerSetpiece('trading.label', Label);
+registerSetpiece('trading.banner', PortfolioBanner);
+registerSetpiece('trading.autopilot', Autopilot);
+registerSetpiece('trading.align', Align);
+registerSetpiece('trading.qtable', QTable);
+registerSetpiece('trading.spring', Spring);
+registerSetpiece('trading.models', Models);
+registerSetpiece('trading.candles', Candles);
+registerSetpiece('trading.walkforward', WalkForward);
+registerSetpiece('trading.results', Results);
 
 // ─── music: a driving minor-key market loop ─────────────────────────
 
