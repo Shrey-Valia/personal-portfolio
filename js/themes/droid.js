@@ -314,19 +314,23 @@ class Scene {
 // ─── voice: the hero's speech bubble with a live waveform ───────────
 
 function voiceBubble(ctx, cx, bottom, word, t) {
+  // what Omi heard: a small "Omi" label, a live waveform, the command
   const text = '“' + word + '”';
-  const tw = Math.ceil(textWidth(text, 8, 700));
-  const w = tw + 34, h = lineHeight(8) + 8;
+  const tw = Math.ceil(textWidth(text, 8, 700)), ow = Math.ceil(textWidth('Omi', 6, 700));
+  const w = tw + ow + 40, h = lineHeight(8) + 8;
   const x = Math.round(Math.max(4, Math.min(ctx.W - w - 4, cx - w / 2))), y = Math.round(bottom - h - 6);
   pill(ctx, x, y, w, h, '#fbf8f1', INK, 4);
   ctx.beginPath(); ctx.moveTo(cx - 3, y + h - 0.5); ctx.lineTo(cx, y + h + 5); ctx.lineTo(cx + 3, y + h - 0.5); ctx.fillStyle = '#fbf8f1'; ctx.fill();
+  pill(ctx, x + 4, y + 4, ow + 6, h - 8, '#0e3b43', null, 2);
+  drawText(ctx, 'Omi', x + 7, y + Math.round(h / 2) - 4, '#6fd6c8', { size: 6, weight: 700 });
+  const wx = x + ow + 14;
   for (let i = 0; i < 6; i++) {
     const a = Math.abs(Math.sin(t / 3 + i * 1.3)) * 0.8 + 0.2;
     const bh = Math.max(2, Math.round(a * (h - 8)));
     ctx.fillStyle = C(i % 2 ? 'cyan.2' : 'teal.2');
-    ctx.fillRect(x + 6 + i * 3, y + Math.round(h / 2 - bh / 2), 2, bh);
+    ctx.fillRect(wx + i * 3, y + Math.round(h / 2 - bh / 2), 2, bh);
   }
-  drawText(ctx, text, x + 28, y + 4, '#1b1e2b', { size: 8, weight: 700 });
+  drawText(ctx, text, wx + 21, y + 4, '#1b1e2b', { size: 8, weight: 700 });
   return { x, y, w, h };
 }
 
