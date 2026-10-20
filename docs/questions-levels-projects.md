@@ -1,8 +1,17 @@
 # Questions for Shrey: Vincio Studio and Trading Floor
 
 Both levels are playable start to finish (`?level=vincio`, `?level=trading`).
-These four are taste or content calls only you can make. Each has a
-default already built in, so nothing is blocked.
+These were four taste and content calls. Shrey said to decide them as I
+saw fit (2026-10-20), so each now records what was decided.
+
+| # | Question | Decision |
+|---|---|---|
+| 1 | Name the asset classes on the autopilot ride? | **A, unnamed.** The résumé doesn't name them. |
+| 2 | Backstage: built vs contributed? | **B, done.** Front end and agent layer are tagged "Built"; database, auth and agent memory "Contributed". The tags appear once the stack powers up. |
+| 3 | What does the text agent type? | **A, "On-screen text".** |
+| 4 | Goal labels? | **A, Export and Execute.** The "Simulated portfolio" banner already frames the trades as simulated. |
+
+The original questions follow for reference.
 
 ## 1. Trading: should the autopilot ride name the asset classes?
 

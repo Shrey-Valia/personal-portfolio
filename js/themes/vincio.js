@@ -708,9 +708,19 @@ class Caption extends Agent {
   }
 }
 
+// what Shrey did on each part, in the bullet's own words: he built the
+// front end and the agent layer, and contributed to the rest
+function roleTag(ctx, role, cx, y) {
+  const built = role === 'built', text = built ? 'Built' : 'Contributed';
+  const w = Math.ceil(textWidth(text, 6)) + 8, x = Math.round(cx - w / 2);
+  pill(ctx, x, y, w, 10, built ? '#3a2a0a' : '#0c1f2a', built ? '#f2b233' : '#156f73', 3);
+  drawText(ctx, text, cx, y + 1, built ? '#ffe08a' : '#6fd6c8', { align: 'center', size: 6 });
+}
+
 // ─── p-vincio-3: Backstage, the stack behind the editor ─────────────
 // Coordinates in spec are absolute room tiles. Before the fact the stack
-// is idle; after it, every layer powers on and packets flow between them.
+// is idle; after it, every layer powers on, packets flow between them, and
+// each part shows whether Shrey built it or contributed to it.
 
 class Backstage {
   constructor(tx, ty, spec, level, key) {
@@ -735,7 +745,7 @@ class Backstage {
       level.state.built.add(this.key + ':auth');
       for (let j = 0; j < d.th; j++) this.map.setFlag(d.tx, d.ty + j, 0);
       level.sfx('build');
-      level.floaters.push(new Floater(d.x + 8, d.y + d.h - 34, 'Signed in', '#90eaa8', 70));
+      level.floaters.push(new Floater(d.x + 8, d.y + d.h - 6, 'Signed in', '#90eaa8', 70));
     }
     if (this.openDoor) d.k = Math.min(1, d.k + 1 / 30);
   }
@@ -770,7 +780,7 @@ class Backstage {
     }
     // agent memory: three chips that light once the layer is running
     const [mx, my] = s.memory, mX = mx * T - cam.x, mY = my * T - cam.y;
-    pill(ctx, mX, mY, 64, 34, '#0c1029', '#2c3566', 3);
+    pill(ctx, mX, mY, 64, 44, '#0c1029', '#2c3566', 3);
     drawText(ctx, 'Agent memory', mX + 32, mY + 1, '#6fd6c8', { align: 'center', size: 6.5 });
     for (let i = 0; i < 3; i++) {
       const cx = mX + 8 + i * 18, cy = mY + 15;
@@ -780,6 +790,7 @@ class Backstage {
       ctx.fillStyle = C(lit ? 'teal.3' : 'slate.2'); ctx.fillRect(cx + 2, cy + 2, 8, 2); ctx.fillRect(cx + 2, cy + 6, 5, 2);
       for (let p = 0; p < 3; p++) { ctx.fillStyle = C('slate.3'); ctx.fillRect(cx + 2 + p * 4, cy + 10, 2, 2); }
     }
+    if (on) roleTag(ctx, s.memoryRole, mX + 32, mY + 31);
     // the front end: the editor itself, in a browser window
     const [fx, fy, fw, fh] = s.front, x = fx * T - cam.x, y = fy * T - cam.y, w = fw * T, h = fh * T;
     ctx.fillStyle = C('ink.0'); ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
@@ -801,8 +812,14 @@ class Backstage {
     } else {
       drawText(ctx, 'Offline', x + w / 2, y + h / 2 - 6, '#4a5068', { align: 'center', size: 7 });
     }
-    // zone labels
-    for (const [text, lx, ly] of s.labels) label(ctx, text, lx * T - cam.x, ly * T - cam.y, on ? '#e3e6ee' : '#8a95b4', 7);
+    // zone labels, with the role tag below or to the right once powered
+    for (const [text, lx, ly, role, place] of s.labels) {
+      const cx = lx * T - cam.x, cy = ly * T - cam.y;
+      label(ctx, text, cx, cy, on ? '#e3e6ee' : '#8a95b4', 7);
+      if (!on || !role) continue;
+      if (place === 'right') roleTag(ctx, role, cx + textWidth(text, 7) / 2 + 16, cy);
+      else roleTag(ctx, role, cx, cy + 10);
+    }
   }
   draw(ctx, cam, t) {
     const on = this.powered();
@@ -841,6 +858,7 @@ class Backstage {
     ctx.fillRect(x + 6, ly + 2, 1, 3); ctx.fillRect(x + 9, ly + (ok ? 1 : 2), 1, ok ? 2 : 3); ctx.fillRect(x + 6, ly + 2, 4, 1);
     ctx.restore();
     label(ctx, 'Auth', d.x + 8 - cam.x, d.y + d.h - 46 - cam.y, ok ? '#90eaa8' : on ? '#ffe08a' : '#ff8f7f', 7);
+    if (on) roleTag(ctx, this.spec.authRole, d.x + 8 - cam.x, d.y + d.h - 36 - cam.y);
   }
 }
 

@@ -158,11 +158,14 @@ export default {
           type: 'vincio.backstage', fact: 'p-vincio-3',
           db: [[6, 9, 2], [8, 7, 4]],                       // [col, top row, height]
           auth: [20, 1, 6],                                 // door: col, top row, height
-          memory: [15.5, 2.6],
-          front: [21, 2.8, 5, 3.2],                         // browser window: col, row, w, h
+          memory: [15.25, 2.4],
+          front: [21.75, 2.8, 4.25, 3.2],                   // browser window: col, row, w, h
           crew: [[11.5, 6.4, 'video'], [13.5, 6.4, 'fx'], [16.5, 6.4, 'trans'], [18.5, 6.4, 'text']],
-          links: [[[7, 9], [7, 5.5], [11.5, 5.5]], [[16.5, 6], [16.5, 4.8]], [[18.5, 5.5], [21.2, 5.5]]],
-          labels: [['Database', 7.5, 4.6], ['Agent layer', 12, 4.6], ['Front end', 23.5, 2]],
+          links: [[[7, 9], [7, 5.5], [11.5, 5.5]], [[16.5, 6], [16.5, 5.1]], [[18.5, 5.5], [21.9, 5.5]]],
+          // what Shrey did on each part, per the bullet: built or contributed
+          labels: [['Database', 7.5, 4.2, 'contributed'], ['Agent layer', 12, 4.2, 'built'], ['Front end', 23.6, 2, 'built', 'right']],
+          memoryRole: 'contributed',
+          authRole: 'contributed',
         },
       },
     },
