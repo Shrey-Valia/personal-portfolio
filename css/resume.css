@@ -1,8 +1,13 @@
 /* ═══════════════════════════════════════════════════════════
-   The résumé: a clean document on its own (no JS), and the
-   in-game log when it lives in #resume-dialog, where each
-   fact gets a found / not-yet-found marker.
+   The résumé: one block of markup, two looks.
+   · body > .resume is the portfolio page: no JS, file://, a
+     failed boot, and the page view all show it this way.
+   · .resume-dialog .resume is the in-game log on paper, where
+     each fact gets a found / not-yet-found marker.
+   Fact cards clone pieces of it; game.css styles those.
    ═══════════════════════════════════════════════════════════ */
+
+/* ─── shared rhythm ────────────────────────────────────────── */
 
 .resume {
   width: min(780px, 100% - 40px);
@@ -32,20 +37,15 @@
 }
 .resume__contact a { display: inline-block; padding: 6px 0; font-weight: 700; }
 
-.resume__open { margin: 8px 0 0; color: var(--paper-mut); }
+.resume__open { margin: 8px 0 0; }
 
 .resume__section { margin-top: 56px; }
-.resume__section > h2 {
-  margin: 0 0 20px;
-  padding-bottom: 8px;
-  font-size: 26px;
-  border-bottom: 2px solid var(--paper-ink);
-}
+.resume__section > h2 { margin: 0 0 20px; font-size: 26px; }
 
 .entry { margin: 0 0 32px; }
 .entry__head h3 { margin: 0; font-size: 22px; }
 .entry__role { margin: 4px 0 0; font-weight: 700; }
-.entry__meta { margin: 2px 0 0; color: var(--paper-mut); font-size: 16px; }
+.entry__meta { margin: 2px 0 0; font-size: 16px; }
 .entry__list { margin: 10px 0 0; padding-left: 1.2em; }
 .entry__list li { margin: 6px 0; }
 .entry__text { margin: 10px 0 0; }
@@ -65,18 +65,346 @@
 }
 .chips li {
   padding: 4px 12px;
-  background: var(--paper-2);
-  border: 1.5px solid #c9c0ac;
+  background: var(--night-3);
+  border: 1.5px solid var(--rule);
   border-radius: 999px;
   font-size: 15px;
   line-height: 1.3;
 }
 
-.resume__foot { margin-top: 56px; color: var(--paper-mut); font-size: 15px; }
+.resume__foot { margin-top: 56px; font-size: 15px; }
 
+/* ─── the page ─────────────────────────────────────────────── */
+
+body > .resume {
+  --gutter: 0px;
+  width: min(1080px, 100% - 32px);
+  padding: 64px 0 80px;
+  counter-reset: sec;
+}
+.view-page body > .resume { padding-top: 56px; }
+.view-page { scroll-padding-top: 84px; }          /* clear the sticky bar */
+
+/* hero: who, what, how to reach him. With JS it splits in two equal
+   halves: Shrey on the left, the game's island on the right (page.css) */
+body > .resume .resume__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "portrait" "name" "contact" "links" "open" "game" "snap";
+}
+body > .resume .resume__head > [data-fact="p-name"] { grid-area: name; }
+body > .resume .resume__head > .resume__contact { grid-area: contact; }
+body > .resume .resume__head > .hero-links { grid-area: links; }
+body > .resume .resume__head > .resume__open { grid-area: open; }
+body > .resume .resume__head > .portrait { grid-area: portrait; }
+body > .resume .resume__head > .hero-game { grid-area: game; }
+body > .resume .resume__head > .snapshot { grid-area: snap; }
+body > .resume .resume__head > .play-chip { display: none; }   /* the game half covers Home */
+body > .resume.has-art .resume__head > .resume__contact { display: none; }   /* shown in full at the end */
+
+body > .resume .resume__name {
+  font-size: clamp(46px, 7vw, 76px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+body > .resume .resume__tag {
+  margin-top: 22px;
+  max-width: 31em;
+  color: #d3d7e8;
+  font-size: 21px;
+  line-height: 1.5;
+}
+
+/* contact links as pills, each with its icon */
+body > .resume .resume__contact,
+body > .resume .hero-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 30px 0 0; padding: 0; list-style: none; }
+body > .resume .resume__contact a,
+body > .resume .hero-links a,
+.contactend__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 15px 8px 13px;
+  border-radius: 999px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1.5px var(--rule);
+  color: var(--text);
+  font-size: 15.5px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+body > .resume .resume__contact a:hover,
+body > .resume .hero-links a:hover,
+.contactend__links a:hover { box-shadow: inset 0 0 0 1.5px var(--sea); }
+body > .resume .resume__contact a::before,
+body > .resume .hero-links a::before,
+.contactend__links a::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: var(--sea);
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+body > .resume a[href^="mailto:"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'%3E%3Crect x='1.5' y='3' width='13' height='10' rx='1.5'/%3E%3Cpath d='M2 4l6 5 6-5'/%3E%3C/svg%3E"); }
+body > .resume a[href*="linkedin.com"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 1h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zm1 5v6h2V6zm1-3.2a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zM7.5 6v6h2V8.9c0-.8.4-1.3 1-1.3s1 .4 1 1.3V12h2V8.4C13.5 6.8 12.7 5.9 11.3 5.9c-.8 0-1.4.4-1.8.9V6z' fill-rule='evenodd'/%3E%3C/svg%3E"); }
+body > .resume a[href*="github.com"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4.5L1.8 8 5 11.5M11 4.5L14.2 8 11 11.5M9.3 3L6.7 13'/%3E%3C/svg%3E"); }
+
+/* open to work: a status light, not a banner */
+body > .resume .resume__open {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  margin-top: 24px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+body > .resume .resume__open::before {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(126, 224, 138, 0.18);
+  transform: translateY(-1px);
+}
+
+/* sections: a number in the gutter, the heading, the map's road dots */
+body > .resume .resume__section { margin-top: 104px; counter-increment: sec; }
+body > .resume .resume__section > h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin: 0 0 36px;
+  font-size: 34px;
+  letter-spacing: -0.01em;
+}
+body > .resume .resume__section > h2::before {
+  content: counter(sec, decimal-leading-zero);
+  min-width: calc(var(--gutter) - 16px);
+  color: var(--sea);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+body > .resume .resume__section > h2::after {
+  content: "";
+  flex: 1;
+  align-self: center;
+  height: 4px;
+  background: linear-gradient(90deg, var(--cream) 0 4px, transparent 4px) 0 0 / 12px 4px repeat-x;
+  opacity: 0.2;
+}
+
+/* entries: landmark tile in the gutter, the text beside it */
+body > .resume .has-tile { position: relative; padding-left: var(--gutter); }
+body > .resume .entry { margin: 0 0 56px; }
+body > .resume .entry:last-child { margin-bottom: 0; }
+body > .resume .entry__head h3 { font-size: 24px; font-weight: 600; line-height: 1.22; }
+body > .resume .entry__role { margin-top: 6px; color: var(--sea); font-size: 17px; }
+body > .resume .entry__meta {
+  margin-top: 6px;
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 15.5px;
+  letter-spacing: 0.01em;
+}
+body > .resume .entry__list,
+body > .resume .entry__text { max-width: 44em; }
+body > .resume .entry__list { margin-top: 16px; padding: 0; list-style: none; }
+body > .resume .entry__list li { position: relative; margin: 10px 0 0; padding-left: 24px; line-height: 1.6; }
+body > .resume .entry__list li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0.66em;
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  box-shadow: 1px 1px 0 #6e420e;
+}
+body > .resume .entry__text { margin-top: 14px; line-height: 1.6; }
+body > .resume .entry__block { margin-top: 18px; }
+body > .resume .entry__label,
+body > .resume .skillset h3 {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* projects: cards, landmark art on top */
+body > .resume .resume__section--cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+body > .resume .resume__section--cards > h2 { grid-column: 1 / -1; margin-bottom: 12px; }
+body > .resume .resume__section--cards > .entry {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 26px 26px;
+  border-radius: 18px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1.5px var(--rule);
+}
+body > .resume .resume__section--cards .entry__head { display: block; }
+body > .resume .resume__section--cards .entry__head > .entry__meta { margin-top: 6px; text-align: left; }
+body > .resume .resume__section--cards .entry__list { margin-bottom: 22px; }
+body > .resume .resume__section--cards .entry > .play-chip { margin-top: auto; }
+
+/* skills: one panel per group, packed in columns */
+body > .resume .skills { columns: 3 260px; column-gap: 16px; }
+body > .resume .skillset {
+  margin: 0 0 16px;
+  break-inside: avoid;
+  padding: 18px 20px 20px;
+  border-radius: 14px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1.5px var(--rule);
+}
+body > .resume .skillset h3 { color: var(--gold); }
+body > .resume .skills > .play-chip { margin: 0 0 16px; }
+
+body > .resume .chips li { font-size: 15.5px; padding: 5px 13px; }
+
+body > .resume .resume__foot {
+  margin-top: 88px;
+  padding-top: 28px;
+  background: linear-gradient(90deg, rgba(255, 243, 196, 0.2) 0 4px, transparent 4px) 0 0 / 12px 4px repeat-x;
+  color: var(--muted);
+}
+body > .resume .resume__foot p { margin: 0; max-width: 40em; }
+
+/* the level link on each section: quiet, after the reading */
+body > .resume .play-chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 36px;
+  margin: 18px 0 0;
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px rgba(111, 214, 200, 0.45);
+  color: var(--sea);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
+
+/* arriving from a link: a brief glow on the section */
+@media (prefers-reduced-motion: no-preference) {
+  .view-page { scroll-behavior: smooth; }
+  body > .resume :target { animation: page-target 1.6s ease-out; border-radius: 14px; }
+}
+@keyframes page-target {
+  from { background: rgba(255, 209, 102, 0.12); box-shadow: 0 0 0 14px rgba(255, 209, 102, 0.12); }
+  to   { background: transparent; box-shadow: 0 0 0 14px transparent; }
+}
+
+@media (min-width: 760px) {
+  body > .resume.has-art { --gutter: 176px; }
+  /* role and dates share the title row */
+  body > .resume .entry__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 28px;
+    align-items: baseline;
+  }
+  body > .resume .entry__head > h3 { grid-row: 1; grid-column: 1; }
+  body > .resume .entry__head > .entry__meta { grid-row: 1; grid-column: 2; margin: 0; text-align: right; white-space: nowrap; }
+  body > .resume .entry__head > .entry__role { grid-column: 1 / -1; }
+  body > .resume .entry.has-tile { display: flex; flex-direction: column; }
+  body > .resume .entry > .play-chip { order: 1; }
+}
+
+@media (max-width: 899px) {
+  body > .resume .resume__section--cards { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 759px) {
+  body > .resume { padding-top: 40px; }
+  body > .resume .resume__section { margin-top: 80px; }
+  body > .resume .resume__section > h2 { font-size: 29px; margin-bottom: 28px; }
+  body > .resume .resume__section > h2::before { font-size: 15px; }
+  body > .resume .entry__head h3 { font-size: 22px; }
+  body > .resume .resume__tag { font-size: 18.5px; }
+  body > .resume .resume__section--cards > .entry { padding: 0 20px 22px; }
+}
+
+/* print, and "Résumé PDF": a plain black-on-white résumé of the same markup */
 @media print {
-  .banner, .skip { display: none !important; }
-  .resume { padding: 0; }
+  @page { margin: 14mm 16mm; }
+  html, body { background: #fff !important; }
+  body { color: #111; font-size: 10.5pt; line-height: 1.4; }
+  .banner, .skip, .play-chip, .page-only { display: none !important; }
+  body > .resume { width: auto; padding: 0; }
+  body > .resume a { color: #000; text-decoration: none; }
+
+  body > .resume .resume__head { display: block; }
+  body > .resume.has-art .resume__head > .resume__contact { display: flex; }
+  body > .resume .resume__name { color: #000; font-size: 24pt; letter-spacing: 0; }
+  body > .resume .resume__tag { max-width: none; margin-top: 4pt; color: #222; font-size: 11pt; }
+  body > .resume .resume__contact { gap: 2pt 16pt; margin-top: 6pt; }
+  body > .resume .resume__contact a { padding: 0; background: none; box-shadow: none; color: #000; font-size: 10pt; font-weight: 400; }
+  body > .resume .resume__contact a::before { width: 9pt; height: 9pt; background: #000; }
+  body > .resume .resume__open { margin-top: 5pt; font-size: 10pt; }
+  body > .resume .resume__open::before { background: #000; box-shadow: none; width: 5pt; height: 5pt; }
+
+  body > .resume .resume__section { margin-top: 14pt; }
+  body > .resume .resume__section > h2 {
+    display: block;
+    margin: 0 0 6pt;
+    padding-bottom: 2pt;
+    border-bottom: 1px solid #000;
+    color: #000;
+    font-size: 13pt;
+  }
+  body > .resume .resume__section > h2::before, body > .resume .resume__section > h2::after { display: none; }
+  body > .resume .resume__section--cards { display: block; }
+  body > .resume .resume__section--cards > .entry,
+  body > .resume .entry.has-tile { display: block; }
+  body > .resume .has-tile, body > .resume .resume__section--cards > .entry {
+    padding: 0; background: none; box-shadow: none; border-radius: 0;
+  }
+  body > .resume .entry { margin: 0 0 9pt; break-inside: avoid; }
+  body > .resume .entry__head,
+  body > .resume .resume__section--cards .entry__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12pt;
+    align-items: baseline;
+  }
+  body > .resume .entry__head > h3 { grid-row: 1; grid-column: 1; font-size: 11.5pt; }
+  body > .resume .entry__head > .entry__meta,
+  body > .resume .resume__section--cards .entry__head > .entry__meta { grid-row: 1; grid-column: 2; margin: 0; text-align: right; white-space: nowrap; }
+  body > .resume .entry__head > .entry__role { grid-column: 1 / -1; }
+  body > .resume .entry__role { margin-top: 1pt; color: #000; font-size: 10.5pt; }
+  body > .resume .entry__meta { color: #333; font-size: 9.5pt; }
+  body > .resume .entry__list { max-width: none; margin-top: 3pt; }
+  body > .resume .entry__list li { margin: 2pt 0 0; padding-left: 11pt; line-height: 1.35; }
+  body > .resume .entry__list li::before { top: 0.55em; width: 3.5pt; height: 3.5pt; background: #000; box-shadow: none; }
+  body > .resume .entry__text { max-width: none; margin-top: 3pt; line-height: 1.35; }
+  body > .resume .entry__block { margin-top: 4pt; }
+  body > .resume .entry__label, body > .resume .skillset h3 { margin: 0 0 2pt; color: #000; font-size: 9pt; }
+
+  body > .resume .skills { columns: 2; column-gap: 18pt; }
+  body > .resume .skillset { margin: 0 0 6pt; padding: 0; background: none; box-shadow: none; }
+  body > .resume .chips { gap: 0; }
+  body > .resume .chips li { padding: 0; border: 0; background: none; font-size: 10pt; }
+  body > .resume .chips li:not(:last-child)::after { content: ",\00a0"; }
+  body > .resume .resume__foot { display: none; }
 }
 
 /* ─── as a dialog (in-game) ────────────────────────────────── */
@@ -100,7 +428,7 @@
 .resume-dialog__bar {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 12px 16px;
   background: var(--ink);
   color: var(--text);
@@ -135,6 +463,13 @@
 
 .resume-dialog__scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
 .resume-dialog .resume { padding: 32px 0 48px; }
+.resume-dialog .resume a { color: var(--teal); }
+.resume-dialog .resume__open,
+.resume-dialog .entry__meta,
+.resume-dialog .resume__foot { color: var(--paper-mut); }
+.resume-dialog .resume__section > h2 { padding-bottom: 8px; border-bottom: 2px solid var(--paper-ink); }
+.resume-dialog .chips li { background: var(--paper-2); border-color: #c9c0ac; }
+.resume-dialog .page-only { display: none; }   /* the website's extras */
 
 /* found markers: a hollow ring until the fact is logged in-game */
 .resume-dialog [data-fact] { position: relative; }
@@ -153,7 +488,7 @@
   box-shadow: 0 0 0 2px var(--paper);
 }
 
-.play-chip {
+.resume-dialog .play-chip {
   display: inline-flex;
   align-items: center;
   margin: 8px 0 0;
@@ -168,9 +503,12 @@
   font-size: 15px;
   cursor: pointer;
 }
-.play-chip:hover { background: var(--teal); color: var(--paper); }
+.resume-dialog .play-chip:hover { background: var(--teal); color: var(--paper); }
+.resume-dialog .skills > .play-chip { margin: 0 0 14px; }
 
 @media (max-width: 600px) {
   .resume-dialog { width: 100vw; height: 100dvh; box-shadow: none; }
   .resume-dialog [data-fact]::before { display: none; }
+  .resume-dialog__found { display: none; }
+  .resume-dialog__title { margin-right: auto; }
 }

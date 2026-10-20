@@ -1,0 +1,364 @@
+/* ═══════════════════════════════════════════════════════════
+   The website's extras: the sticky bar (a Website | Game switch,
+   Shrey running a scroll-progress line), the split hero (Shrey
+   on one half, the game's island on the other), the snapshot
+   and numbers, the landmarks that pop up with each section, and
+   the closing contact block. js/ui/page-art.js and page-fx.js
+   build them; without JS the résumé stands alone.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── the bar ──────────────────────────────────────────────── */
+
+.pagebar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  align-items: center;
+  gap: 30px;
+  height: 64px;
+  padding: 0 max(16px, (100% - 1080px) / 2);
+  background: rgba(14, 20, 51, 0.92);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1.5px 0 var(--rule);
+}
+
+.pagebar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  color: var(--text);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 19px;
+  text-decoration: none;
+}
+.pagebar__mark { width: 32px; height: 26px; image-rendering: pixelated; }
+
+.pagebar__links { display: flex; gap: 24px; min-width: 0; }
+.pagebar__links a {
+  padding: 8px 0;
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 16px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.pagebar__links a:hover { color: var(--text); box-shadow: inset 0 -2px 0 var(--gold); }
+
+.pagebar__end { display: flex; align-items: center; gap: 12px; flex: none; margin-left: auto; }
+
+/* two modes of equal weight: the one you're in is lit */
+.viewswitch {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1.5px var(--rule);
+}
+.viewswitch a {
+  min-width: 92px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  color: var(--text);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+  text-decoration: none;
+}
+.viewswitch a:hover { background: var(--night-3); }
+.viewswitch a[aria-current] { background: var(--gold); color: var(--ink); }
+
+@media (max-width: 1019px) { .pagebar__links { display: none; } }
+@media (max-width: 639px) { .pagebar__pdf { display: none; } }
+@media (max-width: 399px) {
+  .pagebar { gap: 10px; }
+  .pagebar__brand { font-size: 17px; }
+  .viewswitch a { min-width: 0; padding-inline: 12px; }
+}
+
+/* scroll progress: a teal-to-gold line, Shrey running at its tip */
+.progress {
+  --p: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  pointer-events: none;
+}
+.progress__fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--sea), var(--gold));
+  transform: scaleX(var(--p));
+  transform-origin: 0 50%;
+}
+.progress__runner {
+  position: absolute;
+  bottom: 3px;
+  left: calc(var(--p) * (100% - 16px));
+  width: 16px;
+  height: 24px;
+  background-size: 96px 24px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.progress.is-running .progress__runner { animation: runner 0.36s steps(4) infinite; }
+.progress.is-done .progress__runner { background-position: -80px 0; }
+.progress.is-back .progress__runner { transform: scaleX(-1); }
+.progress.is-top .progress__runner { visibility: hidden; }
+@keyframes runner { from { background-position: -16px 0; } to { background-position: -80px 0; } }
+
+/* ─── the split hero ───────────────────────────────────────── */
+
+.portrait {
+  width: 112px;
+  height: 112px;
+  margin-bottom: 26px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--night-2);
+  box-shadow: 0 0 0 4px var(--night), 0 0 0 6px var(--gold);
+}
+.portrait:empty { display: none; }
+.portrait > canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+
+.hero-game {
+  margin-top: 40px;
+  padding: 24px;
+  border-radius: 22px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1.5px var(--rule);
+}
+.hero-game__title { margin: 24px 0 0; font-size: 28px; line-height: 1.15; }
+.hero-game__text { max-width: 30em; margin: 10px 0 20px; color: #d3d7e8; font-size: 16.5px; line-height: 1.55; }
+
+@media (min-width: 1000px) {
+  /* two equal halves: Shrey's card on the left, the game's on the right */
+  body > .has-art .resume__head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto minmax(36px, 1fr) auto;
+    grid-template-areas:
+      "portrait game"
+      "name     game"
+      "links    game"
+      "open     game"
+      ".        game"
+      "snap     snap";
+    column-gap: 24px;
+    isolation: isolate;
+  }
+  body > .has-art .resume__head::before {
+    content: "";
+    grid-area: 1 / 1 / 6 / 2;
+    z-index: -1;
+    border-radius: 22px;
+    background: var(--night-2);
+    box-shadow: inset 0 0 0 1.5px var(--rule);
+  }
+  body > .has-art .resume__head > :is([data-fact="p-name"], .hero-links, .resume__open) { margin-inline: 36px; }
+  body > .has-art .resume__head > .portrait { margin: 36px 36px 26px; }
+  body > .has-art .resume__name { font-size: 64px; }
+  body > .has-art .resume__tag { font-size: 19.5px; }
+  body > .has-art .resume__head > .hero-game { margin-top: 0; }
+}
+
+.snapshot {
+  display: grid;
+  grid-template-columns: 1.1fr 2fr 1fr 1fr 1.5fr;
+  gap: 1.5px;
+  margin: 24px 0 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--rule);
+  box-shadow: 0 0 0 1.5px var(--rule);
+}
+.snapshot__row { padding: 16px 20px 18px; background: var(--night-2); }
+.snapshot dt {
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.snapshot dd { margin: 6px 0 0; font-size: 16.5px; line-height: 1.4; }
+
+/* by the numbers: only figures that are in the résumé */
+.numbers {
+  margin-top: 24px;
+  padding: 26px 32px 30px;
+  border-radius: 20px;
+  background: linear-gradient(115deg, #222f6c 0%, #2c3570 42%, #15596a 100%);
+}
+.numbers__kicker {
+  margin: 0 0 18px;
+  color: var(--sea);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.numbers__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 32px; }
+.stat { display: flex; flex-direction: column; gap: 6px; color: inherit; text-decoration: none; }
+.stat__value {
+  color: var(--gold);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.stat__label { color: rgba(245, 241, 230, 0.84); font-size: 15px; line-height: 1.4; }
+.stat:hover .stat__label { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 999px) {
+  .snapshot { grid-template-columns: 1fr 1fr; }
+  .snapshot__row[data-key="University"], .snapshot__row[data-key="Degree"],
+  .snapshot__row[data-key="Research"] { grid-column: 1 / -1; }
+}
+@media (max-width: 759px) {
+  .portrait { width: 96px; height: 96px; }
+  .hero-game { padding: 16px 16px 22px; }
+  .numbers { padding: 22px 20px 24px; }
+  .numbers__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 20px; }
+  .stat__value { font-size: 36px; }
+}
+
+/* ─── the island map ───────────────────────────────────────── */
+
+.pagemap { margin: 0; }
+.pagemap__art {
+  position: relative;
+  width: 480px;
+  max-width: 100%;
+  aspect-ratio: 480 / 216;
+  border-radius: 14px;
+  box-shadow: 0 0 0 2px var(--ink), 0 8px 0 2px #070914;
+}
+.pagemap__art canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  image-rendering: pixelated;
+}
+.pagemap__pin {
+  position: absolute;
+  transform: translateX(-50%);
+  padding: 1px 7px 2px;
+  border-radius: 999px;
+  background: rgba(11, 13, 23, 0.84);
+  color: var(--text);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.pagemap__pin:hover, .pagemap__pin:focus-visible { background: var(--gold); color: var(--ink); }
+.pagemap__pin:focus-visible { outline-offset: 1px; }
+
+@media (max-width: 559px) {
+  .pagemap__pins, .hero-game__hint { display: none; }    /* no room for names; the picture stays */
+}
+
+/* ─── landmarks: each section's place, captioned by the game ── */
+
+.landmark {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: calc(var(--gutter) - 24px);
+}
+.landmark__art {
+  display: block;
+  width: 96px;
+  height: 72px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 2px var(--ink), 0 0 0 3.5px var(--rule), 0 6px 0 2px #070914;
+  image-rendering: pixelated;
+}
+.landmark__pop {
+  position: relative;
+  display: block;
+  margin-top: 16px;
+  padding: 8px 11px 9px;
+  border-radius: 10px;
+  background: var(--night-3);
+  box-shadow: inset 0 0 0 1.5px var(--rule);
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.landmark__pop::before {                      /* the pointer up to the art */
+  content: "";
+  position: absolute;
+  left: 40px;
+  top: -6px;
+  width: 10px;
+  height: 10px;
+  background: var(--night-3);
+  box-shadow: inset 1.5px 1.5px 0 var(--rule);
+  transform: rotate(45deg);
+}
+.landmark__pop b {
+  display: block;
+  color: var(--text);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* cards: the strip across the top, the caption in its sky */
+.landmark--card { position: relative; top: 0; width: auto; margin: 0 -26px 22px; }
+.landmark--card .landmark__art {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 128 / 44;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 1.5px 0 var(--rule);
+}
+.landmark--card .landmark__pop {
+  position: absolute;
+  left: 18px;
+  top: 14px;
+  max-width: calc(100% - 36px);
+  margin: 0;
+  background: rgba(11, 13, 23, 0.86);
+  box-shadow: none;
+}
+.landmark--card .landmark__pop::before { display: none; }
+.landmark--card .landmark__pop b { display: inline; margin-right: 6px; }
+
+/* the pop: the art bounces up, the caption follows it out */
+.landmark.is-waiting .landmark__art { opacity: 0; transform: translateY(10px) scale(0.6); }
+.landmark.is-waiting .landmark__pop { opacity: 0; transform: translateY(-6px) scale(0.92); }
+.landmark.is-popped .landmark__art { animation: landmark-pop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+.landmark.is-popped .landmark__pop { animation: caption-pop 0.32s ease-out 0.16s both; }
+.landmark--card.is-waiting .landmark__art { opacity: 1; transform: none; }   /* strips stay; captions pop */
+.landmark--card.is-popped .landmark__art { animation: none; }
+@keyframes landmark-pop { from { opacity: 0; transform: translateY(10px) scale(0.6); } }
+@keyframes caption-pop { from { opacity: 0; transform: translateY(-6px) scale(0.92); } }
+
+@media (max-width: 759px) {
+  .landmark { position: relative; top: 0; float: right; width: 72px; margin: 4px 0 12px 16px; }
+  .landmark__art { width: 72px; height: 54px; border-radius: 10px; }
+  .landmark__pop { display: none; }            /* the gutter is gone; the art stays */
+  .landmark--card { float: none; width: auto; margin: 0 -20px 20px; }
+  .landmark--card .landmark__art { width: 100%; height: auto; }
+  .landmark--card .landmark__pop { display: block; left: 12px; top: 10px; }
+  .skills > .landmark { display: none; }       /* the columns have no room to float it */
+}
+
+/* ─── contact, at the end ──────────────────────────────────── */
+
+.contactend__lead { margin: 0; max-width: 26em; font-size: 21px; line-height: 1.5; }
+.contactend__links { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 0; padding: 0; list-style: none; }
+.contactend__links a { padding: 12px 20px 12px 17px; font-size: 17px; }
