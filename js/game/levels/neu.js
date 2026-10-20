@@ -1,6 +1,6 @@
 // NORTHEASTERN · B.S. Computer Science + Computer Engineering, Boston,
 // expected May 2029. Beats: the campus gate and degree sign on a snowy
-// street → road-work digs → the streetcar: ride its roof up to the campus
+// street → a commit flag, then road-work digs → the streetcar: ride its roof up to the campus
 // level → brick rooftops → a port into the LECTURE HALL, where one
 // textbook per course (from the résumé's data-credit list) steps up to
 // the exit and a chalkboard tallies the credits → the quad → CLASS OF 2029.
@@ -36,7 +36,7 @@ const ROADWORK = [
   '',
   '......cc.........cc',
   '',
-  '.....4..4.......4..4....&',
+  '..C..4..4.......4..4....&',
   '######..#########..###########',
   '######..#########..###########',
   '######..#########..###########',
@@ -129,18 +129,18 @@ export default {
       duck: ['Hop on the streetcar roof. It runs up to campus.'],
       ports: [{ to: 'hall', exit: 0 }, { to: 'hall', exit: 1 }],
       marks: {
-        1: { type: 'neuGate', title: 'Northeastern University', sub: 'Boston, MA' },
-        2: { type: 'neuStreetcar', len: 11, dest: 'Northeastern' },
-        3: { type: 'neuStop', w: 5 },
-        4: { type: 'neuBarrier' },
-        5: { type: 'neuFacade', w: 6, title: 'Lecture hall' },
-        9: { type: 'neuSnow', n: 30 },
-        '&': { type: 'neuDeadline', leash: 2 },
+        1: { type: 'neu.gate', title: 'Northeastern University', sub: 'Boston, MA' },
+        2: { type: 'neu.streetcar', len: 11, dest: 'Northeastern' },
+        3: { type: 'neu.stop', w: 5 },
+        4: { type: 'neu.barrier' },
+        5: { type: 'neu.facade', w: 6, title: 'Lecture hall' },
+        9: { type: 'neu.snow', n: 30 },
+        '&': { type: 'neu.deadline', leash: 2 },
       },
     },
     hall: {
-      kit: 'neuHall',
-      theme: 'neuHall',
+      kit: 'neu.hall',
+      theme: 'neu.hall',
       camera: 'fixed',
       safe: true,
       band: 'red.2',
@@ -148,8 +148,8 @@ export default {
       facts: { books: ['e-neu-courses'] },
       ports: [{ to: 'main', exit: 0 }, { to: 'main', exit: 1 }],
       marks: {
-        1: { type: 'neuBooks', span: [64, 384], rise: [176, 96] },
-        2: { type: 'neuBoard', w: 9, h: 4.5 },
+        1: { type: 'neu.textbooks', span: [64, 384], rise: [176, 96] },
+        2: { type: 'neu.chalkboard', w: 9, h: 4.5 },
       },
     },
   },

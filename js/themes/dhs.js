@@ -163,7 +163,7 @@ function onlineKit() {
 }
 
 registerKit('dhs', dhsKit());
-registerKit('dhsOnline', onlineKit());
+registerKit('dhs.online', onlineKit());
 
 // ─── backdrop: golden hour over the Tri-Valley hills ─────────────────
 
@@ -324,7 +324,7 @@ function onlineBackdrop() {
 }
 
 registerBackground('dhs', dhsBackdrop);
-registerBackground('dhsOnline', onlineBackdrop);
+registerBackground('dhs.online', onlineBackdrop);
 
 // ─── bugs: the hall-monitor bug wears a safety-orange vest ───────────
 
@@ -385,11 +385,11 @@ class PopQuiz extends Enemy {
   }
 }
 
-registerSetpiece('dhsPlane', class { constructor(tx, ty, spec, level) { level.enemies.push(new PopQuiz(tx, ty, spec)); } });
+registerSetpiece('dhs.plane', class { constructor(tx, ty, spec, level) { level.enemies.push(new PopQuiz(tx, ty, spec)); } });
 
 // ─── the front marquee: monument sign with a letterboard ─────────────
 
-registerSetpiece('dhsMarquee', class {
+registerSetpiece('dhs.marquee', class {
   constructor(tx, ty, spec, level) {
     this.cx = tx * TILE + 8; this.y = ty * TILE;
     this.ground = groundRow(level.map, tx, ty) * TILE;
@@ -429,7 +429,7 @@ registerSetpiece('dhsMarquee', class {
 
 // ─── grade pennants on light poles: 9th, 10th, 11th, 12th ─────────────
 
-registerSetpiece('dhsGrade', class {
+registerSetpiece('dhs.pennant', class {
   constructor(tx, ty, spec, level) {
     this.x = tx * TILE + 6;
     this.base = groundRow(level.map, tx, ty) * TILE;
@@ -461,7 +461,7 @@ registerSetpiece('dhsGrade', class {
 
 const LOCK = { body: C('indigo.2'), hi: C('indigo.3'), lo: C('indigo.1'), dark: C('indigo.0'), plate: col('#e3e6ee'), steel: col('#c9ced8') };
 
-registerSetpiece('dhsLockers', class {
+registerSetpiece('dhs.lockers', class {
   constructor(tx, ty, spec, level) {
     this.x = tx * TILE; this.y = ty * TILE;
     this.bottom = groundRow(level.map, tx, ty + 1) * TILE;
@@ -496,7 +496,7 @@ registerSetpiece('dhsLockers', class {
 // The hackathon was online, so there's no venue: the port is plugged
 // into a laptop the size of a building, showing the call's gallery.
 
-registerSetpiece('dhsLaptop', class {
+registerSetpiece('dhs.laptop', class {
   constructor(tx, ty, spec, level) {
     this.x = (tx + 1) * TILE; this.w = spec.w * TILE;
     this.ground = groundRow(level.map, tx, ty) * TILE;
@@ -576,7 +576,7 @@ function drawCap(ctx, cx, y, k, t, seed) {
   rect(ctx, tx + sw - 1, y0 + 7, 3, 3, C('red.3'));
 }
 
-registerSetpiece('dhsCaps', class {
+registerSetpiece('dhs.caps', class {
   constructor(tx, ty, spec, level, key) {
     this.key = key;
     this.w = spec.w || 26;
@@ -624,7 +624,7 @@ registerSetpiece('dhsCaps', class {
 
 // ─── commencement stage: skirt, balloon arch, banner, victory toss ───
 
-registerSetpiece('dhsStage', class {
+registerSetpiece('dhs.stage', class {
   constructor(tx, ty, spec, level) {
     this.x = tx * TILE; this.w = spec.w * TILE;
     this.top = groundRow(level.map, tx, ty) * TILE;
@@ -685,7 +685,7 @@ const TILEBG = ['#2a3366', '#323a6e', '#273058', '#3a3a5c', '#2b3f5c', '#3b3150'
 const HEART = ['.x.x.', 'xxxxx', 'xxxxx', '.xxx.', '..x..'];
 const STAR = ['..x..', '.xxx.', 'xxxxx', '.x.x.', 'x...x'];
 
-registerSetpiece('dhsGallery', class {
+registerSetpiece('dhs.gallery', class {
   constructor(tx, ty, spec, level) {
     this.fact = level.room.facts.trophy[0];
     this.level = level;
@@ -768,7 +768,7 @@ registerSetpiece('dhsGallery', class {
 
 // ─── podium 2-1-3 and the trophy on top of 1st ───────────────────────
 
-registerSetpiece('dhsPodium', class {
+registerSetpiece('dhs.podium', class {
   constructor(tx, ty, spec, level) {
     this.level = level;
     this.fact = level.room.facts.trophy[0];

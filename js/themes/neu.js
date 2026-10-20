@@ -197,7 +197,7 @@ function hallKit() {
 }
 
 registerKit('neu', neuKit());
-registerKit('neuHall', hallKit());
+registerKit('neu.hall', hallKit());
 
 // ─── backdrop: Boston at dusk in the snow ────────────────────────────
 
@@ -346,7 +346,7 @@ function hallBackdrop() {
 }
 
 registerBackground('neu', neuBackdrop);
-registerBackground('neuHall', hallBackdrop);
+registerBackground('neu.hall', hallBackdrop);
 
 // ─── bugs: a red campus beetle, and the deadline alarm clock ─────────
 
@@ -411,11 +411,11 @@ class Deadline extends Hopper {
   }
 }
 
-registerSetpiece('neuDeadline', class { constructor(tx, ty, spec, level) { level.enemies.push(new Deadline(tx, ty, spec.leash)); } });
+registerSetpiece('neu.deadline', class { constructor(tx, ty, spec, level) { level.enemies.push(new Deadline(tx, ty, spec.leash)); } });
 
 // ─── the campus gate: brick pillars, an iron arch, the nameplate ─────
 
-registerSetpiece('neuGate', class {
+registerSetpiece('neu.gate', class {
   constructor(tx, ty, spec, level) {
     this.cx = tx * TILE + 8; this.y = ty * TILE;
     this.ground = groundRow(level.map, tx, ty) * TILE;
@@ -456,7 +456,7 @@ registerSetpiece('neuGate', class {
 
 // ─── road work: striped barricades with a blinking lamp ──────────────
 
-registerSetpiece('neuBarrier', class {
+registerSetpiece('neu.barrier', class {
   constructor(tx, ty, spec, level) { this.x = tx * TILE; this.ground = groundRow(level.map, tx, ty) * TILE; this.ph = tx; }
   back(ctx, cam, t) {
     const x = this.x - cam.x, g = this.ground - cam.y;
@@ -473,7 +473,7 @@ registerSetpiece('neuBarrier', class {
 
 // ─── the streetcar: shuttles between two stops; ride its roof ────────
 
-registerSetpiece('neuStreetcar', class {
+registerSetpiece('neu.streetcar', class {
   constructor(tx, ty, spec, level) {
     this.ground = groundRow(level.map, tx, ty) * TILE;
     this.w = 80; this.h = 48;
@@ -545,7 +545,7 @@ registerSetpiece('neuStreetcar', class {
 
 // ─── the stop: a raised platform with a shelter ──────────────────────
 
-registerSetpiece('neuStop', class {
+registerSetpiece('neu.stop', class {
   constructor(tx, ty, spec, level) {
     this.x = tx * TILE; this.w = spec.w * TILE;
     this.top = groundRow(level.map, tx, ty) * TILE;
@@ -580,7 +580,7 @@ registerSetpiece('neuStop', class {
 
 // ─── the lecture hall seen from outside ──────────────────────────────
 
-registerSetpiece('neuFacade', class {
+registerSetpiece('neu.facade', class {
   constructor(tx, ty, spec, level) {
     this.x = (tx + 1) * TILE; this.w = spec.w * TILE;
     this.ground = groundRow(level.map, tx, ty) * TILE;
@@ -622,7 +622,7 @@ registerSetpiece('neuFacade', class {
 
 // ─── falling snow in front of the tiles ──────────────────────────────
 
-registerSetpiece('neuSnow', class {
+registerSetpiece('neu.snow', class {
   constructor(tx, ty, spec, level) { this.level = level; this.f = flakes(11, spec.n || 30, 1024); }
   draw(ctx, cam, t) {
     if (this.level.game.reduced) return;
@@ -653,7 +653,7 @@ const esc = (s) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>
 
 // Books form a staircase from the floor to the exit ledge. However many
 // courses the résumé lists, the climb is evenly split between them.
-registerSetpiece('neuBooks', class {
+registerSetpiece('neu.textbooks', class {
   constructor(tx, ty, spec, level) {
     this.level = level;
     this.fact = level.room.facts.books[0];
@@ -732,7 +732,7 @@ registerSetpiece('neuBooks', class {
 });
 
 // the chalkboard keeps count: each course you earn is chalked up
-registerSetpiece('neuBoard', class {
+registerSetpiece('neu.chalkboard', class {
   constructor(tx, ty, spec, level) {
     this.x = tx * TILE; this.y = ty * TILE; this.w = spec.w * TILE; this.h = spec.h * TILE;
     this.level = level;
