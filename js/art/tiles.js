@@ -6,13 +6,13 @@ import { col } from './palette.js';
 import { bayer } from './draw.js';
 import { hash2, makeCanvas } from '../engine/util.js';
 
-function px(ctx, x, y, c) { ctx.fillStyle = c; ctx.fillRect(x, y, 1, 1); }
-function hline(ctx, x, y, w, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, 1); }
-function vline(ctx, x, y, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, 1, h); }
+export function px(ctx, x, y, c) { ctx.fillStyle = c; ctx.fillRect(x, y, 1, 1); }
+export function hline(ctx, x, y, w, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, 1); }
+export function vline(ctx, x, y, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, 1, h); }
 
 // dithered two-tone 16×16 fill, built once (the Bayer period divides 16,
 // so every tile shares the same pattern)
-function ditherTile(a, b, amount) {
+export function ditherTile(a, b, amount) {
   const [c, ctx] = makeCanvas(16, 16);
   ctx.fillStyle = a; ctx.fillRect(0, 0, 16, 16);
   ctx.fillStyle = b;
@@ -120,3 +120,6 @@ function homeKit() {
 }
 
 export const KITS = { lab: labKit(false), labInterior: labKit(true), home: homeKit() };
+
+// themes add their own kits: { terrain(ctx,x,y,mask,tx,ty), oneway(ctx,x,y,joinL,joinR), animated(ctx,ch,x,y,t) }
+export function registerKit(name, kit) { KITS[name] = kit; }

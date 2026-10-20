@@ -8,7 +8,7 @@ function freq(n) {
   if (!m) return 0;
   return 440 * Math.pow(2, (NOTE[m[1]] + (+m[2] + 1) * 12 - 69) / 12);
 }
-const steps = (s) => s.replace(/\|/g, ' ').trim().split(/\s+/);
+export const steps = (s) => s.replace(/\|/g, ' ').trim().split(/\s+/);
 
 // original loops, 8 steps per bar
 const SONGS = {
@@ -25,6 +25,9 @@ const SONGS = {
     drums: steps('k . h h s . h . | k . h h s . h k | k . h h s . h . | k k h h s . s h'),
   },
 };
+
+// themes add loops: { bpm, lead: steps('…'), bass: steps('…'), drums: steps('k . h . s …') }
+export function registerSong(name, song) { SONGS[name] = song; }
 
 export function createAudio() {
   let ctx = null, master = null, sfxBus = null, musicBus = null, noiseBuf = null;

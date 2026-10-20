@@ -12,7 +12,7 @@ import { drawText } from '../../art/font.js';
 import { Hero } from '../hero.js';
 import { TUNING } from '../tuning.js';
 import { InfoBlock, Bit, Checkpoint, Goal, Sign, Duck, Port, Floater, FactToken } from '../objects.js';
-import { Walker, Hopper } from '../enemies.js';
+import { ENEMIES } from '../enemies.js';
 import { SETPIECES } from '../setpieces.js';
 import { levelFacts } from '../levels/index.js';
 
@@ -99,9 +99,9 @@ export class LevelScene {
             this.ports.push(port);
             break;
           }
-          case 'e': this.enemies.push(new Walker(x, y, R.skin || def.skin || 'lab')); break;
-          case 'h': this.enemies.push(new Hopper(x, y)); break;
           default: {
+            const E = ENEMIES[ch];
+            if (E) { this.enemies.push(new E(x, y, R.skin || def.skin || 'lab', this)); break; }
             const spec = R.marks && R.marks[ch];
             if (spec) {
               const Ctor = SETPIECES[spec.type];

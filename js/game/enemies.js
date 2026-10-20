@@ -10,7 +10,7 @@ import { drawFrame } from '../art/sprite.js';
 import { disc } from '../art/draw.js';
 import { lerp } from '../engine/util.js';
 
-class Enemy {
+export class Enemy {
   constructor(x, y, w, h) {
     this.spawnX = x; this.spawnY = y;
     this.w = w; this.h = h;
@@ -126,3 +126,7 @@ export class Hopper extends Enemy {
     ctx.fillStyle = col('cyan.3'); ctx.fillRect(ex - 1, ey - 1, 2, 2);
   }
 }
+
+// map character → enemy class. Constructed as new Ctor(tx, ty, skin, level).
+export const ENEMIES = { e: Walker, h: Hopper };
+export function registerEnemy(ch, Ctor) { ENEMIES[ch] = Ctor; }

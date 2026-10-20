@@ -10,7 +10,7 @@ import { clamp, lerp, ease, rng } from '../engine/util.js';
 import { line, pill } from '../art/draw.js';
 
 const C = (r) => col(r);
-const platform = (x, y, w, h = 4, active = true) => ({ x, y, w, h, prevX: x, prevY: y, active, oneway: true });
+export const platform = (x, y, w, h = 4, active = true) => ({ x, y, w, h, prevX: x, prevY: y, active, oneway: true });
 
 // ─── self-assembling polymer bridge ──────────────────────────────────
 // Monomers jitter (Brownian) above the pit; when you approach they snap
@@ -299,3 +299,7 @@ export class Panel {
 }
 
 export const SETPIECES = { assembly: Assembly, runbar: RunBar, browsers: Browsers, sliders: Sliders, lifts: Lifts, banner: Banner, panel: Panel };
+
+// themes add their own: new Ctor(tx, ty, spec, level, key) with optional
+// update(level), back(ctx,cam,t), draw(ctx,cam,t), onFact(id, level)
+export function registerSetpiece(name, Ctor) { SETPIECES[name] = Ctor; }

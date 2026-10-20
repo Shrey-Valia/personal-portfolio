@@ -37,8 +37,15 @@ const SKINS = {
   lab: { d: 'magenta.1', b: 'magenta.2', c: 'magenta.3', t: 'teal.3', e: 'white.2', o: 'ink.0', l: 'slate.3' },
 };
 
+const EXTRA = [];
+
+// themes add enemy palette swaps (same bug art) or whole new sprite sets
+export function registerSkin(name, legend) { SKINS[name] = legend; }
+export function registerActorSprites(build) { EXTRA.push(build); }   // build() → { key: frames[] }
+
 export function buildActors() {
   const out = {};
+  for (const build of EXTRA) Object.assign(out, build());
   for (const [name, legend] of Object.entries(SKINS)) {
     out['bug:' + name] = sheet(BUG, legend, { name: 'bug' });
     out['bugFlat:' + name] = sheet(BUG_SQUASHED, legend, { name: 'bugflat' });

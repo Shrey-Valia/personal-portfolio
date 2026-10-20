@@ -6,13 +6,13 @@ import { col } from './palette.js';
 import { stripedSky, disc, noise1 } from './draw.js';
 import { makeCanvas, rng } from '../engine/util.js';
 
-function strip(w, paint) {
+export function strip(w, paint) {
   const [c, ctx] = makeCanvas(w, H);
   paint(ctx, w);
   return c;
 }
 
-function blitStrip(ctx, s, camX, f, y = 0) {
+export function blitStrip(ctx, s, camX, f, y = 0) {
   const w = s.width;
   let x = -Math.floor(camX * f) % w;
   if (x > 0) x -= w;
@@ -163,6 +163,9 @@ function homeRoom() {
 }
 
 const BUILDERS = { lab: labDawn, labInterior: labInside, home: () => homeRoom() };
+
+// themes add backdrops: build(W) → { draw(ctx, camX, camY, t, reduced) }
+export function registerBackground(name, build) { BUILDERS[name] = build; }
 
 const cache = new Map();
 export function getBackground(theme, W) {
