@@ -28,7 +28,7 @@ const WATER = { a: col('#0d1a3c'), b: col('#13265a') };
 
 // ─── tiles: painted tower walls, a plank dock, rock, iron landings ───
 
-registerKit('harbor', {
+registerKit('lighthouse', {
   terrain(ctx, x, y, m, tx, ty) {
     if (ty < geo.ground) {
       // tower wall: red and white bands of masonry, its cut edge facing in
@@ -116,7 +116,7 @@ registerKit('harbor', {
 
 // ─── backdrop: night over the bay ────────────────────────────────────
 
-registerBackground('harbor', (W) => {
+registerBackground('lighthouse', (W) => {
   const sky = strip(W, (ctx) => stripedSky(ctx, W, H, ['#060918', '#0a0f2c', '#111a43', '#1a2658', '#25356c']));
   const r = rng(808);
   const stars = Array.from({ length: 80 }, () => ({ x: Math.floor(r() * W), y: Math.floor(r() * 120), b: r(), tw: r() < 0.3 }));
@@ -674,9 +674,9 @@ function openFinale(game, level) {
   if (first) first.focus();
 }
 
-registerSetpiece('harborTower', Harbor);
-registerSetpiece('harborSignal', Signal);
-registerSetpiece('harborBeacon', Beacon);
+registerSetpiece('lighthouse.tower', Harbor);
+registerSetpiece('lighthouse.signal', Signal);
+registerSetpiece('lighthouse.beacon', Beacon);
 
 // ─── music: a slow tide in A minor ──────────────────────────────────
 

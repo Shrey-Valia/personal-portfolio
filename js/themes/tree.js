@@ -463,7 +463,9 @@ class TierSign extends Sign {
     const w = Math.ceil(Math.max(textWidth(tier.title, s1, 700), textWidth(line2, s2))) + 14;
     const lh = lineHeight(s1), h = lh + lineHeight(s2) + 6;
     const room = level.map.w - cam.x;
-    const bx = Math.round(clamp(x + 8 - w / 2, 2 - cam.x, room - w - 2)), by = y - 8 - h;
+    const bx = Math.round(clamp(x + 8 - w / 2, 2 - cam.x, room - w - 2));
+    // on small screens the text floor makes the board taller: keep it under the bricks
+    const by = tier.bricks.length ? Math.max(y - 8 - h, tier.bricks[0].y + TILE + 3 - Math.round(cam.y)) : y - 8 - h;
     pill(ctx, bx, by, w, h, '#5a3a22', '#26170e', 3);
     ctx.fillStyle = BARK.hi; ctx.fillRect(bx + 3, by + 1, w - 6, 1);
     drawText(ctx, tier.title, bx + w / 2, by + 3, '#fbf8f1', { align: 'center', size: s1, weight: 700 });
@@ -825,8 +827,8 @@ class CrownDecor {
 
 const DECOR = { roots: RootsDecor, data: DataDecor, neural: NeuralDecor, web: WebDecor, crown: CrownDecor };
 
-registerSetpiece('treeArt', TreeArt);
-registerSetpiece('treeTier', Tier);
+registerSetpiece('tree.art', TreeArt);
+registerSetpiece('tree.tier', Tier);
 
 // ─── music: a bright climb in G ──────────────────────────────────────
 

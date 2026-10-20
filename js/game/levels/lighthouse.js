@@ -60,18 +60,18 @@ const CONTACTS = [
 ];
 
 const marks = {
-  1: { type: 'harborTower', door: 12 },
-  5: { type: 'harborBeacon', plaque: 'c-open' },
+  1: { type: 'lighthouse.tower', door: 12 },
+  5: { type: 'lighthouse.beacon', plaque: 'c-open' },
 };
-for (const c of CONTACTS) marks[c.mark] = { type: 'harborSignal', fact: c.fact, glyph: c.glyph, color: c.color };
+for (const c of CONTACTS) marks[c.mark] = { type: 'lighthouse.signal', fact: c.fact, glyph: c.glyph, color: c.color };
 
 export default {
   id: 'lighthouse',
   node: 'lighthouse',
   title: 'Lighthouse',
   sub: 'Contact · light the beacon',
-  theme: 'harbor',
-  kit: 'harbor',
+  theme: 'lighthouse',
+  kit: 'lighthouse',
   music: 'lighthouse',
   goal: null,                       // the beacon ends the level, with its own end screen
   safe: true,

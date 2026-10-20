@@ -100,8 +100,8 @@ const TIERS = [
   { mark: 6, fact: 's-tools', look: 'crown' },
 ];
 
-const marks = { 1: { type: 'treeArt', cx: 15 } };
-for (const t of TIERS) marks[t.mark] = { type: 'treeTier', fact: t.fact, look: t.look, cx: 15, dy: -3 };
+const marks = { 1: { type: 'tree.art', cx: 15 } };
+for (const t of TIERS) marks[t.mark] = { type: 'tree.tier', fact: t.fact, look: t.look, cx: 15, dy: -3 };
 
 export default {
   id: 'tree',
