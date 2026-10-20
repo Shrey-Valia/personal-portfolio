@@ -19,6 +19,11 @@ import { LEVELS, levelFacts } from './game/levels/index.js';
 import { createHud } from './ui/hud.js';
 import { createDialogs } from './ui/dialogs.js';
 import { createResume } from './ui/resume.js';
+import { createPage } from './ui/page.js';
+
+// What a visit with no hash lands on: 'game' (the title screen) or 'page'
+// (the scrollable portfolio). #play and #page always pick one explicitly.
+const DEFAULT_VIEW = 'game';
 
 const root = document.documentElement;
 const $ = (id) => document.getElementById(id);
@@ -56,7 +61,7 @@ function boot() {
 
   const input = createInput({
     onMeta(action) {
-      if (!game) return false;
+      if (!game || game.ui.page.on) return false;
       const dialogOpen = !!document.querySelector('dialog[open]');
       if (action === 'resume') { game.openResume(); return true; }
       if (action === 'mute') { game.toggleMute(); return true; }
@@ -91,12 +96,14 @@ function boot() {
     },
     touchLive(on) { touchEl.classList.toggle('is-live', on); },
   };
+  const page = createPage({ game, display, defaultView: DEFAULT_VIEW });
+  game.ui.page = page;
 
   // ─── wiring ──────────────────────────────────────────────────
   $('title-play').textContent = progress.started ? '▶ Continue' : '▶ Play';
   $('title-play').addEventListener('click', () => game.play());
-  $('title-resume').addEventListener('click', () => game.openResume());
-  $('skip').addEventListener('click', (e) => { e.preventDefault(); game.openResume(); });
+  // "View as page", the bar's "Play the game" and the skip link are plain
+  // hash links; page.js switches views on the hash change
 
   document.querySelectorAll('[data-action]').forEach((b) => {
     b.addEventListener('click', () => {
@@ -137,6 +144,7 @@ function boot() {
       input.clear();
     } else {
       game.resume('hidden');
+      if (page.on) return;
       audio.resume();
       if (game.scene && game.scene.def && !document.querySelector('dialog[open]')) game.openPause();
     }
@@ -147,6 +155,7 @@ function boot() {
   hud.setMute(true);
   if (progress.settings.muted === false) {
     const wake = () => {
+      if (page.on) return;                      // wait for the game view
       audio.setMuted(false); hud.setMute(false);
       window.removeEventListener('pointerdown', wake); window.removeEventListener('keydown', wake);
     };
@@ -169,7 +178,8 @@ function boot() {
 
   root.classList.add('game-ready');
   game.start();
-  if (titleEl.hidden === false) $('title-play').focus({ preventScroll: true });
+  page.sync(true);
+  if (!page.on && titleEl.hidden === false) $('title-play').focus({ preventScroll: true });
 }
 
 try { boot(); } catch (err) { fail(err); }

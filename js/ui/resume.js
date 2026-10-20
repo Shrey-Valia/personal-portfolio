@@ -1,5 +1,7 @@
 // The résumé dialog doubles as the in-game log: found markers per fact,
 // a fast-travel strip, and a "Play level" chip on each section.
+// The résumé itself lives in the page; it moves into the dialog while the
+// dialog is open and goes back on close, so the page view always has it.
 
 import { NODES } from '../game/map.js';
 import { LEVELS } from '../game/levels/index.js';
@@ -11,9 +13,18 @@ export function createResume(game) {
   const slot = $('resume-slot');
   const resume = $('resume');
   const warp = $('warp');
+  const homeParent = resume.parentNode, homeNext = resume.nextSibling;
   let prevFocus = null;
 
-  slot.appendChild(resume);            // the résumé moves into the dialog
+  function home() {
+    if (resume.parentNode !== homeParent) homeParent.insertBefore(resume, homeNext);
+  }
+
+  // from the page view, a chip switches to the game first
+  function play(node) {
+    if (game.ui.page && game.ui.page.on) game.ui.page.go('game', true);
+    game.warp(node);
+  }
 
   // play chips on each section that has a level
   for (const el of resume.querySelectorAll('[data-node]')) {
@@ -24,9 +35,9 @@ export function createResume(game) {
     b.type = 'button';
     b.className = 'play-chip';
     b.textContent = '▶ Play this level';
-    b.addEventListener('click', () => game.warp(node));
-    const head = el.querySelector(':scope > .entry__head, :scope > [data-fact]');
-    (head || el.firstElementChild).after(b);
+    b.addEventListener('click', () => play(node));
+    const head = el.querySelector(':scope > .entry__head') || (el.tagName === 'HEADER' && el.querySelector(':scope > [data-fact]'));
+    if (head) head.after(b); else el.prepend(b);
   }
 
   function buildWarp() {
@@ -56,6 +67,7 @@ export function createResume(game) {
   $('resume-close').addEventListener('click', () => dlg.close());
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
   dlg.addEventListener('close', () => {
+    home();
     game.resume('resume');
     game.input.lockAll();
     if (prevFocus && document.contains(prevFocus) && prevFocus.offsetParent) prevFocus.focus();
@@ -64,9 +76,12 @@ export function createResume(game) {
 
   return {
     get isOpen() { return dlg.open; },
+    home,
     open(node) {
+      if (game.ui.page && game.ui.page.on) { game.ui.page.reveal(node); return; }
       if (dlg.open) { scrollTo(node); return; }
       prevFocus = document.activeElement;
+      slot.appendChild(resume);
       buildWarp();
       $('resume-found').textContent = `Found ${game.progress.facts.size} of ${game.content.total}`;
       game.pause('resume');
@@ -75,6 +90,6 @@ export function createResume(game) {
       if (node) scrollTo(node);
       $('resume-close').focus();
     },
-    close() { if (dlg.open) dlg.close(); },
+    close() { if (dlg.open) dlg.close(); home(); },
   };
 }

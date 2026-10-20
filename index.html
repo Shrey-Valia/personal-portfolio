@@ -14,13 +14,16 @@
 
 <!-- Boot guard. The page is a plain résumé until the game proves it can run:
      `js` is added only where ES modules work and we're served over http(s);
-     if the game hasn't reported ready in 8 s, the résumé comes back. -->
+     if the game hasn't reported ready in 8 s, the résumé comes back.
+     Any hash but #play (#page, #ornl, ...) opens the page view, set here so
+     the first paint is already right; js/ui/page.js applies the same rule. -->
 <script>
   (function () {
     var root = document.documentElement;
     if (location.protocol === 'file:') { root.classList.add('file-proto'); return; }
     if (!('noModule' in HTMLScriptElement.prototype)) return;
     root.classList.add('js');
+    if (location.hash.length > 1 && location.hash !== '#play') root.classList.add('view-page');
     setTimeout(function () {
       if (!root.classList.contains('game-ready')) root.classList.remove('js');
     }, 8000);
@@ -32,6 +35,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/resume.css">
+<link rel="stylesheet" href="css/page.css">
 <link rel="stylesheet" href="css/game.css">
 
 <script type="application/ld+json">
@@ -88,7 +92,7 @@
           <p class="title__pitch">CS + CE @ Northeastern · ML research @ Oak Ridge National Lab</p>
           <div class="title__actions">
             <button class="pbtn pbtn--primary" type="button" id="title-play">▶ Play</button>
-            <button class="pbtn" type="button" id="title-resume">Read résumé</button>
+            <a class="pbtn" href="#page" id="title-page">View as page</a>
           </div>
           <p class="title__links">
             <a href="mailto:valia.s@northeastern.edu">Email</a> ·
@@ -118,7 +122,7 @@
       <p class="rotate__icon" aria-hidden="true">⟲</p>
       <p class="rotate__text">Turn your phone sideways to play.</p>
       <div class="rotate__actions">
-        <button class="pbtn pbtn--primary" type="button" data-action="resume">Read résumé</button>
+        <a class="pbtn pbtn--primary" href="#page">View as page</a>
         <button class="pbtn" type="button" id="rotate-play">Play anyway</button>
       </div>
     </div>
@@ -170,11 +174,12 @@
   <p class="sr-only" id="sr-status" aria-live="polite"></p>
 </div>
 
-<!-- the résumé moves in here once the game boots -->
+<!-- the résumé moves in here while the in-game dialog is open -->
 <dialog class="resume-dialog" id="resume-dialog" aria-labelledby="resume-dialog-title">
   <div class="resume-dialog__bar">
     <h2 class="resume-dialog__title" id="resume-dialog-title">Résumé</h2>
     <span class="resume-dialog__found" id="resume-found"></span>
+    <a class="pbtn pbtn--small" href="#page">View as page</a>
     <button class="pbtn pbtn--small" type="button" id="resume-close">Close <kbd>Esc</kbd></button>
   </div>
   <nav class="warp" id="warp" aria-label="Fast travel"></nav>
@@ -186,7 +191,16 @@
      Every fact the game shows is an element here with data-fact="id".
      Level files reference these ids; cards clone these nodes.
      data-skill and data-credit children become bricks and textbooks.
+     On its own (no JS, file://, or the page view) it is the portfolio page.
      ════════════════════════════════════════════════════════════════════ -->
+
+<!-- page view only: links are built from the section headings -->
+<nav class="pagebar" id="pagebar" aria-label="Sections">
+  <a class="pagebar__brand" href="#resume" id="pagebar-brand">Shrey Valia</a>
+  <span class="pagebar__links" id="pagebar-links"></span>
+  <a class="pbtn pbtn--primary pbtn--small pagebar__play" href="#play">Play the game ▶</a>
+</nav>
+
 <main class="resume" id="resume" tabindex="-1">
 
   <header class="resume__head" data-node="home">
@@ -194,7 +208,7 @@
       <h1 class="resume__name">Shrey Valia</h1>
       <p class="resume__tag">Computer Science + Computer Engineering at Northeastern University. Machine learning research, AI tools, and hackathon builds. Based in Dublin, CA.</p>
     </div>
-    <ul class="resume__contact" data-node="lighthouse">
+    <ul class="resume__contact" id="contact" data-node="lighthouse">
       <li data-fact="c-email" data-title="Email" data-kicker="Contact"><a href="mailto:valia.s@northeastern.edu">valia.s@northeastern.edu</a></li>
       <li data-fact="c-linkedin" data-title="LinkedIn" data-kicker="Contact"><a href="https://www.linkedin.com/in/shrey-valia-7a0041267/" rel="me">linkedin.com/in/shrey-valia-7a0041267</a></li>
       <li data-fact="c-github" data-title="GitHub" data-kicker="Contact"><a href="https://github.com/Shrey-Valia" rel="me">github.com/Shrey-Valia</a></li>
@@ -305,27 +319,29 @@
     </article>
   </section>
 
-  <section class="resume__section" id="skills" data-node="tree" aria-labelledby="h-skills" data-kicker="Skills">
+  <section class="resume__section" id="skills" aria-labelledby="h-skills" data-kicker="Skills">
     <h2 id="h-skills">Technical skills</h2>
-    <div class="skillset" data-fact="s-lang" data-title="Languages">
-      <h3>Languages</h3>
-      <ul class="chips"><li data-skill>Python</li><li data-skill>Java</li><li data-skill>C/C++</li><li data-skill>JavaScript</li><li data-skill>SQL</li><li data-skill>HTML/CSS</li></ul>
-    </div>
-    <div class="skillset" data-fact="s-data" data-title="Data and scientific computing">
-      <h3>Data and scientific computing</h3>
-      <ul class="chips"><li data-skill>pandas</li><li data-skill>NumPy</li><li data-skill>SciPy</li><li data-skill>Matplotlib</li><li data-skill>OpenCV</li><li data-skill>NLTK</li></ul>
-    </div>
-    <div class="skillset" data-fact="s-ml" data-title="Machine learning and AI">
-      <h3>Machine learning and AI</h3>
-      <ul class="chips"><li data-skill>PyTorch</li><li data-skill>TensorFlow</li><li data-skill>Keras</li><li data-skill>Scikit-learn</li><li data-skill>Graph Neural Networks</li><li data-skill>Deep Reinforcement Learning</li><li data-skill>Multi-Agent Systems</li><li data-skill>Retrieval-Augmented Generation</li></ul>
-    </div>
-    <div class="skillset" data-fact="s-web" data-title="Web and backend">
-      <h3>Web and backend</h3>
-      <ul class="chips"><li data-skill>React</li><li data-skill>Node.js</li><li data-skill>Express.js</li><li data-skill>Flask</li><li data-skill>Django</li><li data-skill>FastAPI</li><li data-skill>Spring Boot</li><li data-skill>Redux</li><li data-skill>Socket.io</li><li data-skill>Vercel</li></ul>
-    </div>
-    <div class="skillset" data-fact="s-tools" data-title="Tools and infrastructure">
-      <h3>Tools and infrastructure</h3>
-      <ul class="chips"><li data-skill>Git</li><li data-skill>Docker</li><li data-skill>AWS (S3, EC2)</li><li data-skill>PostgreSQL</li><li data-skill>MongoDB</li><li data-skill>QuantConnect</li><li data-skill>JUnit</li><li data-skill>VS Code</li></ul>
+    <div class="skills" data-node="tree">
+      <div class="skillset" data-fact="s-lang" data-title="Languages">
+        <h3>Languages</h3>
+        <ul class="chips"><li data-skill>Python</li><li data-skill>Java</li><li data-skill>C/C++</li><li data-skill>JavaScript</li><li data-skill>SQL</li><li data-skill>HTML/CSS</li></ul>
+      </div>
+      <div class="skillset" data-fact="s-data" data-title="Data and scientific computing">
+        <h3>Data and scientific computing</h3>
+        <ul class="chips"><li data-skill>pandas</li><li data-skill>NumPy</li><li data-skill>SciPy</li><li data-skill>Matplotlib</li><li data-skill>OpenCV</li><li data-skill>NLTK</li></ul>
+      </div>
+      <div class="skillset" data-fact="s-ml" data-title="Machine learning and AI">
+        <h3>Machine learning and AI</h3>
+        <ul class="chips"><li data-skill>PyTorch</li><li data-skill>TensorFlow</li><li data-skill>Keras</li><li data-skill>Scikit-learn</li><li data-skill>Graph Neural Networks</li><li data-skill>Deep Reinforcement Learning</li><li data-skill>Multi-Agent Systems</li><li data-skill>Retrieval-Augmented Generation</li></ul>
+      </div>
+      <div class="skillset" data-fact="s-web" data-title="Web and backend">
+        <h3>Web and backend</h3>
+        <ul class="chips"><li data-skill>React</li><li data-skill>Node.js</li><li data-skill>Express.js</li><li data-skill>Flask</li><li data-skill>Django</li><li data-skill>FastAPI</li><li data-skill>Spring Boot</li><li data-skill>Redux</li><li data-skill>Socket.io</li><li data-skill>Vercel</li></ul>
+      </div>
+      <div class="skillset" data-fact="s-tools" data-title="Tools and infrastructure">
+        <h3>Tools and infrastructure</h3>
+        <ul class="chips"><li data-skill>Git</li><li data-skill>Docker</li><li data-skill>AWS (S3, EC2)</li><li data-skill>PostgreSQL</li><li data-skill>MongoDB</li><li data-skill>QuantConnect</li><li data-skill>JUnit</li><li data-skill>VS Code</li></ul>
+      </div>
     </div>
   </section>
 

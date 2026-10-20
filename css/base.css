@@ -2,8 +2,10 @@
    Base: tokens, reset, and the js / no-js switch.
 
    Without JS (or from file://, or if the game fails to boot)
-   the page is a plain résumé. With html.js the game shell
-   fills the viewport and the résumé lives inside a dialog.
+   the page is the résumé as a portfolio page. With html.js the
+   game shell fills the viewport and the résumé opens in a
+   dialog; html.js.view-page swaps back to the page, with the
+   page bar on top (js/ui/page.js).
    ═══════════════════════════════════════════════════════════ */
 
 :root {
@@ -18,6 +20,14 @@
   --gold:   #ffd166;
   --pink:   #ff6fb5;
   --green:  #7ee08a;
+
+  /* the page: night navy, like the map at dusk */
+  --night:   #0e1433;
+  --night-2: #151d45;
+  --night-3: #1d2756;
+  --rule:    #2c3570;
+  --sea:     #6fd6c8;   /* links and roles, 10:1 on --night */
+  --cream:   #fff3c4;   /* the map's road dots */
 
   --paper:     #fbf8f1;
   --paper-2:   #f1ebdd;
@@ -35,20 +45,20 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  background: var(--paper);
+  background: var(--night);
 }
 
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--paper-ink);
+  background: var(--night);
+  color: var(--text);
   font-family: var(--read);
   font-size: 18px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
 
-a { color: var(--teal); text-underline-offset: 2px; }
+a { color: var(--sea); text-underline-offset: 3px; }
 
 :focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
 
@@ -86,11 +96,13 @@ kbd {
   text-decoration: none;
 }
 .skip:focus { top: 12px; }
+.view-page .skip:focus { top: 76px; }
 
 .banner {
   margin: 0;
   padding: 12px 20px;
   background: var(--ink);
+  border-bottom: 1.5px solid var(--rule);
   color: var(--text);
   font-size: 15px;
   text-align: center;
@@ -116,6 +128,7 @@ kbd {
   font-size: 17px;
   font-weight: 600;
   letter-spacing: 0.01em;
+  text-decoration: none;
   cursor: pointer;
   box-shadow: inset 0 0 0 1.5px var(--line), 0 4px 0 #070914;
   transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s;
@@ -130,10 +143,15 @@ kbd {
 
 /* ─── the switch ───────────────────────────────────────────── */
 
-.game { display: none; }
+.game, .pagebar { display: none; }
 
-.js, .js body { height: 100%; overflow: hidden; background: var(--void); }
-.js .game { display: block; }
-.js .resume { display: none; }           /* until boot moves it into the dialog */
-.js .resume-dialog .resume { display: block; }
-.js .skip { display: block; }
+.js:not(.view-page), .js:not(.view-page) body { height: 100%; overflow: hidden; background: var(--void); }
+.js:not(.view-page) .game { display: block; }
+.js:not(.view-page) body > .resume { display: none; }   /* shown in the dialog instead */
+.js.view-page .pagebar { display: flex; }
+
+@media print {
+  html, body, .js body { height: auto !important; overflow: visible !important; }
+  .js .game, .pagebar { display: none !important; }
+  .js body > .resume { display: block !important; }
+}
