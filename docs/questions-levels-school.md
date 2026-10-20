@@ -1,61 +1,44 @@
 # Questions for Shrey: Dublin High and Northeastern
 
-Both levels are playable (`?level=dhs`, `?level=neu`). These four are
-taste or content calls only you can make. Each lists what the level does
-now and my recommendation.
+All four are answered (Oct 20, 2026). They are kept here so the decisions
+stay on record.
 
-## 1. Was the EduLearn Hackathon in person?
+## 1. Was the EduLearn Hackathon in person? No, it was online.
 
-Right now, after the 12th-grade pennant, the hero ports into an "EduLearn
-Hackathon" event hall. Inside, 700 tiny spectators sit in bleachers above
-rows of laptops. You climb a 2-1-3 podium to the trophy, the screen
-switches to "1st place" and the crowd does the wave. The hall is not
-labelled as the school gym. If the event was online, this is a false
-claim.
+**Done.** Nothing in the level suggests an in-person venue now:
 
-- **A. Keep the arena.** It was in person, or a stylized results stage is
-  fine with you.
-- **B. Online version.** Same podium and trophy, but the 700 become a
-  giant grid of video-call tiles (or leaderboard rows) and the hall
-  becomes a screen.
-- **C. Keep the arena, drop the hall facade** from the school walk, so it
-  doesn't suggest the event was on campus.
+- The wall at the end of 12th grade is a giant laptop. Its screen shows the
+  hackathon's video call with a red "Live" badge. A cable runs from the
+  port into it, so entering the port reads as plugging in.
+- The room behind it is the call itself:
+  - a gallery of 700 webcam tiles, some lighting up green as people talk;
+  - a "Results" window;
+  - a 2-1-3 results podium.
+- Climbing to 1st takes the trophy (a-edulearn). The window switches to
+  "1st place", applause sweeps across the tiles, and hearts and stars float
+  up.
+- The bleachers, laptop tables and event-hall facade are gone.
 
-Recommendation: A if it was in person, B if it was online.
+## 2. School colors: red, white and blue
 
-## 2. School colors
+**Done.** Dublin High now uses its real colors:
 
-Dublin High uses teal and gold (pennants, marquee, canopies, balloon
-arch), which reads as California golden hour. Northeastern is red brick
-with red accents. Neither copies any official branding.
+- navy trim and fascias
+- red covered walkways
+- royal-blue lockers
+- navy pennants with a red and white band
+- a navy marquee with a red stripe
+- a red "Class of 2025" banner
+- red, white and blue balloons
+- red tassels on the caps
 
-- **A. Keep these palettes.**
-- **B. Switch Dublin High to its real school colors.** Tell me which they
-  are.
+The golden-hour sky and hills stay. The EduLearn call keeps its own UI
+colors, since it isn't the school.
 
-Recommendation: A. It looks like the place without looking like official
-branding.
+## 3. The Northeastern streetcar: keep it
 
-## 3. The Northeastern streetcar
+No change.
 
-You ride the roof of a generic green streetcar from a snowy street stop up
-to the campus level. Its destination sign says "Northeastern". It hints
-at the Green Line without any MBTA logo.
+## 4. Years on the grade pennants: keep grades only
 
-- **A. Keep it.**
-- **B. Neutral color, no stop name on the sign.**
-- **C. Drop the ride** and climb snow piles up to campus instead.
-
-Recommendation: A. It's the strongest "Boston" image in the level and
-makes no claim about you.
-
-## 4. Years on the grade pennants?
-
-Dublin High's four sections are marked "9th grade", "10th grade", "11th
-grade" and "12th grade". The dates appear only in the diploma card
-(Aug 2021 – Jun 2025).
-
-- **A. Grades only.**
-- **B. Add the school year under each grade** (2021–22 … 2024–25).
-
-Recommendation: A. It keeps the dates in one place, the résumé.
+No change. The dates stay in the diploma card.

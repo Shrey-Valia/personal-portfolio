@@ -1,9 +1,10 @@
-// DUBLIN HIGH · a golden-hour California high school: stucco classroom
-// wings with teal trim, outdoor lockers, covered walkways and the golden
-// Tri-Valley hills. Set pieces: the front marquee, grade pennants that
-// count 9th → 12th, locker banks you climb, the gym and its event board,
-// the EduLearn Arena (700 spectators, a 2-1-3 podium and the trophy) and
-// the commencement stage with its cap toss.
+// DUBLIN HIGH · a golden-hour California high school in its red, white
+// and blue: stucco classroom wings with navy trim, outdoor lockers, red
+// covered walkways and the golden Tri-Valley hills. Set pieces: the front
+// marquee, grade pennants that count 9th → 12th, locker banks you climb,
+// a giant laptop you plug into for the EduLearn Hackathon (an online
+// event: 700 webcam tiles, a 2-1-3 results podium and the trophy) and the
+// commencement stage with its cap toss.
 
 import { TILE, H } from '../config.js';
 import { col } from '../art/palette.js';
@@ -41,7 +42,8 @@ const K = {
   slabHi: col('#f6e9cb'), slab: col('#dfcda9'), slabLo: col('#c4ae88'), joint: col('#9a8461'),
   curb: col('#5b4634'), soil: col('#3d2c22'), soil2: col('#30231b'), pebble: col('#54402f'),
   wall: col('#f0cd98'), wall2: col('#e4bc84'), wallLo: col('#c99b67'), base: col('#a97c52'),
-  trim: C('teal.2'), trimHi: C('teal.3'), trimLo: C('teal.1'), coping: col('#fbefd6'),
+  trim: col('#2b3a7a'), trimHi: col('#4a5cab'), trimLo: col('#1d2656'), coping: col('#fbefd6'),
+  can: col('#b8323a'), canHi: col('#e0574f'), canLo: col('#7e1f28'),
   glass: col('#1f4c5b'), glass2: col('#2f6d7a'), glint: col('#ffdb92'), ink: C('ink.0'),
   vent: col('#a9a59b'), ventLo: col('#77736b'),
 };
@@ -110,12 +112,12 @@ function dhsKit() {
       if (top >= GROUND) ground(ctx, x, y, m, tx, ty, ty - top);
       else building(ctx, x, y, m, tx, ty, ty - top, map);
     },
-    // '=' is a covered-walkway canopy: corrugated teal metal on slim posts
+    // '=' is a covered-walkway canopy: corrugated red metal on slim posts
     oneway(ctx, x, y, joinL, joinR, tx) {
-      hline(ctx, x, y, 16, K.trimHi);
-      ctx.fillStyle = K.trim; ctx.fillRect(x, y + 1, 16, 3);
-      for (let i = 1; i < 16; i += 4) vline(ctx, x + i, y + 1, 3, K.trimLo);
-      hline(ctx, x, y + 4, 16, K.trimLo);
+      hline(ctx, x, y, 16, K.canHi);
+      ctx.fillStyle = K.can; ctx.fillRect(x, y + 1, 16, 3);
+      for (let i = 1; i < 16; i += 4) vline(ctx, x + i, y + 1, 3, K.canLo);
+      hline(ctx, x, y + 4, 16, K.canLo);
       hline(ctx, x, y + 5, 16, K.ink);
       // posts at the ends (canopies sit three rows above the walkway)
       const post = (px0) => {
@@ -130,46 +132,38 @@ function dhsKit() {
   };
 }
 
-// ─── kit: the arena floor (hardwood) inside padded walls ─────────────
+// ─── kit: the online results room (an app window, not a venue) ───────
 
-function arenaKit() {
-  const W1 = col('#1b2250'), W2 = col('#151b40'), WT = C('gold.2');
-  const woodHi = col('#f4c98a'), wood = col('#d99d58'), wood2 = col('#c98a45'), woodLo = col('#9a6331'), sub = col('#5f3a1d');
+function onlineKit() {
+  const frame = col('#2a2f42'), frameHi = col('#3d4560'), frameLo = col('#1a1d2b');
+  const panel = col('#232a52'), panelHi = col('#6fd6c8'), panel2 = col('#1c2244'), panelLo = col('#141938');
   return {
     terrain(ctx, x, y, m, tx, ty, map) {
       const wall = tx === 0 || tx === map.cols - 1 || ty === 0;
-      if (wall) {
-        ctx.fillStyle = W1; ctx.fillRect(x, y, 16, 16);
-        vline(ctx, x + (tx === 0 ? 15 : 0), y, 16, W2);
-        if (ty % 2 === 0) hline(ctx, x, y + 15, 16, W2);
-        if (ty === 6) { ctx.fillStyle = WT; ctx.fillRect(x, y + 6, 16, 2); }
+      if (wall) {                                   // the window frame
+        ctx.fillStyle = frame; ctx.fillRect(x, y, 16, 16);
+        vline(ctx, x + (tx === 0 ? 15 : 0), y, 16, frameHi);
+        vline(ctx, x + (tx === 0 ? 14 : 1), y, 16, frameLo);
         return;
       }
-      const top = !(m & 1) || ty === map.rows - 3;        // the floor reads as floor under the podium too
-      ctx.fillStyle = top ? wood : sub; ctx.fillRect(x, y, 16, 16);
+      const top = !(m & 1) || ty === map.rows - 3;     // the floor reads as floor under the podium too
+      ctx.fillStyle = top ? panel : panelLo; ctx.fillRect(x, y, 16, 16);
       if (top) {
-        hline(ctx, x, y, 16, woodHi);
-        for (let r = 0; r < 4; r++) {
-          const yy = y + 2 + r * 3;
-          hline(ctx, x, yy + 2, 16, wood2);
-          const s = (tx * 7 + r * 5) % 16;
-          vline(ctx, x + s, yy, 2, woodLo);
-        }
-        hline(ctx, x, y + 14, 16, woodLo);
-        hline(ctx, x, y + 15, 16, sub);
-      } else if (ty % 2 === 0) {
-        hline(ctx, x, y + 8, 16, col('#4c2e17'));
+        hline(ctx, x, y, 16, panelHi);
+        hline(ctx, x, y + 1, 16, col('#3e4fa3'));
+        for (let i = 0; i < 16; i += 4) px(ctx, x + i + ((ty * 2) & 3), y + 7, panel2);
+        hline(ctx, x, y + 15, 16, panelLo);
       }
-      if (!(m & 8)) vline(ctx, x, y, 16, woodLo);
-      if (!(m & 2)) vline(ctx, x + 15, y, 16, sub);
+      if (!(m & 8)) vline(ctx, x, y, 16, panel2);
+      if (!(m & 2)) vline(ctx, x + 15, y, 16, panelLo);
     },
-    oneway(ctx, x, y) { hline(ctx, x, y, 16, woodHi); ctx.fillStyle = wood; ctx.fillRect(x, y + 1, 16, 3); hline(ctx, x, y + 4, 16, sub); },
+    oneway(ctx, x, y) { hline(ctx, x, y, 16, panelHi); ctx.fillStyle = panel; ctx.fillRect(x, y + 1, 16, 3); hline(ctx, x, y + 4, 16, panelLo); },
     animated() {},
   };
 }
 
 registerKit('dhs', dhsKit());
-registerKit('dhsArena', arenaKit());
+registerKit('dhsOnline', onlineKit());
 
 // ─── backdrop: golden hour over the Tri-Valley hills ─────────────────
 
@@ -217,7 +211,7 @@ function dhsBackdrop(W) {
 
   const campus = strip(800, (ctx, w) => {
     const base = H - 42;
-    const wall = col('#e2ab7c'), wallSh = col('#c38a66'), teal = col('#3f8f8a'), tealHi = col('#68b5a8');
+    const wall = col('#e2ab7c'), wallSh = col('#c38a66'), teal = col('#3f4c88'), tealHi = col('#6070ad'), door = col('#b04a50');
     const glass = col('#41687a'), glint = col('#ffd38c'), lawn = col('#9a8a3c'), lawn2 = col('#7f7533');
     ctx.fillStyle = lawn2; ctx.fillRect(0, base, w, H - base);
     ctx.fillStyle = lawn; ctx.fillRect(0, base, w, 2);
@@ -234,7 +228,7 @@ function dhsBackdrop(W) {
           if ((wx + bh) % 4 === 0) { ctx.fillStyle = glint; ctx.fillRect(wx, Math.round(wy), 2, 2); }
         }
       }
-      ctx.fillStyle = teal; ctx.fillRect(x + Math.round(bw * 0.4), base - 11, 7, 11);
+      ctx.fillStyle = door; ctx.fillRect(x + Math.round(bw * 0.4), base - 11, 7, 11);
       ctx.fillStyle = teal; ctx.fillRect(x, top + Math.round(bh / 2) - 2, bw - 5, 1);
     }
     function gym(x, bw, bh) {
@@ -247,12 +241,12 @@ function dhsBackdrop(W) {
       }
       for (let dx = 8; dx < bw - 8; dx += 16) { ctx.fillStyle = wallSh; ctx.fillRect(x + dx, top + 4, 2, bh - 4); }
       ctx.fillStyle = glass; ctx.fillRect(x + 10, top + 6, bw - 20, 4);
-      ctx.fillStyle = teal; ctx.fillRect(x + bw / 2 - 8, base - 14, 16, 14);
+      ctx.fillStyle = door; ctx.fillRect(x + bw / 2 - 8, base - 14, 16, 14);
       ctx.fillStyle = wallSh; ctx.fillRect(x + bw - 5, top, 5, bh);
     }
     function walkway(x, ww) {
-      ctx.fillStyle = teal; ctx.fillRect(x, base - 16, ww, 3);
-      ctx.fillStyle = tealHi; ctx.fillRect(x, base - 16, ww, 1);
+      ctx.fillStyle = door; ctx.fillRect(x, base - 16, ww, 3);
+      ctx.fillStyle = col('#d0686c'); ctx.fillRect(x, base - 16, ww, 1);
       for (let px0 = x + 3; px0 < x + ww; px0 += 12) { ctx.fillStyle = col('#8d8a86'); ctx.fillRect(px0, base - 13, 1, 13); }
     }
     function palm(x, h) {
@@ -314,52 +308,23 @@ function dhsBackdrop(W) {
   };
 }
 
-// ─── backdrop: the EduLearn Arena (crowd and screen are a set piece) ──
+// ─── backdrop: inside the hackathon's video call ─────────────────────
 
-function arenaBackdrop() {
+function onlineBackdrop() {
   const [c, ctx] = makeCanvas(480, 224);
-  stripedSky(ctx, 480, 224, ['#0b0f25', '#121838', '#19204a', '#1e2655', '#232c5e']);
-  // roof trusses
-  for (let x = 0; x < 480; x += 24) {
-    line(ctx, x, 16, x + 12, 28, '#2a3366'); line(ctx, x + 12, 28, x + 24, 16, '#2a3366');
-  }
-  ctx.fillStyle = col('#2a3366'); ctx.fillRect(0, 16, 480, 1); ctx.fillRect(0, 28, 480, 1);
-  // bleacher steps behind the crowd
-  for (const [x0, x1] of [[18, 190], [290, 462]]) {
-    for (let row = 0; row < 10; row++) {
-      const y = 46 + row * 8;
-      ctx.fillStyle = col('#1a2148'); ctx.fillRect(x0, y - 1, x1 - x0, 8);
-      ctx.fillStyle = col('#3a4478'); ctx.fillRect(x0, y + 4, x1 - x0, 1);
-      ctx.fillStyle = col('#10152f'); ctx.fillRect(x0, y + 5, x1 - x0, 1);
-    }
-    ctx.fillStyle = col('#2f3a6e'); ctx.fillRect(x0, 125, x1 - x0, 3);
-  }
-  // pennant string along the wall
-  for (let x = 20; x < 460; x += 10) {
-    const k = (x / 10) % 3;
-    ctx.fillStyle = col(k === 0 ? 'teal.2' : k === 1 ? 'gold.2' : 'magenta.2');
-    for (let j = 0; j < 5; j++) ctx.fillRect(x + j, 132 + j, 6 - j * 1.2, 1);
-  }
-  // hackathon tables with laptops, behind the podium
-  for (let x = 22; x < 458; x += 2) { ctx.fillStyle = col('#2e3866'); ctx.fillRect(x, 160, 2, 2); }
-  for (let x = 26; x < 456; x += 30) {
-    ctx.fillStyle = col('#1a2047'); ctx.fillRect(x, 162, 1, 14); ctx.fillRect(x + 26, 162, 1, 14);
-  }
-  for (let x = 30; x < 450; x += 15) {
-    ctx.fillStyle = col('#0b0d17'); ctx.fillRect(x, 151, 10, 8);
-    ctx.fillStyle = col((x / 15) % 4 === 1 ? '#e3e6ee' : '#6fd6c8'); ctx.fillRect(x + 1, 152, 8, 6);
-    ctx.fillStyle = col('#8597bb'); ctx.fillRect(x - 1, 159, 12, 1);
-  }
-  // soft spotlight cones onto the podium
-  ctx.fillStyle = 'rgba(255, 226, 160, 0.07)';
-  for (const [sx, ex] of [[150, 214], [330, 266]]) {
-    ctx.beginPath(); ctx.moveTo(sx - 6, 16); ctx.lineTo(sx + 6, 16); ctx.lineTo(ex + 34, 176); ctx.lineTo(ex - 34, 176); ctx.fill();
-  }
+  stripedSky(ctx, 480, 224, ['#0d1126', '#121733', '#171d40', '#1b2249']);
+  // a faint UI grid
+  ctx.fillStyle = col('#1d2450');
+  for (let x = 16; x < 480; x += 32) ctx.fillRect(x, 16, 1, 160);
+  for (let y = 32; y < 176; y += 32) ctx.fillRect(16, y, 448, 1);
+  // the call's toolbar, below the HUD
+  ctx.fillStyle = col('#20264a'); ctx.fillRect(16, 26, 448, 12);
+  ctx.fillStyle = col('#2c335c'); ctx.fillRect(16, 37, 448, 1);
   return { draw(ctx2, camX, camY) { ctx2.fillStyle = col('#05060c'); ctx2.fillRect(0, 0, ctx2.W, H); ctx2.drawImage(c, -camX, -camY); } };
 }
 
 registerBackground('dhs', dhsBackdrop);
-registerBackground('dhsArena', arenaBackdrop);
+registerBackground('dhsOnline', onlineBackdrop);
 
 // ─── bugs: the hall-monitor bug wears a safety-orange vest ───────────
 
@@ -435,12 +400,12 @@ registerSetpiece('dhsMarquee', class {
     const w = Math.ceil(tw) + 26, x = Math.round(this.cx - w / 2 - cam.x), y = this.y - cam.y;
     const hh = lineHeight(9) + 8, lh = lineHeight(7.5), bh = this.lines.length * lh + 8;
     const g = this.ground - cam.y;
-    // stucco pillars with teal caps, a planter of flowers at the foot
+    // stucco pillars with red caps, a planter of flowers at the foot
     for (const px0 of [x + 4, x + w - 16]) {
       rect(ctx, px0 - 1, y - 3, 14, g - y + 3, K.ink);
       rect(ctx, px0, y - 2, 12, g - y + 2, K.wall);
       rect(ctx, px0 + 9, y - 2, 3, g - y + 2, K.wallLo);
-      rect(ctx, px0 - 2, y - 5, 16, 3, K.trim); rect(ctx, px0 - 2, y - 5, 16, 1, K.trimHi);
+      rect(ctx, px0 - 2, y - 5, 16, 3, K.can); rect(ctx, px0 - 2, y - 5, 16, 1, K.canHi);
     }
     rect(ctx, x + 6, g - 10, w - 12, 10, K.ink);
     rect(ctx, x + 7, g - 9, w - 14, 9, col('#9a6a44'));
@@ -449,16 +414,16 @@ registerSetpiece('dhsMarquee', class {
       rect(ctx, x + 9 + i, g - 13 - (i % 3), 2, 2, C(['magenta.3', 'gold.3', 'white.2', 'red.3'][(i / 4) % 4]));
     }
     // header panel
-    pill(ctx, x, y, w, hh, C('teal.1'), '#0b0d17', 3);
-    rect(ctx, x + 2, y + hh - 3, w - 4, 1, K.trimHi);
-    drawText(ctx, this.title, x + w / 2, y + 4, '#fbefd6', { align: 'center', size: 9, weight: 700 });
+    pill(ctx, x, y, w, hh, K.trim, '#0b0d17', 3);
+    rect(ctx, x + 2, y + hh - 4, w - 4, 2, K.can); rect(ctx, x + 2, y + hh - 2, w - 4, 1, col('#fbf8f1'));
+    drawText(ctx, this.title, x + w / 2, y + 3, '#fbf8f1', { align: 'center', size: 9, weight: 700 });
     // letterboard
     const by = y + hh + 2;
     pill(ctx, x + 6, by, w - 12, bh, '#11131c', '#0b0d17', 2);
     for (let i = 0; i < this.lines.length; i++) {
-      drawText(ctx, this.lines[i], x + w / 2, by + 4 + i * lh, '#ffe9b8', { align: 'center', size: 7.5 });
+      drawText(ctx, this.lines[i], x + w / 2, by + 4 + i * lh, '#fbf8f1', { align: 'center', size: 7.5 });
     }
-    for (let i = 10; i < w - 10; i += 5) rect(ctx, x + i, by + 1, 2, 1, ((i / 5 + (t >> 4)) & 3) === 0 ? C('gold.3') : col('#3a3528'));
+    for (let i = 10; i < w - 10; i += 5) rect(ctx, x + i, by + 1, 2, 1, ((i / 5 + (t >> 4)) & 3) === 0 ? col('#fbf8f1') : col('#3a3528'));
   }
 });
 
@@ -475,26 +440,26 @@ registerSetpiece('dhsGrade', class {
     rect(ctx, x - 1, top, 4, 78, K.ink);
     rect(ctx, x, top, 2, 78, col('#8f9aa6'));
     rect(ctx, x + 1, top, 1, 78, col('#5d6670'));
-    rect(ctx, x - 1, top - 3, 4, 3, C('gold.2'));
+    rect(ctx, x - 1, top - 3, 4, 3, K.can);
     rect(ctx, x, top + 4, 22, 2, col('#5d6670'));
     // the banner sways a little in the evening breeze
     const sway = Math.round(Math.sin(t / 40 + this.x) * 1);
     const bx = x + 3 + sway, by = top + 6, bw = 28, bh = 38;
     rect(ctx, bx - 1, by, bw + 2, bh, K.ink);
-    rect(ctx, bx, by, bw, bh - 1, C('teal.2'));
-    rect(ctx, bx, by, bw, 2, C('gold.2'));
-    rect(ctx, bx + 2, by + 3, 1, bh - 8, C('teal.3'));
+    rect(ctx, bx, by, bw, bh - 1, K.trim);
+    rect(ctx, bx, by, bw, 3, K.can); rect(ctx, bx, by + 3, bw, 1, col('#fbf8f1'));
+    rect(ctx, bx + 2, by + 5, 1, bh - 10, K.trimHi);
     for (let i = 0; i < 7; i++) {                       // swallowtail notch
       rect(ctx, bx + bw / 2 - 7 + i, by + bh - 1 - i, 14 - i * 2, 1, K.ink);
     }
-    drawText(ctx, this.big, bx + bw / 2, by + 6, '#ffe08a', { align: 'center', size: 10, weight: 700 });
-    drawText(ctx, this.small, bx + bw / 2, by + 19, '#e3f6f1', { align: 'center', size: 6.5 });
+    drawText(ctx, this.big, bx + bw / 2, by + 7, '#fbf8f1', { align: 'center', size: 10, weight: 700 });
+    drawText(ctx, this.small, bx + bw / 2, by + 20, '#c9d3f0', { align: 'center', size: 6.5 });
   }
 });
 
 // ─── outdoor lockers: one '[' per column, tops are one-way platforms ──
 
-const LOCK = { body: C('cyan.2'), hi: C('cyan.3'), lo: C('cyan.1'), dark: C('cyan.0'), plate: C('gold.2'), steel: col('#c9ced8') };
+const LOCK = { body: C('indigo.2'), hi: C('indigo.3'), lo: C('indigo.1'), dark: C('indigo.0'), plate: col('#e3e6ee'), steel: col('#c9ced8') };
 
 registerSetpiece('dhsLockers', class {
   constructor(tx, ty, spec, level) {
@@ -527,59 +492,63 @@ registerSetpiece('dhsLockers', class {
   }
 });
 
-// ─── the EduLearn venue: the wall you enter through the port ─────────
-// A modern event hall, not the school gym: the résumé doesn't say where
-// the hackathon was held. Through the glass you can see the crowd.
+// ─── the giant laptop: the wall you "log in" through ────────────────
+// The hackathon was online, so there's no venue: the port is plugged
+// into a laptop the size of a building, showing the call's gallery.
 
-registerSetpiece('dhsVenue', class {
+registerSetpiece('dhsLaptop', class {
   constructor(tx, ty, spec, level) {
     this.x = (tx + 1) * TILE; this.w = spec.w * TILE;
     this.ground = groundRow(level.map, tx, ty) * TILE;
     this.title = spec.title;
+    this.port = (tx + (spec.port || -3)) * TILE;          // where the cable starts
     const r = rng(tx * 5 + 1);
-    this.dots = [];
-    for (let i = 0; i < 90; i++) this.dots.push([r(), r(), SHIRTS[Math.floor(r() * SHIRTS.length)]]);
+    this.tiles = [];
+    for (let i = 0; i < 160; i++) this.tiles.push([SKINS[Math.floor(r() * SKINS.length)], SHIRTS[Math.floor(r() * SHIRTS.length)], TILEBG[Math.floor(r() * TILEBG.length)], Math.floor(r() * 64)]);
+  }
+  back(ctx, cam, t) {
+    // the cable from the conduit along the walk and up into the laptop
+    const g = this.ground - cam.y, x0 = this.port - cam.x + 30, x1 = this.x - cam.x + 2;
+    rect(ctx, x0, g - 4, x1 - x0, 2, col('#1b1d26'));
+    rect(ctx, x0, g - 4, x1 - x0, 1, col('#3a3e4c'));
+    rect(ctx, x1 - 2, g - 8, 4, 6, col('#9aa0ad'));
   }
   draw(ctx, cam, t) {
-    const x = this.x - cam.x, w = this.w, g = this.ground - cam.y;
+    const x = this.x - cam.x, w = this.w, g = this.ground - cam.y, top = -cam.y;
     if (x > ctx.W || x + w < 0) return;
-    const top = -cam.y;
-    rect(ctx, x, top, w, g - top, col('#232a5c'));
-    for (let i = 12; i < w - 6; i += 24) { rect(ctx, x + i, top, 4, g - top, col('#2f3874')); rect(ctx, x + i, top, 1, g - top, col('#3e4a8c')); }
-    rect(ctx, x, top, 1, g - top, K.ink); rect(ctx, x + 1, top, 1, g - top, col('#3e4a8c'));
-    // marquee band with chasing bulbs
-    const my = 34 - cam.y, mh = lineHeight(8.5) + 10;
-    rect(ctx, x + 6, my - 1, w - 12, mh + 2, K.ink);
-    rect(ctx, x + 7, my, w - 14, mh, col('#11131c'));
-    for (let i = 10; i < w - 10; i += 6) {
-      const on = ((i / 6 + (t >> 3)) % 3) === 0;
-      rect(ctx, x + i, my + 1, 2, 2, on ? C('gold.3') : C('gold.1'));
-      rect(ctx, x + i, my + mh - 3, 2, 2, on ? C('gold.1') : C('gold.3'));
+    // lid
+    rect(ctx, x, top, w, g - top - 9, col('#2a2d36'));
+    rect(ctx, x, top, 1, g - top - 9, K.ink); rect(ctx, x + 1, top, 1, g - top - 9, col('#4a4f5e'));
+    rect(ctx, x + w - 2, top, 2, g - top - 9, col('#1b1d24'));
+    // screen
+    const sx = x + 6, sy = top + 22, sw = w - 12, sh = g - 9 - 8 - sy;
+    rect(ctx, sx, sy, sw, sh, col('#11152c'));
+    rect(ctx, sx, sy, sw, 11, col('#1f2550'));
+    for (const [i, c] of [[0, 'red.2'], [1, 'gold.2'], [2, 'green.2']]) rect(ctx, sx + 3 + i * 5, sy + 4, 3, 3, C(c));
+    drawText(ctx, this.title, sx + 20, sy + 1, '#ffd166', { size: 6.5, weight: 700 });
+    // a "live" badge, then the gallery of webcam tiles
+    rect(ctx, sx + sw - 24, sy + 2, 21, 7, C('red.2'));
+    drawText(ctx, 'Live', sx + sw - 13.5, sy + 1, '#fbf8f1', { align: 'center', size: 5.5, weight: 700 });
+    const cols = Math.floor((sw - 4) / 10), rows = Math.floor((sh - 18) / 8);
+    let i = 0;
+    for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++, i++) {
+      const [skin, shirt, bg, ph] = this.tiles[i % this.tiles.length];
+      const tx = sx + 3 + q * 10, ty = sy + 15 + r * 8;
+      rect(ctx, tx, ty, 9, 7, bg);
+      rect(ctx, tx + 3, ty + 1, 3, 3, skin);
+      rect(ctx, tx + 2, ty + 4, 5, 3, shirt);
+      if (((t >> 4) + ph) % 37 === 0) { rect(ctx, tx, ty, 9, 1, C('green.3')); rect(ctx, tx, ty + 6, 9, 1, C('green.3')); }
     }
-    drawText(ctx, this.title, x + w / 2, my + 5, '#ffd166', { align: 'center', size: 8.5, weight: 700 });
-    // glass curtain wall: warm light and the crowd inside
-    const gy = 76 - cam.y, gh = 56, gx = x + 10, gw = w - 20;
-    rect(ctx, gx - 1, gy - 1, gw + 2, gh + 2, K.ink);
-    rect(ctx, gx, gy, gw, gh, col('#ffcf86'));
-    rect(ctx, gx, gy + gh * 0.55, gw, gh * 0.45, col('#f2a65e'));
-    for (const [u, v, c] of this.dots) {
-      const dx = gx + 2 + Math.floor(u * (gw - 4)), dy = gy + 18 + Math.floor(v * (gh - 26));
-      rect(ctx, dx, dy, 2, 1, col('#7c4729')); rect(ctx, dx, dy + 1, 2, 2, c);
-    }
-    for (let i = 0; i <= gw; i += 18) rect(ctx, gx + i, gy, 2, gh, col('#2f3874'));
-    rect(ctx, gx, gy + 20, gw, 1, col('#2f3874'));
-    rect(ctx, gx + 3, gy + 3, 10, 1, col('#fff3cf')); rect(ctx, gx + 3, gy + 4, 6, 1, col('#fff3cf'));
-    // entrance canopy and doors
-    rect(ctx, x + 4, g - 38, w - 8, 3, C('gold.2')); rect(ctx, x + 4, g - 38, w - 8, 1, C('gold.3'));
-    const dx = x + w / 2 - 15;
-    rect(ctx, dx - 1, g - 31, 32, 31, K.ink);
-    rect(ctx, dx, g - 30, 14, 30, col('#ffcf86')); rect(ctx, dx + 16, g - 30, 14, 30, col('#ffcf86'));
-    rect(ctx, dx + 13, g - 18, 1, 6, K.ink); rect(ctx, dx + 16, g - 18, 1, 6, K.ink);
-    // the walkway runs on in front of it
-    rect(ctx, x, g, w, H + 8 - g, K.soil);
-    rect(ctx, x, g, w, 1, K.slabHi); rect(ctx, x, g + 1, w, 5, K.slab);
-    rect(ctx, x, g + 6, w, 1, K.slabLo); rect(ctx, x, g + 7, w, 1, K.curb); rect(ctx, x, g + 8, w, 1, K.soil2);
-    for (let i = 0; i < w; i += 48) rect(ctx, x + i, g + 1, 1, 5, K.joint);
+    // keyboard deck on the walk
+    rect(ctx, x - 6, g - 9, w + 12, 9, K.ink);
+    rect(ctx, x - 5, g - 8, w + 10, 7, col('#9aa0ad'));
+    rect(ctx, x - 5, g - 8, w + 10, 1, col('#c9ced8'));
+    for (let k = 0; k < w; k += 6) rect(ctx, x + 2 + k, g - 6, 4, 2, col('#5d626d'));
+    rect(ctx, x + w / 2 - 14, g - 3, 28, 2, col('#7d818b'));
+    // the walk runs on in front of it
+    rect(ctx, x - 6, g, w + 12, H + 8 - g, K.soil);
+    rect(ctx, x - 6, g, w + 12, 1, K.slabHi); rect(ctx, x - 6, g + 1, w + 12, 5, K.slab);
+    rect(ctx, x - 6, g + 6, w + 12, 1, K.slabLo); rect(ctx, x - 6, g + 7, w + 12, 1, K.curb); rect(ctx, x - 6, g + 8, w + 12, 1, K.soil2);
   }
 });
 
@@ -598,13 +567,13 @@ function drawCap(ctx, cx, y, k, t, seed) {
   rows.forEach((w, i) => rect(ctx, cx - w / 2 - 1, y0 + i - 1, w + 2, 3, K.ink));
   rows.forEach((w, i) => rect(ctx, cx - w / 2, y0 + i, w, 1, i < 2 ? col('#3e4672') : col('#262b48')));
   if (!under) cap(y0 + 5);
-  // button and swinging gold tassel off the front corner
-  rect(ctx, cx - 1, y0 + 1, 2, 1, C('gold.3'));
+  // button and swinging red tassel off the front corner
+  rect(ctx, cx - 1, y0 + 1, 2, 1, C('red.3'));
   const sw = Math.round(Math.sin(t / 14 + seed) * 1.5);
   const tx = cx + Math.round(9 * s);
-  rect(ctx, cx, y0 + 1, Math.max(0, tx - cx), 1, C('gold.2'));
-  rect(ctx, tx + sw, y0 + 2, 1, 6, C('gold.2'));
-  rect(ctx, tx + sw - 1, y0 + 7, 3, 3, C('gold.3'));
+  rect(ctx, cx, y0 + 1, Math.max(0, tx - cx), 1, C('red.2'));
+  rect(ctx, tx + sw, y0 + 2, 1, 6, C('red.2'));
+  rect(ctx, tx + sw - 1, y0 + 7, 3, 3, C('red.3'));
 }
 
 registerSetpiece('dhsCaps', class {
@@ -682,18 +651,19 @@ registerSetpiece('dhsStage', class {
       const a = Math.PI * (i / 26);
       const bx = cx - Math.cos(a) * rx, by = ay - Math.sin(a) * ry;
       disc(ctx, bx, by, 4, 'ink.0');
-      disc(ctx, bx, by, 3, i % 2 ? 'gold.2' : 'teal.2');
-      rect(ctx, bx - 1, by - 2, 1, 1, i % 2 ? C('gold.3') : C('teal.3'));
+      const k = i % 3;
+      disc(ctx, bx, by, 3, k === 0 ? 'red.2' : k === 1 ? 'white.2' : 'indigo.2');
+      rect(ctx, bx - 1, by - 2, 1, 1, k === 0 ? C('red.3') : k === 1 ? col('#ffffff') : C('indigo.3'));
     }
     const tw = Math.ceil(textWidth(this.text, 9, 700)) + 20;
     const by = ay - ry - 4;                       // hung from the top of the arch
-    pill(ctx, cx - tw / 2, by, tw, lineHeight(9) + 8, C('indigo.1'), '#0b0d17', 3);
-    drawText(ctx, this.text, cx, by + 4, '#ffe08a', { align: 'center', size: 9, weight: 700 });
+    pill(ctx, cx - tw / 2, by, tw, lineHeight(9) + 8, K.can, '#0b0d17', 3);
+    drawText(ctx, this.text, cx, by + 4, '#fbf8f1', { align: 'center', size: 9, weight: 700 });
   }
   draw(ctx, cam, t) {
     const x = this.x - cam.x, top = this.top - cam.y, w = this.w;
     if (x > ctx.W || x + w < 0) return;
-    // stage floor lip and a pleated navy skirt with gold trim
+    // stage floor lip and a pleated navy skirt with red and white trim
     rect(ctx, x, top, w, 4, col('#c98a45')); rect(ctx, x, top, w, 1, col('#f4c98a'));
     rect(ctx, x, top + 4, w, H - top + 8, col('#232a5c'));
     for (let i = 4; i < w; i += 8) rect(ctx, x + i, top + 6, 2, H - top, col('#1a1f48'));
@@ -701,66 +671,97 @@ registerSetpiece('dhsStage', class {
       ctx.fillStyle = col('#2f3874');
       ctx.beginPath(); ctx.moveTo(x + i, top + 4); ctx.lineTo(x + i + 16, top + 4); ctx.lineTo(x + i + 8, top + 12); ctx.fill();
     }
-    rect(ctx, x, top + 4, w, 1, C('gold.2'));
+    rect(ctx, x, top + 4, w, 1, col('#fbf8f1')); rect(ctx, x, top + 5, w, 1, K.can);
     rect(ctx, x, top, 1, H - top + 8, K.ink);
     if (this.toss) for (const c of this.toss) if (c.wait < 0) drawCap(ctx, c.x - cam.x, c.y - cam.y, Math.cos(c.k), t, c.s);
   }
 });
 
-// ─── arena crowd: 700 spectators, the screen, the wave ───────────────
+// ─── the call: 700 webcam tiles, the results window, reactions ──────
 
 const SKINS = ['#5a321f', '#7c4729', '#a0653d', '#c0845a', '#e0b08a'].map(col);
 const SHIRTS = ['teal.2', 'gold.2', 'magenta.2', 'cyan.2', 'red.2', 'white.1', 'indigo.3', 'green.2', 'orange.2', 'teal.3', 'gold.3'].map(C);
+const TILEBG = ['#2a3366', '#323a6e', '#273058', '#3a3a5c', '#2b3f5c', '#3b3150'].map(col);
+const HEART = ['.x.x.', 'xxxxx', 'xxxxx', '.xxx.', '..x..'];
+const STAR = ['..x..', '.xxx.', 'xxxxx', '.x.x.', 'x...x'];
 
-registerSetpiece('dhsCrowd', class {
+registerSetpiece('dhsGallery', class {
   constructor(tx, ty, spec, level) {
     this.fact = level.room.facts.trophy[0];
     this.level = level;
+    const win = spec.window;                                // the results window, kept clear
     const r = rng(700);
-    this.seats = [];
-    for (let row = 0; row < 12 && this.seats.length < spec.n; row++) {
-      const y = 44 + row * 8;
-      for (const [x0, x1] of [[20, 188], [292, 460]]) {
-        for (let x = x0 + (row % 2) * 2, i = 0; x < x1 - 2; x += 4, i++) {
-          if (i % 14 === 13) continue;                     // aisles
-          this.seats.push({ x, y, skin: SKINS[Math.floor(r() * SKINS.length)], shirt: SHIRTS[Math.floor(r() * SHIRTS.length)], ph: Math.floor(r() * 64) });
-        }
+    this.tiles = [];
+    for (let y = spec.area[1]; y + 5 <= spec.area[3] && this.tiles.length < spec.n; y += 7) {
+      for (let x = spec.area[0]; x + 6 <= spec.area[2] && this.tiles.length < spec.n; x += 7) {
+        if (x + 6 > win[0] && x < win[2] && y + 5 > win[1] && y < win[3]) continue;
+        this.tiles.push({ x, y, skin: SKINS[Math.floor(r() * SKINS.length)], shirt: SHIRTS[Math.floor(r() * SHIRTS.length)], bg: TILEBG[Math.floor(r() * TILEBG.length)], ph: Math.floor(r() * 97) });
       }
     }
-    this.seats.length = Math.min(this.seats.length, spec.n);
+    this.win = win;
+    // prerender the still gallery once; per frame only the highlights move
+    const [c, g] = makeCanvas(480, 224);
+    for (const p of this.tiles) {
+      g.fillStyle = p.bg; g.fillRect(p.x, p.y, 6, 5);
+      g.fillStyle = p.skin; g.fillRect(p.x + 2, p.y + 1, 2, 2);
+      g.fillStyle = p.shirt; g.fillRect(p.x + 1, p.y + 3, 4, 2);
+    }
+    this.canvas = c;
     this.won = level.game.progress.hasFact(this.fact);
     this.waveT = this.won ? 999 : -1;
+    this.pops = [];
   }
   onFact(id) { if (id === this.fact) { this.won = true; this.waveT = 0; } }
-  update() { if (this.waveT >= 0) this.waveT++; }
+  update() {
+    if (this.waveT >= 0) this.waveT++;
+    if (this.level.game.reduced) return;
+    // reactions float up from the gallery once you've won
+    if (this.won && this.waveT < 600 && Math.random() < 0.25) {
+      const p = this.tiles[(Math.random() * this.tiles.length) | 0];
+      this.pops.push({ x: p.x, y: p.y, life: 60, k: Math.random() < 0.5 });
+    }
+    for (const p of this.pops) { p.y -= 0.5; p.life--; }
+    this.pops = this.pops.filter((p) => p.life > 0);
+  }
   back(ctx, cam, t) {
     const reduced = this.level.game.reduced;
     const ox = -cam.x, oy = -cam.y;
-    const front = this.waveT >= 0 && this.waveT < 360 ? (this.waveT * 3.2) % 520 - 20 : -999;
-    for (const s of this.seats) {
-      let lift = 0, arm = false;
-      if (!reduced) {
-        if (Math.abs(s.x - front) < 10) { lift = 2; arm = true; }
-        else arm = (((t >> 4) + s.ph) % (this.won ? 5 : 11)) === 0;
+    ctx.drawImage(this.canvas, ox, oy);
+    if (!reduced) {
+      // someone is always talking; after the win, applause sweeps the call
+      const front = this.waveT >= 0 && this.waveT < 360 ? (this.waveT * 3.2) % 520 - 20 : -999;
+      for (const p of this.tiles) {
+        const lit = Math.abs(p.x - front) < 8;
+        if (lit || ((t >> 4) + p.ph) % 97 === 0) {
+          ctx.fillStyle = lit ? C('gold.3') : C('green.3');
+          ctx.fillRect(p.x + ox, p.y + oy, 6, 1); ctx.fillRect(p.x + ox, p.y + oy + 4, 6, 1);
+        }
       }
-      const x = s.x + ox, y = s.y + oy - lift;
-      ctx.fillStyle = s.skin; ctx.fillRect(x, y, 2, 1);
-      ctx.fillStyle = s.shirt; ctx.fillRect(x, y + 1, 2, 2 + lift);
-      if (arm) { ctx.fillStyle = s.skin; ctx.fillRect(x + ((s.ph & 1) ? 1 : 0), y - 1, 1, 1); }
+      for (const p of this.pops) {
+        if (p.life < 10 && (p.life & 1)) continue;
+        const g = p.k ? HEART : STAR, c = p.k ? C('red.3') : C('gold.3');
+        ctx.fillStyle = c;
+        g.forEach((row, j) => { for (let i = 0; i < 5; i++) if (row[i] === 'x') ctx.fillRect(Math.round(p.x + ox + i), Math.round(p.y + oy + j - 6), 1, 1); });
+      }
     }
-    // the big screen
-    const sx = 200 + ox, sy = 22 + oy, sw = 80, sh = 40;
-    rect(ctx, sx + 38, oy + 16, 4, 6, col('#2a3366'));
+    // title bar and the results window
+    rect(ctx, 22 + ox, 28 + oy, 22, 8, C('red.2'));
+    drawText(ctx, 'Live', 33 + ox, 27 + oy, '#fbf8f1', { align: 'center', size: 6, weight: 700 });
+    drawText(ctx, 'EduLearn Hackathon · online', 52 + ox, 27 + oy, '#c9d3f0', { size: 6.5 });
+    const [wx0, wy0, wx1, wy1] = this.win;
+    const sx = wx0 + 2 + ox, sy = wy0 + 2 + oy, sw = wx1 - wx0 - 4, sh = wy1 - wy0 - 4;
     pill(ctx, sx - 2, sy - 2, sw + 4, sh + 4, '#2a3366', '#0b0d17', 3);
-    rect(ctx, sx, sy, sw, sh, col('#070914'));
+    rect(ctx, sx, sy, sw, 9, col('#1f2550'));
+    for (const [i, c] of [[0, 'red.2'], [1, 'gold.2'], [2, 'green.2']]) rect(ctx, sx + 3 + i * 5, sy + 3, 3, 3, C(c));
+    drawText(ctx, 'Results', sx + 20, sy, '#c9d3f0', { size: 6 });
+    rect(ctx, sx, sy + 9, sw, sh - 9, col('#070914'));
     if (!this.won) {
-      drawText(ctx, 'EduLearn', sx + sw / 2, sy + 5, '#ffd166', { align: 'center', size: 8.5, weight: 700 });
-      drawText(ctx, 'Hackathon', sx + sw / 2, sy + 16, '#ffd166', { align: 'center', size: 8.5, weight: 700 });
-      drawText(ctx, 'Final results', sx + sw / 2, sy + 29, '#6fd6c8', { align: 'center', size: 6.5 });
+      drawText(ctx, 'EduLearn Hackathon', sx + sw / 2, sy + 11, '#ffd166', { align: 'center', size: 7.5, weight: 700 });
+      drawText(ctx, 'Final results', sx + sw / 2, sy + 22, '#6fd6c8', { align: 'center', size: 6.5 });
     } else {
       const blink = reduced || ((t >> 4) & 1);
-      drawText(ctx, '1st place', sx + sw / 2, sy + 8, blink ? '#ffe08a' : '#f2b233', { align: 'center', size: 11, weight: 700 });
-      drawText(ctx, 'EduLearn Hackathon', sx + sw / 2, sy + 26, '#6fd6c8', { align: 'center', size: 6.5 });
+      drawText(ctx, '1st place', sx + sw / 2, sy + 10, blink ? '#ffe08a' : '#f2b233', { align: 'center', size: 10, weight: 700 });
+      drawText(ctx, 'EduLearn Hackathon', sx + sw / 2, sy + 24, '#6fd6c8', { align: 'center', size: 6 });
     }
   }
 });
@@ -815,7 +816,7 @@ registerSetpiece('dhsPodium', class {
       drawText(ctx, String(s.n), x + s.w / 2, y + Math.max(5, hgt / 2 - 8), num, { align: 'center', size: 13, weight: 700 });
     }
     // the trophy: hoisted and glowing once won
-    const lift = ease.outCubic(this.lift) * 22;
+    const lift = ease.outCubic(this.lift) * 8;            // raised, but clear of the results window
     const bob = this.won ? Math.round(Math.sin(t / 16) * 1.5) : 0;
     const x = Math.round(this.tx - cam.x), y = Math.round(this.ty - cam.y - lift + bob);
     if (this.won && ((t >> 3) & 1)) {
