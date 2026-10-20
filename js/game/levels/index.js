@@ -3,8 +3,9 @@
 
 import home from './home.js';
 import ornl from './ornl.js';
+import dhs from './dhs.js';
 
-export const LEVELS = { home, ornl };
+export const LEVELS = { home, ornl, dhs };
 
 // every fact id a level can hand out (signs + blocks), for the coverage report
 export function levelFacts(def) {
