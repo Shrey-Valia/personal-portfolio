@@ -3,7 +3,7 @@
 
 export const STEP = 1000 / 60;
 
-export function createLoop(update, render) {
+export function createLoop(update, render, onError) {
   let last = 0, acc = 0, raf = 0, running = false;
 
   function frame(now) {
@@ -12,12 +12,18 @@ export function createLoop(update, render) {
     last = now;
     acc += dt;
     let n = 0;
-    while (acc >= STEP && n++ < 5) {
-      update();
-      acc -= STEP;
+    try {
+      while (acc >= STEP && n++ < 5) {
+        update();
+        acc -= STEP;
+      }
+      if (n >= 5) acc = 0;            // fell far behind: drop the backlog
+      render(acc / STEP);
+    } catch (err) {
+      running = false;                // never leave a frozen canvas spinning
+      if (onError) onError(err); else throw err;
+      return;
     }
-    if (n >= 5) acc = 0;              // fell far behind: drop the backlog
-    render(acc / STEP);
     raf = requestAnimationFrame(frame);
   }
 

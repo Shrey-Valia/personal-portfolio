@@ -116,7 +116,7 @@ export class RunBar {
       const sx = (t * 3) % (this.w + 40) - 20;
       if (sx > 0 && sx < fw - 4) { ctx.fillStyle = C('white.2'); ctx.fillRect(x + sx, y + 1, 3, 1); }
     }
-    const label = this.fill >= 1 ? 'Run complete ✓' : this.fill > 0 ? 'Running… ' + Math.round(this.fill * 100) + '%' : 'Hit RUN ▶ to build';
+    const label = this.fill >= 1 ? 'Run complete ✓' : this.fill > 0 ? 'Running… ' + Math.round(this.fill * 100) + '%' : 'Hit the >_ block to run';
     drawText(ctx, label, x + this.w / 2, y - 14, this.fill >= 1 ? '#90eaa8' : '#ffd166', { align: 'center', shadow: '#0b0d17', size: 7.5 });
   }
 }
@@ -274,6 +274,7 @@ export class Panel {
   constructor(tx, ty, spec, level) {
     this.x = tx * TILE; this.y = ty * TILE; this.w = spec.w * TILE; this.h = spec.h * TILE;
     this.title = spec.title; this.kind = spec.kind; this.fact = spec.fact;
+    this.bars = spec.bars || null;            // inputs: one bar per slider, 0..1
     this.level = level;
   }
   back(ctx, cam, t) {
@@ -281,15 +282,16 @@ export class Panel {
     pill(ctx, x, y, this.w, this.h, '#0c1029', '#2c3566', 3);
     drawText(ctx, this.title, x + 5, y + 2, '#6fd6c8', { size: 6.5 });
     const solved = !this.fact || this.level.game.progress.hasFact(this.fact);
-    const rows = Math.floor((this.h - 16) / 9);
+    const rows = this.bars ? this.bars.length : Math.floor((this.h - 16) / 9);
+    const gap = Math.min(9, (this.h - 17) / rows);
     for (let i = 0; i < rows; i++) {
-      const ry = y + 15 + i * 9;
+      const ry = Math.round(y + 14 + i * gap);
       ctx.fillStyle = C('slate.1'); ctx.fillRect(x + 6, ry + 2, this.w - 12, 2);
       if (this.kind === 'target') {
         const k = 0.3 + ((i * 37) % 60) / 100;
         ctx.fillStyle = C('magenta.2'); ctx.fillRect(x + 6 + Math.round(k * (this.w - 14)), ry, 2, 6);
       } else if (solved) {
-        const k = 0.25 + ((i * 53) % 55) / 100;
+        const k = this.bars ? this.bars[i] : 0.25 + ((i * 53) % 55) / 100;
         ctx.fillStyle = C('gold.2'); ctx.fillRect(x + 6, ry + 1, Math.round(k * (this.w - 12)), 4);
       } else if ((t >> 4) & 1) {
         drawText(ctx, '?', x + this.w / 2, ry - 2, '#8a95b4', { align: 'center', size: 7 });
@@ -302,4 +304,7 @@ export const SETPIECES = { assembly: Assembly, runbar: RunBar, browsers: Browser
 
 // themes add their own: new Ctor(tx, ty, spec, level, key) with optional
 // update(level), back(ctx,cam,t), draw(ctx,cam,t), onFact(id, level)
-export function registerSetpiece(name, Ctor) { SETPIECES[name] = Ctor; }
+export function registerSetpiece(name, Ctor) {
+  if (SETPIECES[name]) console.error('[portfolio] set piece "' + name + '" is registered twice; rename one.');
+  SETPIECES[name] = Ctor;
+}

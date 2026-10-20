@@ -1,7 +1,7 @@
 // Shrey, the player character: controller, states and animation.
 
 import { TUNING as T } from './tuning.js';
-import { moveBody, touchesFlag, groundFlags } from '../engine/physics.js';
+import { moveBody, carryBody, touchesFlag, groundFlags } from '../engine/physics.js';
 import { HAZARD, CONVEY_L, CONVEY_R, ONEWAY } from '../engine/tilemap.js';
 import { approach, lerp } from '../engine/util.js';
 import { drawFrame } from '../art/sprite.js';
@@ -133,9 +133,13 @@ export class Hero {
   // movement shared by control and coasting (victory)
   physics(level) {
     const map = level.map;
-    if (this.ground) {                                      // ride moving platforms
-      this.x += this.ground.x - this.ground.prevX;
-      this.y += this.ground.y - this.ground.prevY;
+    if (this.ground) {                                      // ride moving platforms, but never into walls
+      const p = this.ground;
+      if (carryBody(this, map, p.x - p.prevX, p.y - p.prevY)) {
+        // squeezed against a ceiling: let the platform pass up through us
+        this.ground = null; this.grounded = false;
+        this.dropping = true; this.dropTimer = 10;
+      }
     }
     let push = 0;
     if (this.grounded) {

@@ -15,6 +15,7 @@ import { InfoBlock, Bit, Checkpoint, Goal, Sign, Duck, Port, Floater, FactToken 
 import { ENEMIES } from '../enemies.js';
 import { SETPIECES } from '../setpieces.js';
 import { levelFacts } from '../levels/index.js';
+import { validateLevel } from '../levels/validate.js';
 
 const TERRAIN_CHARS = new Set(['#', '=', '^', '<', '>', '.']);
 
@@ -34,6 +35,11 @@ export class LevelScene {
     this.deathsHere = 0;
     this.lastSafe = null;
     this.intro = 150;
+    if (FLAGS.debug) {
+      const problems = validateLevel(def, game.content);
+      problems.forEach((p) => console.error('[portfolio] level check:', p));
+      if (!problems.length) console.log('[portfolio] level check: ' + def.id + ' OK');
+    }
   }
 
   get W() { return this.game.W; }
@@ -54,7 +60,7 @@ export class LevelScene {
     const R = def.rooms[roomId];
     this.roomId = roomId;
     this.room = R;
-    this.state = this.roomStates[roomId] || (this.roomStates[roomId] = { used: new Set(), built: new Set(), bits: new Set() });
+    this.state = this.roomStates[roomId] || (this.roomStates[roomId] = { used: new Set(), built: new Set(), bits: new Set(), flags: new Set() });
 
     const map = new TileMap(R.map, KITS[R.kit || def.kit]);
     this.map = map;
@@ -87,7 +93,13 @@ export class LevelScene {
           case 'c':
             if (!this.state.bits.has(key)) { const b = new Bit(x * TILE, y * TILE); b.key = key; this.objects.push(b); }
             break;
-          case 'C': this.objects.push(new Checkpoint(x, y, hex7(hashes))); break;
+          case 'C': {
+            const cp = new Checkpoint(x, y, hex7(hashes));
+            cp.key = key;
+            cp.on = this.state.flags.has(key);       // flags stay raised after a trip through a port
+            this.objects.push(cp);
+            break;
+          }
           case 'G': this.objects.push(new Goal(x, y, def.goal || 'DONE')); break;
           case 'S': this.objects.push(new Sign(x, y, facts.S[n.S++], true)); break;
           case 'N': this.objects.push(new Duck(x, y, R.duck[n.N++])); break;
@@ -229,6 +241,7 @@ export class LevelScene {
   // a fact discovered in-game: token, sound, and its card
   discover(id, x, y, { immediate = false } = {}) {
     const g = this.game;
+    if (!g.content.get(id)) { console.error('[portfolio] unknown fact id', id, 'in', this.def.id); return false; }
     const isNew = g.progress.addFact(id);
     if (isNew) {
       for (const sp of this.setpieces) if (sp.onFact) sp.onFact(id, this);
@@ -319,6 +332,9 @@ export class LevelScene {
   }
 
   checkpointReached(cp) {
+    if (cp.key) this.state.flags.add(cp.key);
+    const cur = this.checkpoint;
+    if (cur && cur.room === this.roomId && cp.x < cur.x) return;     // never move the respawn backwards
     this.checkpoint = { room: this.roomId, x: cp.x, y: cp.y + cp.h - 20 };
     this.deathsHere = 0;
     this.hero.coffee = true;
@@ -414,7 +430,7 @@ export class LevelScene {
       title: this.def.title,
       facts: found, factsTotal: this.factIds.length,
       bits: this.stats.bits, bugs: this.stats.bugs,
-      time: Math.round((performance.now() - this.stats.start) / 1000),
+      time: Math.round(this.t / 60),             // play time only: reading cards doesn't count
       quiet: !this.def.goal,
     });
   }
@@ -461,7 +477,7 @@ export class LevelScene {
     if (this.intro > 0 && this.roomId === this.def.start) {
       const k = this.intro;
       if (k < 20 && (k & 2)) return;
-      const y = 60;
+      const y = 112;                              // below the level's own signage
       ctx.fillStyle = 'rgba(5,6,12,0.72)';
       ctx.fillRect(0, y - 10, W, 50);
       drawText(ctx, this.def.title, W / 2, y - 2, '#ffd166', { align: 'center', shadow: '#0b0d17', size: 18, weight: 700 });

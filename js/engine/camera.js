@@ -24,8 +24,14 @@ export function createCamera() {
     cam.prevX = cam.x; cam.prevY = cam.y;
     if (cam.mode === 'fixed') {
       // one-screen rooms: centre the room, follow only if it's wider than the view
-      cam.x = room.w <= W ? Math.round((room.w - W) / 2)
-        : clamp(hero.x + hero.w / 2 - W / 2, 0, room.w - W);
+      if (room.w <= W) cam.x = Math.round((room.w - W) / 2);
+      else {
+        // centred on the room; nudged only to keep the hero 40 px from an edge
+        let x = (room.w - W) / 2;
+        if (hero.x - x < 40) x = hero.x - 40;
+        if (hero.x + hero.w - x > W - 40) x = hero.x + hero.w - W + 40;
+        cam.x = Math.round(clamp(x, 0, room.w - W));
+      }
       cam.y = room.h <= H ? Math.round((room.h - H) / 2) : room.h - H;
     } else {
       // lookahead eases toward the facing direction while moving

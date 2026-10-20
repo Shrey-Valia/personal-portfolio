@@ -19,6 +19,7 @@ export const LEGEND = {
   n: 'shoe.1', N: 'shoe.0',
 };
 
+const RIM = 'slate.3';
 const BLANK = '..............';
 
 // rounded, textured top; the sides fade from dark to skin around the ear
@@ -150,7 +151,8 @@ const CROUCH = [
 function build(rowsArr) {
   if (rowsArr.length !== 22) throw new Error('hero frame must be 22 rows, got ' + rowsArr.length);
   // hitbox is 10×20: its origin sits 3 px right and 3 px down from the canvas corner
-  return frame(outline(compileMap(rowsArr.join('\n'), LEGEND, 'hero'), 'ink.0'), 3, 3);
+  // ink outline, then a soft light rim: black shirt and hair stay readable on night scenes
+  return frame(outline(outline(compileMap(rowsArr.join('\n'), LEGEND, 'hero'), 'ink.0'), RIM), 4, 4);
 }
 
 export function buildHero() {

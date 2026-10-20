@@ -31,9 +31,12 @@ export function createInput({ onMeta, onDevice }) {
   const held = Object.create(null);
   const pressed = Object.create(null);
   const released = Object.create(null);
+  const count = Object.create(null);       // sources holding each action (keys + touch)
+  const keysDown = new Set();
 
-  function down(a) { if (!raw[a]) latch[a] = true; raw[a] = true; }
-  function up(a) { raw[a] = false; }
+  // an action stays held while any of its keys (or touch pads) is down
+  function down(a) { count[a] = (count[a] || 0) + 1; if (!raw[a]) latch[a] = true; raw[a] = true; }
+  function up(a) { count[a] = Math.max(0, (count[a] || 0) - 1); raw[a] = count[a] > 0; }
 
   window.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -50,19 +53,21 @@ export function createInput({ onMeta, onDevice }) {
     const onControl = t instanceof HTMLElement && t.matches('button, a, [role="button"]');
     if (onControl && (e.code === 'Space' || e.code === 'Enter')) return;
     e.preventDefault();
-    if (e.repeat) return;
+    if (e.repeat || keysDown.has(e.code)) return;
+    keysDown.add(e.code);
     a.forEach(down);
   });
 
   window.addEventListener('keyup', (e) => {
     const a = KEYMAP[e.code];
-    if (a) a.forEach(up);
+    if (a && keysDown.delete(e.code)) a.forEach(up);
   });
 
   window.addEventListener('blur', clear);
 
   function clear() {
-    for (const a of ACTIONS) { raw[a] = false; latch[a] = false; }
+    keysDown.clear();
+    for (const a of ACTIONS) { raw[a] = false; latch[a] = false; count[a] = 0; }
   }
 
   return {
@@ -83,7 +88,10 @@ export function createInput({ onMeta, onDevice }) {
 
     // ignore an action until it has been let go
     lock(a) { locks[a] = true; latch[a] = false; },
-    lockAll() { for (const a of ACTIONS) this.lock(a); },
+    // after a dialog closes: the key that closed it must not also jump or
+    // interact, but movement resumes from whatever is still held
+    lockPresses() { for (const a of ['jump', 'confirm', 'interact']) this.lock(a); },
+    lockAll() { this.lockPresses(); },
   };
 }
 

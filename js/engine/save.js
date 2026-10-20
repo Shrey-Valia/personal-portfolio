@@ -15,14 +15,22 @@ export function createSave(fresh) {
     } catch (e) { data = null; }
   }
 
-  let timer = 0;
+  let timer = 0, dirty = false;
+  function flush() {
+    clearTimeout(timer);
+    if (!dirty || fresh) return;
+    dirty = false;
+    try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* memory only */ }
+  }
   function write() {
     if (fresh) return;                    // a ?fresh=1 run never touches the real save
+    dirty = true;
     clearTimeout(timer);
-    timer = setTimeout(() => {
-      try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* memory only */ }
-    }, 400);
+    timer = setTimeout(flush, 400);
   }
+  // closing the tab right after a level clear must not lose it
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
 
   return {
     load() { return data; },

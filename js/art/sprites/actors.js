@@ -40,7 +40,11 @@ const SKINS = {
 const EXTRA = [];
 
 // themes add enemy palette swaps (same bug art) or whole new sprite sets
-export function registerSkin(name, legend) { SKINS[name] = legend; }
+export function registerSkin(name, legend) {
+  if (SKINS[name]) console.error('[portfolio] skin "' + name + '" is registered twice; rename one.');
+  SKINS[name] = legend;
+}
+export const hasSkin = (name) => !!SKINS[name];
 export function registerActorSprites(build) { EXTRA.push(build); }   // build() → { key: frames[] }
 
 export function buildActors() {

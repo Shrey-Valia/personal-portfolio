@@ -75,13 +75,10 @@ automatically.
 
 ## Before you publish
 
-1. **Confirm the LinkedIn URL.** The site links `linkedin.com/in/shrey-valia`
-   (from the résumé). You've also used `linkedin.com/in/shrey-valia-7a0041267`.
-   Open the short one and make sure it resolves.
-2. **"Open to summer 2027 internships"** is inferred from your class year,
+1. **"Open to summer 2027 internships"** is inferred from your class year,
    not stated on the résumé. It's marked `data-flag="inference"` in
    `index.html`. Change or delete it.
-3. Your phone number is deliberately not on the site. Don't host the résumé
+2. Your phone number is deliberately not on the site. Don't host the résumé
    PDF here unless you remove it from that file first.
 
 ## Deploy

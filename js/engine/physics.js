@@ -99,6 +99,23 @@ function moveY(b, map, platforms, dy, res, opts) {
   }
 }
 
+// move a body by a platform's delta without passing through solids.
+// Returns true if a ceiling stopped it (the platform slides out from under).
+export function carryBody(b, map, dx, dy) {
+  if (dx) { const vx = b.vx; moveX(b, map, dx, { wall: 0 }); b.vx = vx; }
+  if (dy < 0) {
+    b.y += dy;
+    const row = Math.floor(b.y / T);
+    const left = Math.floor(b.x / T), right = Math.floor((b.x + b.w - EPS) / T);
+    for (let c = left; c <= right; c++) {
+      if (solidAt(map, c, row)) { b.y = (row + 1) * T; return true; }
+    }
+  } else if (dy > 0) {
+    b.y += dy;
+  }
+  return false;
+}
+
 // is any tile under the (inset) box carrying this flag?
 export function touchesFlag(b, map, flag, inset = 2) {
   const l = Math.floor((b.x + inset) / T), r = Math.floor((b.x + b.w - inset - EPS) / T);
