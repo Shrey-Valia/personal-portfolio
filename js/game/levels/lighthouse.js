@@ -60,10 +60,10 @@ const CONTACTS = [
 ];
 
 const marks = {
-  1: { type: 'harbor', door: 12 },
-  5: { type: 'beacon', plaque: 'c-open' },
+  1: { type: 'harborTower', door: 12 },
+  5: { type: 'harborBeacon', plaque: 'c-open' },
 };
-for (const c of CONTACTS) marks[c.mark] = { type: 'signal', fact: c.fact, glyph: c.glyph, color: c.color };
+for (const c of CONTACTS) marks[c.mark] = { type: 'harborSignal', fact: c.fact, glyph: c.glyph, color: c.color };
 
 export default {
   id: 'lighthouse',

@@ -11,10 +11,10 @@ import { registerKit, hline, vline, px } from '../art/tiles.js';
 import { registerBackground, strip, blitStrip } from '../art/backgrounds.js';
 import { registerSetpiece } from '../game/setpieces.js';
 import { registerSong, steps } from '../engine/audio.js';
-import { InfoBlock, Sign, Floater } from '../game/objects.js';
+import { InfoBlock, Sign } from '../game/objects.js';
 import { drawText, textWidth, lineHeight } from '../art/font.js';
 import { disc, pill, stripedSky, noise1 } from '../art/draw.js';
-import { makeCanvas, rng, hash2, clamp, lerp, overlaps } from '../engine/util.js';
+import { makeCanvas, rng, hash2, lerp, overlaps } from '../engine/util.js';
 
 const INK = col('ink.0');
 // tower layout, read from the map by the harbor mark before tiles prerender
@@ -372,11 +372,7 @@ class Signal {
     const s = this.path.segs[this.path.segs.length - 1];
     return [s.bx, s.by];
   }
-  onFact(id, level) {
-    if (id !== this.fact) return;
-    this.send = 0;
-    level.floaters.push(new Floater(this.postX, this.armY - 22, this.label + ' linked', '#ffe08a', 70));
-  }
+  onFact(id) { if (id === this.fact) this.send = 0; }
   update() { if (this.send >= 0) { this.send += 6; if (this.send > this.path.len) this.send = -1; } }
 
   back(ctx, cam, t) {
@@ -454,7 +450,8 @@ class Beacon {
     if (!this.lit && h.state === 'normal' && overlaps(h, this.plaque) && level.game.progress.hasFact(this.fact)) this.light(level);
     if (this.lit) {
       this.t++;
-      this.angle += level.game.reduced ? 0.02 : 0.035;
+      if (level.game.reduced) this.angle = 0.7;          // reduced motion: a steady beam, no sweep
+      else this.angle += 0.035;
       if (this.t === 150) this.finish(level);
     }
   }
@@ -463,7 +460,7 @@ class Beacon {
     const g = level.game;
     this.lit = true;
     this.t = 0;
-    this.rainbow = g.progress.facts.size >= g.content.total;
+    this.rainbow = factsFound(g) >= g.content.total;      // every fact on the island: a rainbow beam
     const h = level.hero;
     h.setState('victory');
     h.vx = 0;
@@ -534,13 +531,16 @@ class Beacon {
         const dx = Math.cos(a), toward = Math.sin(a);
         const len = 420 * Math.abs(dx);
         if (len < 8) continue;
-        const hue = this.rainbow ? `hsla(${(t * 2 + (a > this.angle ? 180 : 0)) % 360},90%,70%,` : 'rgba(255,236,170,';
-        const k = (0.22 + 0.18 * Math.max(0, toward)) * fade;
+        const hue = this.rainbow ? `hsla(${(t * 2 + (a > this.angle ? 180 : 0)) % 360},90%,70%,` : 'rgba(255,214,120,';
+        const k = (0.34 + 0.26 * Math.max(0, toward)) * fade;
         const grd = ctx.createLinearGradient(cx, ly, cx + dx * len, ly);
         grd.addColorStop(0, hue + k + ')'); grd.addColorStop(1, hue + '0)');
         ctx.fillStyle = grd;
         ctx.beginPath(); ctx.moveTo(cx, ly - 4); ctx.lineTo(cx + dx * len, ly - 34); ctx.lineTo(cx + dx * len, ly + 30); ctx.lineTo(cx, ly + 4); ctx.fill();
       }
+      const halo = ctx.createRadialGradient(cx, ly, 2, cx, ly, 70);
+      halo.addColorStop(0, `rgba(255,214,120,${0.35 * fade})`); halo.addColorStop(1, 'rgba(255,214,120,0)');
+      ctx.fillStyle = halo; ctx.fillRect(cx - 70, ly - 70, 140, 140);
       const flash = Math.max(0, Math.sin(this.angle)) ** 8;
       ctx.fillStyle = `rgba(255,240,200,${(0.25 + flash * 0.5) * fade})`;
       ctx.beginPath(); ctx.arc(cx, ly, 10 + flash * 14, 0, Math.PI * 2); ctx.fill();
@@ -562,6 +562,7 @@ class Beacon {
 
 // ─── the end screen ─────────────────────────────────────────────────
 
+const factsFound = (game) => [...game.progress.facts].filter((id) => game.content.get(id)).length;
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let finale = null;
 
@@ -620,12 +621,13 @@ function openFinale(game, level) {
     `<div class="finale__pair">${[li, gh].filter(Boolean).map((l) => ext(l, false)).join('')}</div>`;
   d.querySelector('#finale-sub').textContent = 'The quickest ways to reach Shrey:';
 
+  const found = factsFound(game);
   const skills = C.skills.filter((s) => P.hasSkill(s.name)).length;
-  const secs = Math.round(performance.now() / 1000);
-  const rows = [['Facts', `${P.facts.size}/${C.total}`], ['Skills', `${skills}/${C.skills.length}`],
-    ['Bugs fixed', String(P.stats.bugs || 0)], ['Time', `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`]];
+  const secs = Math.round(performance.now() / 1000);          // since the page opened
+  const rows = [['Facts', `${found}/${C.total}`], ['Skills', `${skills}/${C.skills.length}`],
+    ['Bugs fixed', String(P.stats.bugs || 0)], ['This visit', `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`]];
   d.querySelector('#finale-stats').innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
-  const left = C.total - P.facts.size;
+  const left = C.total - found;
   d.querySelector('#finale-note').textContent = left > 0
     ? `${left} fact${left > 1 ? 's' : ''} still out on the island, or all of them in the résumé.`
     : 'Every fact found. Thanks for reading all of it.';
@@ -663,9 +665,9 @@ function openFinale(game, level) {
   if (first) first.focus();
 }
 
-registerSetpiece('harbor', Harbor);
-registerSetpiece('signal', Signal);
-registerSetpiece('beacon', Beacon);
+registerSetpiece('harborTower', Harbor);
+registerSetpiece('harborSignal', Signal);
+registerSetpiece('harborBeacon', Beacon);
 
 // ─── music: a slow tide in A minor ──────────────────────────────────
 

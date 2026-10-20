@@ -401,11 +401,12 @@ class SkillChip {
     this.R = RAMP[look];
     this.t = 0; this.alive = true;
     this.from = null; this.to = null;
+    this.still = level.game.reduced;      // reduced motion: pop and fade, no flight
   }
   update() {
     this.t++;
     const lv = this.level;
-    if (this.fly && this.t === 46) {
+    if (this.fly && !this.still && this.t === 46) {
       this.from = { x: this.x - lv.camera.x, y: this.y - 26 - lv.camera.y };
       const el = document.getElementById('hud-skills');
       const r = el && el.getBoundingClientRect();
@@ -431,7 +432,7 @@ class SkillChip {
         return;
       }
     } else {
-      if (!this.fly && t > 50 && (t & 2)) return;
+      if ((!this.fly || this.still) && t > 50 && (t & 2)) return;
       const k = ease.outBack(clamp(t / 16, 0, 1));
       x = this.x - cam.x; y = this.y - cam.y - 26 * k;
     }
@@ -501,7 +502,7 @@ class Tier {
     });
     this.maxT = 0;
     const D = DECOR[spec.look];
-    this.decor = D ? new D(this, level) : null;
+    this.decor = D && this.bricks.length ? new D(this, level) : null;
   }
 
   get count() { let n = 0; for (const b of this.bricks) if (b.used) n++; return n; }
@@ -707,25 +708,30 @@ class WebDecor {
     const bs = tier.bricks;
     const x0 = Math.min(...bs.map((b) => b.x)), x1 = Math.max(...bs.map((b) => b.x)) + 16;
     const by = bs.length ? bs[0].y : tier.floorY - 64;
-    this.client = { x: x0 - 30, y: by - 64, w: 28, h: 22 };
-    this.server = { x: x1 + 4, y: by - 68, w: 20, h: 30 };
-    this.wa = { x: this.client.x + this.client.w, y: this.client.y + this.client.h - 3 };
-    this.wb = { x: this.server.x, y: this.server.y + this.server.h - 7 };
+    // the client and the server sit level with the bricks, so the whole
+    // exchange stays in view from the tier floor
+    this.client = { x: x0 - 30, y: by - 3, w: 24, h: 18 };
+    this.server = { x: x1 + 6, y: by - 7, w: 18, h: 24 };
+    this.wireY0 = by - 12;
+    this.wa = { x: this.client.x + this.client.w - 4, y: this.wireY0 };
+    this.wb = { x: this.server.x + 4, y: this.wireY0 };
     this.cords = bs.map((b) => ({ b, x: b.x + 8 }));
-    this.y0 = by - 100; this.y1 = by + 16;
+    this.y0 = by - 30; this.y1 = by + 24;
   }
   wireY(x) {
     const { wa, wb } = this;
     const u = (x - wa.x) / (wb.x - wa.x);
-    return lerp(wa.y, wb.y, u) + 18 * (1 - (2 * u - 1) * (2 * u - 1));
+    return wa.y + 3 * (1 - (2 * u - 1) * (2 * u - 1));
   }
   back(ctx, cam, t) {
     if (!onScreen(this.y0, this.y1, cam)) return;
     const tier = this.tier, n = tier.count, maxed = tier.maxed;
     const ox = -cam.x, oy = -cam.y;
-    // hanging ropes for the two boxes
-    ctx.fillStyle = BARK.lo;
-    for (const b of [this.client, this.server]) { ctx.fillRect(b.x + 4 + ox, b.y - 24 + oy, 1, 24); ctx.fillRect(b.x + b.w - 5 + ox, b.y - 24 + oy, 1, 24); }
+    // masts up from each box to the wire
+    for (const [b, x] of [[this.client, this.wa.x], [this.server, this.wb.x]]) {
+      ctx.fillStyle = INK; ctx.fillRect(x - 1 + ox, this.wireY0 - 1 + oy, 3, b.y - this.wireY0 + 1);
+      ctx.fillStyle = col('steel.3'); ctx.fillRect(x + ox, this.wireY0 + oy, 1, b.y - this.wireY0);
+    }
     // the wire and the cords holding each brick
     for (let x = this.wa.x; x <= this.wb.x; x++) {
       const y = Math.round(this.wireY(x) + oy);
@@ -749,23 +755,26 @@ class WebDecor {
         ctx.fillStyle = col(c); ctx.fillRect(Math.round(x + ox) - 1, Math.round(y + oy) - 1, 3, 2);
       }
     }
-    // the browser window
+    // the browser window: its page fills in as skills are collected
     const c = this.client, cx = c.x + ox, cy = c.y + oy;
     ctx.fillStyle = INK; ctx.fillRect(cx - 1, cy - 1, c.w + 2, c.h + 2);
     ctx.fillStyle = '#0f1430'; ctx.fillRect(cx, cy, c.w, c.h);
     ctx.fillStyle = col('indigo.2'); ctx.fillRect(cx, cy, c.w, 5);
     [['red.2', 0], ['gold.2', 4], ['green.2', 8]].forEach(([cc, dx]) => { ctx.fillStyle = col(cc); ctx.fillRect(cx + 2 + dx, cy + 1, 2, 2); });
-    const rows = Math.min(4, 1 + Math.floor((n / Math.max(1, tier.bricks.length)) * 4));
-    for (let i = 0; i < rows; i++) { ctx.fillStyle = col(i === 0 ? 'green.3' : 'slate.3'); ctx.fillRect(cx + 3, cy + 8 + i * 3, c.w - 6 - (i % 2) * 8, 1); }
-    // the server
+    const rows = Math.min(3, Math.ceil((n / Math.max(1, tier.bricks.length)) * 3));
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i < rows ? col(i === 0 ? 'green.3' : 'slate.3') : col('slate.1');
+      ctx.fillRect(cx + 3, cy + 8 + i * 3, c.w - 6 - (i % 2) * 7, 1);
+    }
+    // the server: a light per drive, busier as skills come in
     const s = this.server, sx = s.x + ox, sy = s.y + oy;
     ctx.fillStyle = INK; ctx.fillRect(sx - 1, sy - 1, s.w + 2, s.h + 2);
     ctx.fillStyle = col('steel.2'); ctx.fillRect(sx, sy, s.w, s.h);
-    for (let r = 0; r < 4; r++) {
+    for (let r = 0; r < 3; r++) {
       ctx.fillStyle = col('steel.1'); ctx.fillRect(sx + 2, sy + 3 + r * 7, s.w - 4, 5);
-      const on = maxed || ((t >> 3) + r * 5) % 7 < 3 + Math.min(3, n);
+      const on = maxed || ((t >> 3) + r * 5) % 7 < 2 + Math.min(4, n);
       ctx.fillStyle = on ? col('green.3') : col('slate.1'); ctx.fillRect(sx + s.w - 6, sy + 5 + r * 7, 2, 1);
-      ctx.fillStyle = col('steel.3'); ctx.fillRect(sx + 4, sy + 5 + r * 7, 6, 1);
+      ctx.fillStyle = col('steel.3'); ctx.fillRect(sx + 4, sy + 5 + r * 7, 5, 1);
     }
   }
 }
@@ -816,8 +825,8 @@ class CrownDecor {
 
 const DECOR = { roots: RootsDecor, data: DataDecor, neural: NeuralDecor, web: WebDecor, crown: CrownDecor };
 
-registerSetpiece('tree', TreeArt);
-registerSetpiece('tier', Tier);
+registerSetpiece('treeArt', TreeArt);
+registerSetpiece('treeTier', Tier);
 
 // ─── music: a bright climb in G ──────────────────────────────────────
 
