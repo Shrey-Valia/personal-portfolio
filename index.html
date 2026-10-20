@@ -2,261 +2,338 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shrey Valia — Machine learning research</title>
-<meta name="description" content="Shrey Valia builds physics-informed and graph neural networks that predict how molecules organize themselves. Machine learning research at Oak Ridge National Laboratory; CS + CE at Northeastern University.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shrey Valia · CS + CE @ Northeastern · ML research · Playable portfolio</title>
+<meta name="description" content="Shrey Valia builds physics-informed and graph neural networks and AI tools. Play through his résumé as a 16-bit platformer, or read it as text.">
 <meta name="author" content="Shrey Valia">
-<meta name="theme-color" content="#05070f">
-
+<meta name="theme-color" content="#0b0d17">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%232c3570'/%3E%3Crect x='1' y='1' width='14' height='14' fill='%230f1430'/%3E%3Cpath d='M4 5h1v1h1v1h1v1H6v1H5v1H4V9h1V8h1V7H5V6H4z M8 10h4v1H8z' fill='%236fd6c8'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Shrey Valia — Machine learning research">
-<meta property="og:description" content="Physics-informed and graph neural networks for polymer growth and molecular self-assembly.">
+<meta property="og:title" content="Shrey Valia · Playable portfolio">
+<meta property="og:description" content="A 16-bit platformer you play to learn about Shrey Valia: ML research at Oak Ridge National Laboratory, AI projects, hackathon wins.">
+
+<!-- Boot guard. The page is a plain résumé until the game proves it can run:
+     `js` is added only where ES modules work and we're served over http(s);
+     if the game hasn't reported ready in 8 s, the résumé comes back. -->
+<script>
+  (function () {
+    var root = document.documentElement;
+    if (location.protocol === 'file:') { root.classList.add('file-proto'); return; }
+    if (!('noModule' in HTMLScriptElement.prototype)) return;
+    root.classList.add('js');
+    setTimeout(function () {
+      if (!root.classList.contains('game-ready')) root.classList.remove('js');
+    }, 8000);
+  })();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/resume.css">
+<link rel="stylesheet" href="css/game.css">
 
-<!-- motion is opt-in: without JS every section stays visible -->
-<script>document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Shrey Valia",
+  "email": "mailto:valia.s@northeastern.edu",
+  "address": { "@type": "PostalAddress", "addressLocality": "Dublin", "addressRegion": "CA" },
+  "alumniOf": [{ "@type": "CollegeOrUniversity", "name": "Northeastern University" }],
+  "sameAs": ["https://www.linkedin.com/in/shrey-valia", "https://github.com/Shrey-Valia"]
+}
+</script>
 </head>
 <body>
 
-<a class="skip" href="#experience">Skip to content</a>
+<a class="skip" id="skip" href="#resume">Skip to text résumé</a>
 
-<!-- one fixed canvas; the figure it draws matches whatever section you're in -->
-<div class="field" aria-hidden="true">
-  <canvas id="sim"></canvas>
-</div>
-<div class="vignette" aria-hidden="true"></div>
+<noscript>
+  <p class="banner">This portfolio is also a playable game. Turn on JavaScript to play; the full résumé is below.</p>
+</noscript>
+<p class="banner banner--file">To play the game, serve this folder (<code>python3 -m http.server 4173</code>) and open localhost:4173. The full résumé is below.</p>
 
-<figure class="readout" id="readout">
-  <figcaption>
-    <span class="readout__id">Fig. 1</span>
-    <span class="readout__name">Branched polymer chain, self-assembling</span>
-  </figcaption>
-</figure>
+<!-- ═══ GAME SHELL (hidden unless html.js) ═══════════════════════════════ -->
+<div class="game" id="game">
+  <div class="stage" id="stage" tabindex="-1">
+    <div class="viewport" id="viewport">
+      <canvas id="screen" aria-hidden="true"></canvas>
 
-<header class="topbar">
-  <a class="topbar__mark" href="#top">SV</a>
-  <a class="topbar__link" href="#contact">Contact</a>
-</header>
+      <div class="hud" id="hud" hidden>
+        <div class="hud__left">
+          <span class="hud__item hud__lives" title="Lives"><i class="ico ico--head" aria-hidden="true"></i><span class="sr-only">Lives </span>×<b id="hud-lives">5</b></span>
+          <span class="hud__item hud__coffee" id="hud-coffee" title="Coffee shield"><i class="ico ico--coffee" aria-hidden="true"></i><span class="sr-only">Coffee shield</span></span>
+          <span class="hud__item" title="Bits"><i class="ico ico--bit" aria-hidden="true"></i><span class="sr-only">Bits </span><b id="hud-bits">000</b></span>
+          <span class="hud__item hud__facts" title="Facts discovered"><span class="hud__label">Facts</span> <b id="hud-facts">0/34</b></span>
+          <span class="hud__item hud__node" id="hud-node"></span>
+        </div>
+        <div class="hud__right">
+          <button class="hud__btn hud__btn--resume" type="button" data-action="resume" aria-keyshortcuts="R"><span class="hud__btn-label">Résumé</span><kbd>R</kbd></button>
+          <button class="hud__btn" type="button" data-action="map" aria-keyshortcuts="M"><span class="hud__btn-label">Map</span><kbd>M</kbd></button>
+          <button class="hud__btn" type="button" data-action="mute" aria-keyshortcuts="N" aria-pressed="false" id="hud-mute"><span class="hud__btn-label" id="hud-mute-label">Sound off</span><kbd>N</kbd></button>
+          <button class="hud__btn" type="button" data-action="pause" aria-keyshortcuts="P"><span class="hud__btn-label">Pause</span><kbd>P</kbd></button>
+        </div>
+      </div>
 
-<nav class="rail" aria-label="Sections">
-  <ul>
-    <li><a href="#top"        data-rail="top"><span>Top</span></a></li>
-    <li><a href="#experience" data-rail="experience"><span>Experience</span></a></li>
-    <li><a href="#work"       data-rail="work"><span>Work</span></a></li>
-    <li><a href="#record"     data-rail="record"><span>Record</span></a></li>
-    <li><a href="#toolkit"    data-rail="toolkit"><span>Toolkit</span></a></li>
-    <li><a href="#contact"    data-rail="contact"><span>Contact</span></a></li>
-  </ul>
-</nav>
+      <p class="node-banner" id="node-banner" aria-live="polite"></p>
+      <div class="toasts" id="toasts" role="status"></div>
 
-<main id="top">
-
-  <!-- ─── HERO ─────────────────────────────────────────────── -->
-  <section class="hero" data-figure="chain">
-    <p class="hero__eyebrow load" data-load="1">
-      Northeastern CS&nbsp;+&nbsp;CE&nbsp;’29 <i>/</i> Oak Ridge National Laboratory
-    </p>
-
-    <h1 class="hero__name" data-load="2">Shrey Valia</h1>
-
-    <p class="hero__thesis load" data-load="3">
-      I build physics-informed and graph neural networks that
-      predict how molecules organize themselves.
-    </p>
-
-    <p class="hero__fig load" data-load="4">
-      The figure behind this page is live, and it changes to match whatever
-      you’re reading — a polymer chain for the molecular work, an equity curve
-      for the trading agent, an agent graph for the video editor.
-    </p>
-
-    <p class="hero__cue load" data-load="4"><span>Scroll</span></p>
-  </section>
-
-  <!-- ─── EXPERIENCE ───────────────────────────────────────── -->
-  <section class="band" id="experience" data-accent="teal">
-    <header class="head">
-      <p class="label" data-anim="rise">Experience</p>
-      <h2 class="head__title" data-anim="head">Two research roles</h2>
-    </header>
-
-    <div class="stack">
-      <article class="entry" data-figure="chain" data-anim="rise" style="--i:0">
-        <p class="marker">2026.01 <i>→</i> 2026.05</p>
-        <h3 class="entry__org">Oak Ridge National Laboratory</h3>
-        <p class="entry__role">Machine Learning Research Assistant <span>· Remote</span></p>
-        <ul class="bullets">
-          <li>Engineered physics-informed and graph neural networks in PyTorch and TensorFlow to model polymer growth and molecular self-assembly, working with Dr.&nbsp;Rajeev Kumar.</li>
-          <li>Built the front end of an internal web tool deployed on Vercel that let scientists configure, train, and run the group’s models from the browser instead of editing scripts by hand.</li>
-          <li>Developed an inverse prediction model with the team to estimate polymer design inputs from target properties.</li>
-          <li>Automated preprocessing pipelines in pandas and NumPy and parallelized GPU training, cutting experiment turnaround.</li>
-        </ul>
-      </article>
-
-      <article class="entry" data-figure="diffusion" data-anim="rise" style="--i:1">
-        <p class="marker">2026.01 <i>→</i> 2026.05</p>
-        <h3 class="entry__org">Handshake&nbsp;AI</h3>
-        <p class="entry__role">AI Training Specialist, Handshake AI Fellow <span>· Part-time, remote</span></p>
-        <ul class="bullets">
-          <li>Labeled and audited training data for generative AI models against strict quality and safety rubrics.</li>
-          <li>Evaluated text-to-image model outputs and fine-tuned diffusion models on the resulting annotations.</li>
-          <li>Diagnosed recurring model failure cases and delivered corrective feedback to improve prompt adherence.</li>
-        </ul>
-      </article>
-    </div>
-  </section>
-
-  <!-- ─── WORK ─────────────────────────────────────────────── -->
-  <section class="band" id="work" data-accent="green">
-    <header class="head">
-      <p class="label" data-anim="rise">Work</p>
-      <h2 class="head__title" data-anim="head">Selected projects</h2>
-    </header>
-
-    <div class="stack">
-      <article class="entry" data-figure="agents" data-anim="rise">
-        <p class="marker">2026.01 <i>→</i> 2026.08</p>
-        <h3 class="entry__org">Vincio — AI Video Editor</h3>
-        <p class="entry__stack">Multi-agent AI · LLM orchestration · Full-stack web app</p>
-        <ul class="bullets">
-          <li>Built an AI video editor that turns raw clips and a written vision into a finished cut using coordinated agents.</li>
-          <li>Implemented agent capabilities for B-roll selection, motion graphics, transitions, and on-screen text.</li>
-          <li>Developed the front end and the agent layer, and contributed to database management, authentication, and agent memory.</li>
-        </ul>
-      </article>
-
-      <article class="entry" data-figure="series" data-anim="rise">
-        <p class="marker">2024.04 <i>→</i> 2024.08</p>
-        <h3 class="entry__org">Algorithmic Trading Bot</h3>
-        <p class="entry__stack">Python · QuantConnect · TensorFlow · pandas · Deep RL</p>
-        <ul class="bullets">
-          <li>Built a deep reinforcement learning agent in Python on the QuantConnect LEAN engine to trade a simulated $50,000 portfolio across multiple asset classes without manual input.</li>
-          <li>Organized the project’s market data in pandas and NumPy, cleaning and time-aligning Level&nbsp;II order-flow and microstructure feeds into one consistent dataset for every backtest.</li>
-          <li>Engineered entry and exit signals from that dataset and trained policies in TensorFlow with Q-learning and PPO.</li>
-        </ul>
-        <dl class="metrics">
-          <div><dt>Win rate</dt><dd data-count-to="43" data-suffix="%">43%</dd></div>
-          <div><dt>Profit factor</dt><dd data-count-to="2.76" data-decimals="2">2.76</dd></div>
-          <div><dt>Validation</dt><dd class="is-prose">Walk-forward, custom event-driven framework</dd></div>
-        </dl>
-      </article>
-    </div>
-  </section>
-
-  <!-- ─── RECORD ───────────────────────────────────────────── -->
-  <section class="band" id="record" data-accent="lime">
-    <header class="head">
-      <p class="label" data-anim="rise">Record</p>
-      <h2 class="head__title" data-anim="head">Honors and education</h2>
-    </header>
-
-    <div class="stack">
-      <article class="entry" data-figure="ladder" data-anim="rise" style="--i:0">
-        <p class="marker">2024.10</p>
-        <h3 class="entry__org">EduLearn Hackathon <span>· 1st place</span></h3>
-        <p class="entry__role">Financial-education technology</p>
-        <dl class="metrics">
-          <div class="is-award">
-            <dt>Placed</dt>
-            <dd data-count-to="700" data-prefix="1st of " data-suffix="+">1st of 700+</dd>
+      <!-- title screen: plain HTML so it paints before the art compiles -->
+      <section class="title" id="title" aria-labelledby="title-name">
+        <div class="title__panel">
+          <p class="title__kicker">A playable résumé</p>
+          <h1 class="title__name" id="title-name">Shrey Valia</h1>
+          <p class="title__pitch">CS + CE @ Northeastern · ML research @ Oak Ridge National Lab</p>
+          <div class="title__actions">
+            <button class="pbtn pbtn--primary" type="button" id="title-play">▶ Play</button>
+            <button class="pbtn" type="button" id="title-resume">Read résumé</button>
           </div>
-          <div><dt>Field</dt><dd class="is-prose">Financial-education technology</dd></div>
-        </dl>
-      </article>
+          <p class="title__links">
+            <a href="mailto:valia.s@northeastern.edu">Email</a> ·
+            <a href="https://www.linkedin.com/in/shrey-valia" rel="me">LinkedIn</a> ·
+            <a href="https://github.com/Shrey-Valia" rel="me">GitHub</a>
+          </p>
+          <p class="title__help"><span class="when-keys">Arrow keys to move and jump · ↓ to enter ports · R for the résumé, anytime</span><span class="when-touch">Tap a place on the map to travel · the résumé is always one tap away</span></p>
+        </div>
+      </section>
 
-      <article class="entry" data-anim="rise" style="--i:1">
-        <p class="marker">2025.09 <i>→</i> 2029.05</p>
-        <h3 class="entry__org">Northeastern University <span>· Boston, MA</span></h3>
-        <p class="entry__role">Bachelor of Science, Computer Science and Computer Engineering</p>
-        <p class="entry__note">Relevant coursework</p>
-        <ul class="chips chips--tight">
-          <li>Object-Oriented Programming 1 &amp; 2</li>
-          <li>Data Structures and Algorithms</li>
-          <li>Discrete Structures</li>
-          <li>Cornerstone of Engineering 1 &amp; 2</li>
-          <li>Calculus 1 &amp; 2</li>
-          <li>Physics 1</li>
-          <li>Chemistry 1</li>
-        </ul>
-      </article>
-
-      <article class="entry" data-anim="rise" style="--i:2">
-        <p class="marker">2021.08 <i>→</i> 2025.06</p>
-        <h3 class="entry__org">Dublin High School <span>· Dublin, CA</span></h3>
-        <p class="entry__role">High School Diploma</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- ─── TOOLKIT ──────────────────────────────────────────── -->
-  <section class="band" id="toolkit" data-accent="chartreuse" data-figure="lattice">
-    <header class="head">
-      <p class="label" data-anim="rise">Toolkit</p>
-      <h2 class="head__title" data-anim="head">What I work in</h2>
-    </header>
-
-    <div class="tools">
-      <div class="tool" data-anim="rise" style="--i:0">
-        <h3 class="tool__label">Languages</h3>
-        <ul class="chips"><li>Python</li><li>Java</li><li>C / C++</li><li>JavaScript</li><li>SQL</li><li>HTML / CSS</li></ul>
-      </div>
-      <div class="tool" data-anim="rise" style="--i:1">
-        <h3 class="tool__label">Machine learning &amp; AI</h3>
-        <ul class="chips"><li>PyTorch</li><li>TensorFlow</li><li>Keras</li><li>Scikit-learn</li><li>Graph neural networks</li><li>Deep reinforcement learning</li><li>Multi-agent systems</li><li>RAG</li></ul>
-      </div>
-      <div class="tool" data-anim="rise" style="--i:2">
-        <h3 class="tool__label">Data &amp; scientific computing</h3>
-        <ul class="chips"><li>pandas</li><li>NumPy</li><li>SciPy</li><li>Matplotlib</li><li>OpenCV</li><li>NLTK</li></ul>
-      </div>
-      <div class="tool" data-anim="rise" style="--i:3">
-        <h3 class="tool__label">Web &amp; backend</h3>
-        <ul class="chips"><li>React</li><li>Node.js</li><li>Express.js</li><li>Flask</li><li>Django</li><li>FastAPI</li><li>Spring Boot</li><li>Redux</li><li>Socket.io</li><li>Vercel</li></ul>
-      </div>
-      <div class="tool" data-anim="rise" style="--i:4">
-        <h3 class="tool__label">Tools &amp; infrastructure</h3>
-        <ul class="chips"><li>Git</li><li>Docker</li><li>AWS (S3, EC2)</li><li>PostgreSQL</li><li>MongoDB</li><li>QuantConnect</li><li>JUnit</li><li>VS Code</li></ul>
+      <!-- touch controls (coarse pointers only) -->
+      <div class="touch" id="touch" aria-hidden="true">
+        <div class="touch__pad">
+          <span class="touch__key touch__key--up" data-key="up jump"></span>
+          <span class="touch__key touch__key--left" data-key="left"></span>
+          <span class="touch__key touch__key--right" data-key="right"></span>
+          <span class="touch__key touch__key--down" data-key="down"></span>
+        </div>
+        <div class="touch__buttons">
+          <span class="touch__btn touch__btn--b" data-key="run">B</span>
+          <span class="touch__btn touch__btn--a" data-key="jump">A</span>
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- ─── CONTACT ──────────────────────────────────────────── -->
-  <section class="closing" id="contact" data-accent="yellow" data-figure="converge">
-    <h2 class="closing__head" data-anim="head">Open to summer 2027 internships in machine learning and software engineering.</h2>
+    <div class="rotate" id="rotate">
+      <p class="rotate__icon" aria-hidden="true">⟲</p>
+      <p class="rotate__text">Turn your phone sideways to play.</p>
+      <div class="rotate__actions">
+        <button class="pbtn pbtn--primary" type="button" data-action="resume">Read résumé</button>
+        <button class="pbtn" type="button" id="rotate-play">Play anyway</button>
+      </div>
+    </div>
+  </div>
 
-    <ul class="links" data-anim="rise">
-      <li>
-        <a href="mailto:valia.s@northeastern.edu">
-          <span class="links__label">Email</span>
-          <span class="links__value">valia.s@northeastern.edu</span>
-        </a>
-      </li>
-      <li>
-        <a href="https://www.linkedin.com/in/shrey-valia" rel="me">
-          <span class="links__label">LinkedIn</span>
-          <span class="links__value">in/shrey-valia</span>
-        </a>
-      </li>
-      <li>
-        <a href="https://github.com/Shrey-Valia" rel="me">
-          <span class="links__label">GitHub</span>
-          <span class="links__value">Shrey-Valia</span>
-        </a>
-      </li>
+  <dialog class="card" id="card" aria-labelledby="card-title">
+    <p class="card__kicker" id="card-kicker"></p>
+    <h2 class="card__title" id="card-title"></h2>
+    <div class="card__body" id="card-body"></div>
+    <div class="card__foot">
+      <span class="card__count" id="card-count"></span>
+      <button class="pbtn pbtn--primary" type="button" id="card-ok">Continue ▶</button>
+    </div>
+  </dialog>
+
+  <dialog class="menu" id="pause" aria-labelledby="pause-title">
+    <h2 class="menu__title" id="pause-title">Paused</h2>
+    <div class="menu__list">
+      <button class="pbtn pbtn--primary" type="button" data-menu="continue">Resume game</button>
+      <button class="pbtn" type="button" data-menu="map">Return to map</button>
+      <button class="pbtn" type="button" data-menu="resume">Read résumé</button>
+      <button class="pbtn" type="button" data-menu="mute" id="menu-mute">Sound: off</button>
+      <button class="pbtn" type="button" data-menu="assist" id="menu-assist">Assist mode: off</button>
+      <button class="pbtn" type="button" data-menu="skip" id="menu-skip" hidden>Skip this level</button>
+      <button class="pbtn pbtn--quiet" type="button" data-menu="reset">Reset progress</button>
+    </div>
+    <p class="menu__keys">Move ← → · Jump ↑ or Space · Run Shift · Enter a port ↓ · Read a sign Enter · Drop through ↓ + Space · Résumé R · Map M · Sound N</p>
+  </dialog>
+
+  <dialog class="menu menu--tally" id="tally" aria-labelledby="tally-title">
+    <p class="menu__kicker">Level clear</p>
+    <h2 class="menu__title" id="tally-title"></h2>
+    <dl class="tally" id="tally-list"></dl>
+    <p class="tally__note" id="tally-note"></p>
+    <div class="menu__list">
+      <button class="pbtn pbtn--primary" type="button" id="tally-ok">Back to map ▶</button>
+    </div>
+  </dialog>
+
+  <dialog class="menu menu--over" id="gameover" aria-labelledby="over-title">
+    <h2 class="menu__title" id="over-title">Game over</h2>
+    <p class="menu__sub">(core dumped)</p>
+    <p class="menu__text">Lives restored. Every fact you found is saved.</p>
+    <div class="menu__list">
+      <button class="pbtn pbtn--primary" type="button" id="over-ok">Back to map ▶</button>
+    </div>
+  </dialog>
+
+  <p class="sr-only" id="sr-status" aria-live="polite"></p>
+</div>
+
+<!-- the résumé moves in here once the game boots -->
+<dialog class="resume-dialog" id="resume-dialog" aria-labelledby="resume-dialog-title">
+  <div class="resume-dialog__bar">
+    <h2 class="resume-dialog__title" id="resume-dialog-title">Résumé</h2>
+    <span class="resume-dialog__found" id="resume-found"></span>
+    <button class="pbtn pbtn--small" type="button" id="resume-close">Close <kbd>Esc</kbd></button>
+  </div>
+  <nav class="warp" id="warp" aria-label="Fast travel"></nav>
+  <div class="resume-dialog__scroll" id="resume-slot"></div>
+</dialog>
+
+
+<!-- ═══ RÉSUMÉ: the single source of truth ════════════════════════════════
+     Every fact the game shows is an element here with data-fact="id".
+     Level files reference these ids; cards clone these nodes.
+     data-skill and data-credit children become bricks and textbooks.
+     ════════════════════════════════════════════════════════════════════ -->
+<main class="resume" id="resume" tabindex="-1">
+
+  <header class="resume__head" data-node="home">
+    <div data-fact="p-name" data-title="Shrey Valia" data-kicker="Player one">
+      <h1 class="resume__name">Shrey Valia</h1>
+      <p class="resume__tag">Computer Science + Computer Engineering at Northeastern University. Machine learning research, AI tools, and hackathon builds. Based in Dublin, CA.</p>
+    </div>
+    <ul class="resume__contact" data-node="lighthouse">
+      <li data-fact="c-email" data-title="Email" data-kicker="Contact"><a href="mailto:valia.s@northeastern.edu">valia.s@northeastern.edu</a></li>
+      <li data-fact="c-linkedin" data-title="LinkedIn" data-kicker="Contact"><a href="https://www.linkedin.com/in/shrey-valia" rel="me">linkedin.com/in/shrey-valia</a></li>
+      <li data-fact="c-github" data-title="GitHub" data-kicker="Contact"><a href="https://github.com/Shrey-Valia" rel="me">github.com/Shrey-Valia</a></li>
     </ul>
+    <p class="resume__open" data-fact="c-open" data-title="Open to work" data-kicker="Contact" data-flag="inference">Open to summer 2027 internships in machine learning and software engineering.</p>
+  </header>
 
-    <p class="closing__foot">
-      <span>Boston, MA &amp; Dublin, CA</span>
-      <i aria-hidden="true">·</i>
-      <span>Built from scratch — no framework, no build step.</span>
-    </p>
+  <section class="resume__section" aria-labelledby="h-experience">
+    <h2 id="h-experience">Experience</h2>
+
+    <article class="entry" id="ornl" data-node="ornl" data-kicker="Oak Ridge National Laboratory · ML Research Assistant">
+      <header class="entry__head" data-fact="x-ornl" data-title="Oak Ridge National Laboratory">
+        <h3>Oak Ridge National Laboratory</h3>
+        <p class="entry__role">Machine Learning Research Assistant</p>
+        <p class="entry__meta">Remote · Jan 2026 – May 2026</p>
+      </header>
+      <ul class="entry__list">
+        <li data-fact="x-ornl-1" data-title="Physics-informed GNNs">Engineered physics-informed and graph neural networks (GNNs) in PyTorch and TensorFlow to model polymer growth and molecular self-assembly, working with Dr. Rajeev Kumar.</li>
+        <li data-fact="x-ornl-2" data-title="Models in the browser">Built the front end of an internal web tool deployed on Vercel that let scientists configure, train, and run the group’s models from the browser instead of editing scripts by hand.</li>
+        <li data-fact="x-ornl-3" data-title="Inverse design">Developed an inverse prediction model with the team to estimate polymer design inputs from target properties.</li>
+        <li data-fact="x-ornl-4" data-title="Faster experiments">Automated preprocessing pipelines in pandas and NumPy and parallelized GPU training, cutting experiment turnaround.</li>
+      </ul>
+    </article>
+
+    <article class="entry" id="handshake" data-node="handshake" data-kicker="Handshake AI · AI Training Specialist">
+      <header class="entry__head" data-fact="x-hs" data-title="Handshake AI">
+        <h3>Handshake AI</h3>
+        <p class="entry__role">AI Training Specialist, Handshake AI Fellow (Part-time)</p>
+        <p class="entry__meta">Remote · Jan 2026 – May 2026</p>
+      </header>
+      <ul class="entry__list">
+        <li data-fact="x-hs-1" data-title="Data quality">Labeled and audited training data for generative AI models against strict quality and safety rubrics.</li>
+        <li data-fact="x-hs-2" data-title="Diffusion fine-tuning">Evaluated text-to-image model outputs and fine-tuned diffusion models on the resulting annotations.</li>
+        <li data-fact="x-hs-3" data-title="Failure analysis">Diagnosed recurring model failure cases and delivered corrective feedback to improve prompt adherence.</li>
+      </ul>
+    </article>
   </section>
 
+  <section class="resume__section" aria-labelledby="h-projects">
+    <h2 id="h-projects">Projects</h2>
+
+    <article class="entry" id="vincio" data-node="vincio" data-kicker="Project · Vincio">
+      <header class="entry__head" data-fact="p-vincio" data-title="Vincio – AI Video Editor">
+        <h3>Vincio – AI Video Editor</h3>
+        <p class="entry__role">Multi-Agent AI · LLM Orchestration · Full-Stack Web App</p>
+        <p class="entry__meta">Jan 2026 – Aug 2026</p>
+      </header>
+      <ul class="entry__list">
+        <li data-fact="p-vincio-1" data-title="Raw clips in, finished cut out">Built an AI video editor that turns raw clips and a written vision into a finished cut using coordinated agents.</li>
+        <li data-fact="p-vincio-2" data-title="Agent capabilities">Implemented agent capabilities for B-roll selection, motion graphics, transitions, and on-screen text.</li>
+        <li data-fact="p-vincio-3" data-title="Full stack">Developed the front end and the agent layer, and contributed to database management, authentication, and agent memory.</li>
+      </ul>
+    </article>
+
+    <article class="entry" id="trading" data-node="trading" data-kicker="Project · Algorithmic Trading Bot">
+      <header class="entry__head" data-fact="p-trade" data-title="Algorithmic Trading Bot">
+        <h3>Algorithmic Trading Bot</h3>
+        <p class="entry__role">Python · QuantConnect · TensorFlow · pandas · Deep RL</p>
+        <p class="entry__meta">Apr 2024 – Aug 2024</p>
+      </header>
+      <ul class="entry__list">
+        <li data-fact="p-trade-1" data-title="Deep RL agent">Built a deep reinforcement learning agent in Python on the QuantConnect LEAN engine to trade a simulated $50,000 portfolio across multiple asset classes without manual input.</li>
+        <li data-fact="p-trade-2" data-title="One clean dataset">Organized the project’s market data in pandas and NumPy, cleaning and time-aligning Level II order-flow and microstructure feeds into one consistent dataset for every backtest.</li>
+        <li data-fact="p-trade-3" data-title="Q-learning and PPO">Engineered entry and exit signals from that dataset and trained policies in TensorFlow with Q-learning and PPO.</li>
+        <li data-fact="p-trade-4" data-title="Walk-forward results">Achieved a 43% win rate and 2.76 profit factor in walk-forward backtests on a custom event-driven framework.</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="resume__section" aria-labelledby="h-education">
+    <h2 id="h-education">Education &amp; honors</h2>
+
+    <article class="entry" id="neu" data-node="neu" data-kicker="Northeastern University">
+      <header class="entry__head" data-fact="e-neu" data-title="Northeastern University">
+        <h3>Northeastern University</h3>
+        <p class="entry__role">Bachelor of Science in Computer Science and Computer Engineering</p>
+        <p class="entry__meta">Boston, MA · Expected graduation May 2029</p>
+      </header>
+      <div class="entry__block" data-fact="e-neu-courses" data-title="Relevant coursework">
+        <p class="entry__label">Relevant coursework</p>
+        <ul class="chips">
+          <li data-credit>Object-Oriented Programming</li>
+          <li data-credit>Data Structures and Algorithms</li>
+          <li data-credit>Discrete Structures</li>
+          <li data-credit>Cornerstone of Engineering</li>
+          <li data-credit>Calculus</li>
+          <li data-credit>Physics</li>
+          <li data-credit>Chemistry</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry" id="droid" data-node="droid" data-kicker="Award · Droid Strike Back Hackathon">
+      <header class="entry__head" data-fact="a-droid" data-title="1st Place, Omi Category">
+        <h3>1st Place, Omi Category · Droid Strike Back Hackathon</h3>
+        <p class="entry__meta">San Francisco · Nov 2025</p>
+      </header>
+      <p class="entry__text" data-fact="a-droid-build" data-title="The build">Built a voice-controlled robot that converted spoken commands from Omi, an AI wearable, into instructions for a digital robot navigating a burning building.</p>
+    </article>
+
+    <article class="entry" id="dhs" data-node="dhs" data-kicker="Dublin High School">
+      <header class="entry__head" data-fact="e-dhs" data-title="Dublin High School">
+        <h3>Dublin High School</h3>
+        <p class="entry__role">High School Diploma</p>
+        <p class="entry__meta">Dublin, CA · Aug 2021 – Jun 2025</p>
+      </header>
+      <p class="entry__text" data-fact="a-edulearn" data-title="1st of 700+">Award: 1st Place of 700+ participants, EduLearn Hackathon (Oct 2024).</p>
+    </article>
+  </section>
+
+  <section class="resume__section" id="skills" data-node="tree" aria-labelledby="h-skills" data-kicker="Skills">
+    <h2 id="h-skills">Technical skills</h2>
+    <div class="skillset" data-fact="s-lang" data-title="Languages">
+      <h3>Languages</h3>
+      <ul class="chips"><li data-skill>Python</li><li data-skill>Java</li><li data-skill>C/C++</li><li data-skill>JavaScript</li><li data-skill>SQL</li><li data-skill>HTML/CSS</li></ul>
+    </div>
+    <div class="skillset" data-fact="s-data" data-title="Data and scientific computing">
+      <h3>Data and scientific computing</h3>
+      <ul class="chips"><li data-skill>pandas</li><li data-skill>NumPy</li><li data-skill>SciPy</li><li data-skill>Matplotlib</li><li data-skill>OpenCV</li><li data-skill>NLTK</li></ul>
+    </div>
+    <div class="skillset" data-fact="s-ml" data-title="Machine learning and AI">
+      <h3>Machine learning and AI</h3>
+      <ul class="chips"><li data-skill>PyTorch</li><li data-skill>TensorFlow</li><li data-skill>Keras</li><li data-skill>Scikit-learn</li><li data-skill>Graph Neural Networks</li><li data-skill>Deep Reinforcement Learning</li><li data-skill>Multi-Agent Systems</li><li data-skill>Retrieval-Augmented Generation</li></ul>
+    </div>
+    <div class="skillset" data-fact="s-web" data-title="Web and backend">
+      <h3>Web and backend</h3>
+      <ul class="chips"><li data-skill>React</li><li data-skill>Node.js</li><li data-skill>Express.js</li><li data-skill>Flask</li><li data-skill>Django</li><li data-skill>FastAPI</li><li data-skill>Spring Boot</li><li data-skill>Redux</li><li data-skill>Socket.io</li><li data-skill>Vercel</li></ul>
+    </div>
+    <div class="skillset" data-fact="s-tools" data-title="Tools and infrastructure">
+      <h3>Tools and infrastructure</h3>
+      <ul class="chips"><li data-skill>Git</li><li data-skill>Docker</li><li data-skill>AWS (S3, EC2)</li><li data-skill>PostgreSQL</li><li data-skill>MongoDB</li><li data-skill>QuantConnect</li><li data-skill>JUnit</li><li data-skill>VS Code</li></ul>
+    </div>
+  </section>
+
+  <footer class="resume__foot">
+    <p>Built from scratch: hand-written Canvas2D engine, code-drawn pixel art, synthesized sound. No framework, no build step.</p>
+  </footer>
 </main>
 
-<script src="main.js"></script>
+<script type="module" src="js/boot.js" onerror="document.documentElement.classList.remove('js')"></script>
 </body>
 </html>

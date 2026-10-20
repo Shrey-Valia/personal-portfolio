@@ -1,0 +1,16 @@
+// Level registry. A node on the map without an entry here is "in
+// progress": the map shows it, and entering opens that résumé section.
+
+import home from './home.js';
+import ornl from './ornl.js';
+
+export const LEVELS = { home, ornl };
+
+// every fact id a level can hand out (signs + blocks), for the coverage report
+export function levelFacts(def) {
+  const ids = [];
+  for (const room of Object.values(def.rooms)) {
+    for (const list of Object.values(room.facts || {})) ids.push(...list);
+  }
+  return ids;
+}

@@ -1,0 +1,176 @@
+/* ═══════════════════════════════════════════════════════════
+   The résumé: a clean document on its own (no JS), and the
+   in-game log when it lives in #resume-dialog, where each
+   fact gets a found / not-yet-found marker.
+   ═══════════════════════════════════════════════════════════ */
+
+.resume {
+  width: min(780px, 100% - 40px);
+  margin: 0 auto;
+  padding: 56px 0 72px;
+}
+.resume:focus { outline: none; }
+
+.resume h2, .resume h3, .resume__name {
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+.resume__name { margin: 0; font-size: clamp(34px, 6vw, 52px); }
+
+.resume__tag { margin: 12px 0 0; max-width: 36em; font-size: 19px; }
+
+.resume__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.resume__contact a { display: inline-block; padding: 6px 0; font-weight: 700; }
+
+.resume__open { margin: 8px 0 0; color: var(--paper-mut); }
+
+.resume__section { margin-top: 56px; }
+.resume__section > h2 {
+  margin: 0 0 20px;
+  padding-bottom: 8px;
+  font-size: 26px;
+  border-bottom: 2px solid var(--paper-ink);
+}
+
+.entry { margin: 0 0 32px; }
+.entry__head h3 { margin: 0; font-size: 22px; }
+.entry__role { margin: 4px 0 0; font-weight: 700; }
+.entry__meta { margin: 2px 0 0; color: var(--paper-mut); font-size: 16px; }
+.entry__list { margin: 10px 0 0; padding-left: 1.2em; }
+.entry__list li { margin: 6px 0; }
+.entry__text { margin: 10px 0 0; }
+.entry__block { margin-top: 12px; }
+.entry__label { margin: 0 0 6px; font-weight: 700; }
+
+.skillset { margin: 0 0 18px; }
+.skillset h3 { margin: 0 0 8px; font-size: 18px; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chips li {
+  padding: 4px 12px;
+  background: var(--paper-2);
+  border: 1.5px solid #c9c0ac;
+  border-radius: 999px;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.resume__foot { margin-top: 56px; color: var(--paper-mut); font-size: 15px; }
+
+@media print {
+  .banner, .skip { display: none !important; }
+  .resume { padding: 0; }
+}
+
+/* ─── as a dialog (in-game) ────────────────────────────────── */
+
+.resume-dialog {
+  width: min(880px, 100vw - 24px);
+  height: min(92dvh, 100% - 24px);
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.resume-dialog[open] { display: flex; flex-direction: column; }
+.resume-dialog::backdrop { background: rgba(5, 6, 12, 0.72); }
+
+.resume-dialog__bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--ink);
+  color: var(--text);
+}
+.resume-dialog__title { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; }
+.resume-dialog__found { margin-right: auto; color: var(--gold); font-family: var(--display); font-weight: 600; font-size: 16px; }
+
+.warp {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  background: var(--paper-2);
+  border-bottom: 3px solid var(--paper-ink);
+}
+.warp button {
+  flex: none;
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 1.5px solid #c9c0ac;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+.warp button:hover { background: #fff; }
+.warp button[data-state="cleared"]::after { content: " ✓"; color: var(--teal); }
+.warp button[data-state="soon"] { opacity: 0.7; }
+
+.resume-dialog__scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+.resume-dialog .resume { padding: 32px 0 48px; }
+
+/* found markers: a hollow ring until the fact is logged in-game */
+.resume-dialog [data-fact] { position: relative; }
+.resume-dialog [data-fact]::before {
+  content: "";
+  position: absolute;
+  left: -22px; top: 0.45em;
+  width: 10px; height: 10px;
+  border: 2px solid var(--paper-mut);
+  border-radius: 50%;
+}
+.resume-dialog li[data-fact]::before { left: -40px; }
+.resume-dialog [data-fact].is-found::before {
+  background: var(--gold);
+  border-color: #8a6516;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+.play-chip {
+  display: inline-flex;
+  align-items: center;
+  margin: 8px 0 0;
+  min-height: 36px;
+  padding: 4px 14px;
+  border: 1.5px solid var(--teal);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--teal);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+.play-chip:hover { background: var(--teal); color: var(--paper); }
+
+@media (max-width: 600px) {
+  .resume-dialog { width: 100vw; height: 100dvh; box-shadow: none; }
+  .resume-dialog [data-fact]::before { display: none; }
+}
