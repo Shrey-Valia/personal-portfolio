@@ -5,8 +5,10 @@ import home from './home.js';
 import ornl from './ornl.js';
 import vincio from './vincio.js';
 import trading from './trading.js';
+import handshake from './handshake.js';
+import droid from './droid.js';
 
-export const LEVELS = { home, ornl, vincio, trading };
+export const LEVELS = { home, ornl, vincio, trading, handshake, droid };
 
 // every fact id a level can hand out (signs + blocks), for the coverage report
 export function levelFacts(def) {
