@@ -72,7 +72,8 @@ export function runtime(mod) {
   const split = mod.split || SPLIT;
   let local = null;
   const rt = {
-    mod, id: mod.id, facts: mod.facts || [], split, idle: !!mod.idle,
+    mod, id: mod.id, facts: mod.facts || [], split,
+    get idle() { return !!mod.idle; },
     get poses() { return local || (local = mod.poses ? mod.poses() || {} : {}); },
 
     build({ w, h = SCENE_H, el = null }) {
@@ -86,13 +87,15 @@ export function runtime(mod) {
 
     // the state a stop draws from. active: it's the stop he's at (or, with
     // reduced motion, the current one). t: the idle clock in ms (hold only).
-    frame({ p = 0, active = true, reduced = false, t = 0, dir = 1, still = false, w, h = SCENE_H }) {
+    // end: this stop is where the path ends (the last one): he never walks
+    // out, so from the start of `out` on it is the finished hold (hold 1).
+    frame({ p = 0, active = true, reduced = false, t = 0, dir = 1, still = false, end = false, w, h = SCENE_H }) {
       const [a, b, c] = split;
       if (reduced) p = mod.key != null ? mod.key : (b + c) / 2;
       let phase;
       if (!active && !reduced && p <= 0) phase = 'before';
-      else if (!active && !reduced && p >= 1) phase = 'after';
-      else phase = p < a ? 'in' : p < b ? 'act' : p < c ? 'hold' : 'out';
+      else if (!active && !reduced && p >= 1 && !end) phase = 'after';
+      else phase = p < a ? 'in' : p < b ? 'act' : p < c || end ? 'hold' : 'out';
       const act = phase === 'before' ? 0 : phase === 'after' ? 1 : clamp((p - a) / (b - a), 0, 1);
       const hold = phase === 'before' ? 0 : phase === 'after' ? 1 : clamp((p - b) / (c - b), 0, 1);
       const walk = phase === 'in' ? p / a : phase === 'out' ? (p - c) / (1 - c) : phase === 'before' ? 0 : 1;
@@ -191,8 +194,8 @@ export const defaultTransit = {
 export function transitRuntime(tr = defaultTransit) {
   return {
     tr,
-    build({ w, h, from = [Math.round(w / 2), 0], to = [Math.round(w / 2), h], side = 0 }) {
-      const b = tr.build({ w, h, dy: h, from, to, side }) || {};
+    build({ w, h, from = [Math.round(w / 2), 0], to = [Math.round(w / 2), h], side = 0, lane = 0 }) {
+      const b = tr.build({ w, h, dy: h, from, to, side, lane }) || {};
       b.w = w; b.h = h; b.from = from; b.to = to;
       return b;
     },

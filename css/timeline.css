@@ -260,3 +260,6 @@
 @media (max-width: 767px) {
   .view-page .snapshot { width: auto; }        /* full width, so it covers the centre line */
 }
+@media (min-width: 768px) {
+  .view-page .timeline__title { width: fit-content; padding-right: 12px; }   /* clear of the centre line */
+}
