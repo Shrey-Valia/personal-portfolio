@@ -240,9 +240,7 @@ export default {
     }
     return {
       back: paintBack(w, h, X), X, c, enter, cables, line, len,
-      // (the out walk starts with a step left, so if the page ever shows it at
-      // walk 0 he still faces the dock, as he does waving)
-      route: { enter, act: [X(STAND), GALLERY], leave: [[X(STAND) - 4, GALLERY]], exit: [c, h] },
+      route: { enter, act: [X(STAND), GALLERY], exit: [c, h] },
     };
   },
 

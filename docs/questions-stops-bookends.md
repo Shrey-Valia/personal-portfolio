@@ -10,24 +10,14 @@ contact 1 ms. Every draw is ≤ 0.2 ms.
 
 ## For the engine owner (timeline-core)
 
-1. **`transitRuntime.build` drops `lane`.** In `api.js`, the call at
-   line 194 destructures `{ w, h, from, to, side }` and passes on
-   `{ w, h, dy, from, to, side }`, so transits never see the lane that
-   `index.js` hands in. Fix: add `lane = 0` to the destructuring and pass it
-   through. T0 depends on it. With lane > 0 (desktop), the three clips sit in
-   the open strip under the intro scene, above the Timeline title. With
-   lane 0 (phones and tablets), they sit in the last 21 px above Vincio. Until
-   the fix, desktop gets the phone layout, and the title band hides him from
-   the waist up while he hops the clips. (Sent to the coordinator.)
-2. **The last stop ends in `out`, not `hold`.** `layout.js` sets
-   `last.p1 = endP = split[2]`, so at the end of Contact's window, and over the
-   whole footer below it, p equals split[2] exactly. `frame()` reads that as
-   phase `out` with walk 0, so the engine walks him (run or idle at route.act),
-   `hero()` isn't asked, and the idle loop stops. In practice he stops waving
-   and the beacon stops flickering just as the page ends. Fix: make p1
-   `endP - 1e-6`, or have `frame()` treat p ≥ c on the last stop as hold 1.
-   Contact works around it: its out walk starts with a step left, so he still
-   faces the dock. (Sent to the coordinator.)
+1. ~~**`transitRuntime.build` drops `lane`.**~~ Fixed in 0b45d40, merged
+   here. T0 now spreads the clips down the open desktop lane. With lane 0
+   (phones and tablets) they sit in the last 21 px above Vincio, below the
+   snapshot that covers the centre just under the intro scene.
+2. ~~**The last stop ends in `out`, not `hold`.**~~ Fixed in 4391166
+   (`frame({ end })`). At the very bottom of the page he keeps waving and the
+   idle loop keeps running, so contact.js no longer needs its out-walk
+   workaround.
 3. **Tier icons for the skills card.** `skills.js` has a named export,
    `tierIcons()`, which returns `{ 's-lang', 's-data', 's-ml', 's-web',
    's-tools' }`. Each value is a fresh 16 × 16 canvas with that tier's lit
@@ -43,11 +33,8 @@ contact 1 ms. Every draw is ≤ 0.2 ms.
    Suggested CSS: `width: calc(var(--gp) * 8px)` (or a fixed 24 px),
    `image-rendering: pixelated`, `vertical-align: -5px`, `margin-right: 8px`.
    The `print` and `plain` views should hide them.
-4. **The Timeline title band (68c8081) covers the centre on desktop.** The
-   intro→Vincio gap on desktop is 64 game px, and `.timeline__title` is now a
-   full-width page-colour band at 29–42 of it. Making it `width: fit-content`
-   at ≥ 1000 px, as was done for `.year-mark`, would leave the lane clear.
-   T0 already works around it (see 1). It's only a request.
+4. ~~**The Timeline title band covers the centre on desktop.**~~ Fixed
+   in 0b45d40: the band is fit-content from 768 px up.
 
 ## For Shrey (defaults chosen; say if you want them changed)
 

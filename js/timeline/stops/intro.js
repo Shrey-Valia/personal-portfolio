@@ -369,21 +369,19 @@ const T0 = {
     const o = lane ? clamp(lane - 8, 6, 12) : 7;
     const d = side ? -side : from[0] > cx ? -1 : 1;            // the first hop crosses the centre
     const shift = side ? -side * 4 : 0;
-    // The page puts text blocks on the page colour across this gap, above
-    // the track: the Timeline title (from 29 px down on desktop) and, on
-    // phones and tablets, the snapshot just under the intro scene. So the
-    // clips step down where he stays in view: right under the ledge on
-    // desktop (the lane is open there), in the last 21 px above Vincio
-    // elsewhere. He falls behind the blocks in between, as he passes
-    // behind cards.
-    const top = lane ? 9 : Math.max(12, h - 21);
-    const clips = [[cx + d * o + shift, top], [cx - d * o + shift, top + 7], [cx + d * o * 0.6 + shift, top + 14]]
-      .map(([x, y]) => [Math.round(x), Math.round(y)]);
+    // On desktop (a lane) the gap is open down the middle, so the clips
+    // step down through it. On phones and tablets the snapshot covers the
+    // centre just under the intro scene, above the track, so they sit in
+    // the last 21 px above Vincio and he falls behind the snapshot first,
+    // as he passes behind cards.
+    const ys = lane ? [0.46, 0.66, 0.85].map((k) => Math.round(h * k)) : [0, 7, 14].map((dy) => Math.max(12, h - 21) + dy);
+    const clips = [[cx + d * o + shift, ys[0]], [cx - d * o + shift, ys[1]], [cx + d * o * 0.6 + shift, ys[2]]]
+      .map(([x, y]) => [Math.round(x), y]);
     const start = from, apex = [from[0] + d * 5, -5];
     const pts = { start, apex, clips, end: to };
     const b = { w, h, d, pts, cw: 18, ch: 6 };
-    // the wisp, just under the ledge, where his fall passes it
-    const yw = Math.min(7, Math.round((clips[0][1] - 4) * 0.5));
+    // the wisp, where his fall passes it (just under the ledge on phones)
+    const yw = lane ? Math.round(clips[0][1] * 0.42) : Math.min(7, Math.round((clips[0][1] - 4) * 0.5));
     const uw = Math.sqrt(clamp((yw - apex[1]) / (clips[0][1] - apex[1]), 0, 1));
     b.wisp = [Math.round(lerp(apex[0], clips[0][0], uw)), yw];
     // the dotted line along his flight, and its length at each step
