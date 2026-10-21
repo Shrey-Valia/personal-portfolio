@@ -9,6 +9,7 @@ import { SCENE_H, CORE_W, drawHero, frameOf } from '../js/timeline/kit.js';
 
 const $ = (id) => document.getElementById(id);
 const q = new URLSearchParams(location.search);
+const LANE_CSS = 120, CARD_GAP_CSS = 24;          // css/timeline.css, desktop
 
 // where each stop's content lives in index.html (until it carries data-stop)
 const LEGACY = { intro: 'header.resume__head', edulearn: '[data-fact="a-edulearn"]', contact: '#h-contact, #contact' };
@@ -16,7 +17,7 @@ const LEGACY = { intro: 'header.resume__head', edulearn: '[data-fact="a-edulearn
 const state = {
   id: STOP_IDS.includes(q.get('stop')) ? q.get('stop') : 'intro',
   w: +q.get('w') || 200, p: q.has('p') ? +q.get('p') : 0.35, s: 0.4, th: 180,
-  gp: +q.get('gp') || 3, reduced: q.get('reduced') === '1', up: false, still: false, idle: false,
+  gp: +q.get('gp') || 3, reduced: q.get('reduced') === '1', up: false, still: false, idle: false, side: 0,
   who: 'here', t: 0,
 };
 let rt = null, el = null, built = new Map(), tbuilt = new Map(), doc = null, idleTimer = 0, t0 = performance.now();
@@ -34,6 +35,7 @@ $('s').addEventListener('input', () => { state.s = +$('s').value; drawTransit();
 $('th').addEventListener('input', () => { state.th = +$('th').value; drawTransit(); });
 for (const r of document.querySelectorAll('input[name="gp"]')) r.addEventListener('change', () => { state.gp = +r.value; draw(); drawTransit(); });
 for (const r of document.querySelectorAll('input[name="state"]')) r.addEventListener('change', () => { state.who = r.value; draw(); });
+for (const r of document.querySelectorAll('input[name="side"]')) r.addEventListener('change', () => { state.side = +r.value; drawTransit(); });
 for (const k of ['reduced', 'up', 'still', 'idle']) $(k).addEventListener('change', () => { state[k] = $(k).checked; draw(); drawTransit(); });
 $('core').addEventListener('change', () => $('stage').classList.toggle('no-core', !$('core').checked));
 $('check').addEventListener('click', runChecks);
@@ -122,8 +124,11 @@ function drawTransit() {
   const tw = state.gp >= 3 ? 96 : 64, th = state.th - (state.th % 2);
   $('s-out').value = state.s.toFixed(3); $('th-out').value = th;
   const tr = transitRuntime(rt.mod.transit || defaultTransit);
-  const key = tw + 'x' + th;
-  if (!tbuilt.has(key)) tbuilt.set(key, tr.build({ w: tw, h: th }));
+  // as on the desktop page: the centre lane is 120 CSS px (20 game px each side)
+  // and the card starts 24 CSS px beyond it; phones have no lane
+  const side = state.side, lane = side ? LANE_CSS / 2 / 3 : 0;
+  const key = `${tw}x${th}|${side}|${lane}`;
+  if (!tbuilt.has(key)) tbuilt.set(key, tr.build({ w: tw, h: th, side, lane }));
   const b = tbuilt.get(key);
   const canvas = $('tcanvas');
   sizeCanvas(canvas, tw, th);
@@ -135,6 +140,13 @@ function drawTransit() {
   $('tbox').style.height = (th * k) + 'px';
   const box = $('tbox').getBoundingClientRect(), stage = $('tstage').getBoundingClientRect();
   placeHeroEl($('thero'), state.reduced ? null : hero, box.left - stage.left, box.top - stage.top);
+  // the card over the side it sits on, from the lane's edge plus the gap
+  const card = $('tcard');
+  card.hidden = !side;
+  if (side) {
+    const edge = (tw / 2) * k + (LANE_CSS / 2 + CARD_GAP_CSS) * (k / 3);
+    Object.assign(card.style, side > 0 ? { left: edge + 'px', right: '-40px' } : { left: '-40px', right: edge + 'px' });
+  }
 }
 
 // ─── play and check ───────────────────────────────────────────────────

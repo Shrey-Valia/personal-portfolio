@@ -194,8 +194,8 @@ export const defaultTransit = {
 export function transitRuntime(tr = defaultTransit) {
   return {
     tr,
-    build({ w, h, from = [Math.round(w / 2), 0], to = [Math.round(w / 2), h], side = 0 }) {
-      const b = tr.build({ w, h, dy: h, from, to, side }) || {};
+    build({ w, h, from = [Math.round(w / 2), 0], to = [Math.round(w / 2), h], side = 0, lane = 0 }) {
+      const b = tr.build({ w, h, dy: h, from, to, side, lane }) || {};
       b.w = w; b.h = h; b.from = from; b.to = to;
       return b;
     },
