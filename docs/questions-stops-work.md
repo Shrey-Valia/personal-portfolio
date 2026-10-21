@@ -15,13 +15,13 @@ at 1280×800 and 375×812, scrolling down and back up.
    Suggested fix (additive): forward `lane` in `transitRuntime.build`. The bench
    (`tools/stop.js`) also builds transits with neither `side` nor `lane`, so it always
    previews the phone layout.
-2. **The year markers sit under the track layer.** `.year-mark` is static with no z-index,
-   and `.tl-track` is `z-index: 1`, so any transit that paints across the bottom-left of
-   its gap hides the marker. The "2025" marker lands inside the Handshake→Droid gap on
-   desktop (game px x 6–20, y 123–130 of a 96×135 connector). T3 now keeps its dusk
-   skyline right of `w/2 − lane − 2`. Suggestion: give `.year-mark` `position: relative;
-   z-index: 2` so no transit can cover it. On phones and tablets the marker sits outside
-   the connector canvas, so only desktop is affected.
+2. **The year markers sat under the track layer: resolved by 68c8081** (merged into this
+   branch). `.year-mark` is now `z-index: 2` on the page colour. Before that fix, T3's
+   dusk hid the "2025" marker on desktop (game px x 6–20 near the bottom of the
+   Handshake→Droid connector), so T3 still starts its dusk skyline right of
+   `w/2 − lane − 2`. With the fix the marker's opaque strip covers only x < 20 for about
+   8 rows, clear of the chute (it ends at 0.48 h) and of his drop. Re-checked after the
+   merge at 1280×800 and 375×812.
 
 ## Questions for Shrey (defaults picked; nothing blocked)
 
