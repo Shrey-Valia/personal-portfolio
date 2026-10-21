@@ -161,13 +161,16 @@ function fits(fr, hero, w, h) {
 // straight on phones (it runs under the card there), with a small ledge at
 // each turn. A stop's `transit` replaces it for the gap below that stop.
 export const defaultTransit = {
-  build({ w, h, from, to }) {
-    const amp = Math.max(0, Math.min(w / 2 - 10, 28));
+  build({ w, h, from, to, side = 0, lane = 0 }) {
+    // wide on the side the card isn't on, within the lane on the side it is
+    const near = Math.max(6, lane - 6), wide = side ? Math.min(w / 2 - 10, 28) : near;
     const turns = Math.max(1, Math.round(h / 48));
     const pts = [from];
     for (let k = 1; k <= turns; k++) {
       const t = k / (turns + 1);
-      pts.push([Math.round(w / 2 + (k % 2 ? amp : -amp)), Math.round(lerp(from[1], to[1], t))]);
+      const free = k % 2 ? -1 : 1;                          // first swing towards the free side
+      const x = side ? w / 2 + (free === -side ? wide * free : near * free) : w / 2 + near * free;
+      pts.push([Math.round(x), Math.round(lerp(from[1], to[1], t))]);
     }
     pts.push(to);
     return { pts, len: pathLength(pts) };

@@ -1,32 +1,22 @@
-// The website view: the same <main id="resume"> as a scroll timeline
-// (js/site/timeline.js), with the game behind a small "Play the game"
-// link. The URL picks the view: #play (or ?play, ?level=) is the game, any
-// other hash (#page, or an id like #ornl) is the website, and a plain
-// visit is the default from boot.js. The toggles are plain links, so Back
-// moves between the two.
-//
-// page-art.js builds the bar and the footer link; page-fx.js the thin
-// progress line under the bar.
+// The two views and the URL. #play (or ?play, ?level=) is the game, any
+// other hash (#page, or an id like #ornl) is the website, and a plain visit
+// is the default from boot.js. The toggles are plain links, so Back moves
+// between the two. The website is the scroll timeline (js/timeline); the
+// game is loaded the first time it's wanted (loadGame) and then kept.
 
 import { FLAGS } from '../config.js';
-import { decoratePage } from './page-art.js';
-import { startFx } from './page-fx.js';
-import { createTimeline } from '../site/timeline.js';
 
 const $ = (id) => document.getElementById(id);
 
-// old section links (the grouped résumé's headings) → the stop they start with
-const SECTION = { 'h-experience': 'ornl', 'h-projects': 'vincio', 'h-education': 'neu', 'h-skills': 'skills' };
+// the game's place ids → the page (the rest are stop ids already)
+const PLACE = { home: 'top', lighthouse: 'contact', tree: 'skills' };
+// old section links → the stop they start with
+const SECTION = { 'h-experience': 'ornl', 'h-projects': 'vincio', 'h-education': 'droid', 'h-skills': 'skills', resume: 'intro' };
 
-export function createPage({ game, display, defaultView }) {
+export function createPage({ timeline, loadGame, defaultView }) {
   const root = document.documentElement;
   const resume = $('resume');
-  const titleEl = $('title');
-  let on = false;
-
-  decoratePage(game);
-  const timeline = createTimeline({ game });
-  const fx = startFx({ isOn: () => on });
+  let on = false, game = null;
 
   // the game must not read keys while the page is up: arrows and space scroll
   document.addEventListener('keydown', (e) => { if (on) e.stopPropagation(); }, true);
@@ -40,7 +30,7 @@ export function createPage({ game, display, defaultView }) {
     if (!a) return;
     const id = decodeURIComponent(a.getAttribute('href').slice(1));
     const el = id && document.getElementById(id);
-    if (!el || el === resume || !resume.contains(el)) return;
+    if (!el || !resume.contains(el) || a.id === 'skip') return;
     e.preventDefault();
     history.pushState(null, '', '#' + id);
     reveal(el, true);
@@ -66,7 +56,7 @@ export function createPage({ game, display, defaultView }) {
   }
 
   function sync(initial = false, quiet = false) {
-    if (wanted() !== 'page') { hide(quiet); return; }
+    if (wanted() !== 'page') { hide(quiet, initial); return; }
     if (!on) { show(initial); return; }
     const el = target();                     // Back / Forward between places on the page
     if (el) reveal(el);
@@ -75,35 +65,30 @@ export function createPage({ game, display, defaultView }) {
   function show(initial) {
     if (on) return;
     on = true;
-    game.ui.resume.close();
-    game.ui.dialogs.closeAll();
-    game.ui.resume.home();
-    game.input.clear();
-    game.pause('page');
-    game.loop.stop();
-    game.audio.suspend();
+    if (game) game.leave();
     root.classList.add('view-page');
-    timeline.mount();
+    timeline.start();
     const el = target();
     if (el) reveal(el);
     else if (!initial) window.scrollTo({ top: 0, behavior: 'instant' });
     if (!initial) resume.focus({ preventScroll: true });
-    fx.refresh();
   }
 
-  // back in a level: start paused, the way returning to the tab does
-  function hide(quiet) {
-    if (on) timeline.unmount();
-    root.classList.remove('view-page');
-    if (!on) return;
+  // into the game: load it the first time, then wake it
+  function hide(quiet, initial) {
+    const was = on;
+    if (on) timeline.stop();
     on = false;
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    display.fit();                     // the stage had no size while hidden
-    game.resume('page');
-    game.loop.start();
-    game.audio.resume();
-    if (!titleEl.hidden) $('title-play').focus({ preventScroll: true });
-    else if (quiet || !game.openPause()) game.focusStage();
+    root.classList.remove('view-page');
+    if (was) window.scrollTo({ top: 0, behavior: 'instant' });
+    if (game) { game.enter(quiet); return; }
+    loadGame().then((g) => {
+      game = g;
+      if (!on) g.enter(quiet, initial || !was);
+    }).catch((err) => {
+      console.error('[portfolio] the game failed to load; back to the website.', err);
+      go('page');
+    });
   }
 
   // switch from code; quiet skips the pause menu when a warp follows
@@ -116,7 +101,7 @@ export function createPage({ game, display, defaultView }) {
   // the résumé dialog was asked for while the page is up: show the place here
   function place(node) {
     if (node && timeline.revealNode(node)) return;
-    const el = node && resume.querySelector(`[data-node="${node}"]`);
+    const el = node && document.getElementById(PLACE[node] || node);
     if (el) reveal(el);
   }
 
@@ -124,6 +109,5 @@ export function createPage({ game, display, defaultView }) {
     get on() { return on; },
     sync, go,
     reveal: place,
-    timeline,
   };
 }

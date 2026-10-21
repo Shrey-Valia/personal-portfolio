@@ -27,8 +27,7 @@ questions doc and the engine owner adds it (additively).
 `js/game`, `js/themes`, `js/ui`, and `font.js`. To reuse a level's art,
 read its theme file and *copy* the drawing code into your module, turning
 per-tick fields into functions of `f.act` and `f.hold` (e.g. a bridge's
-`fill` becomes `fill = ease.outCubic(f.act)`). (`js/site/` is the first
-draft's engine; it is removed in M2. Ignore it.)
+`fill` becomes `fill = ease.outCubic(f.act)`).
 
 ## The module
 
@@ -169,7 +168,7 @@ export `transit` and it replaces the default for the gap *below your stop*:
 
 ```js
 transit: {
-  build({ w, h, dy, from, to, side }) { return { /* cached art, the polyline */ }; },
+  build({ w, h, dy, from, to, side, lane }) { return { /* cached art, the polyline */ }; },
   draw(ctx, g, built) { /* the hardware, as a function of g.s */ },
   hero(g, built) { return { pose, frame, x, y, facing }; },
 }
@@ -179,7 +178,9 @@ The connector canvas is `w` wide (96 game px on desktop, 64 on phones),
 centred on the page's centre line, and `h` (= `dy`) tall: `from` is your
 exit on its top edge, `to` the next entrance on its bottom edge. `side` is
 where the card sits beside it on desktop (`1` right, `-1` left, `0` the card
-covers the middle, as on phones): keep hardware on the free side. `g` is
+covers the middle, as on phones): keep hardware on the free side. `lane`
+is the half-width of the clear lane in game px (20 on desktop, 0 on phones):
+anything on the card's side beyond it is hidden behind the card. `g` is
 `{ s, dir, reduced, still }`, with `s` 0 → 1 along the move. Pure in `g`;
 with `reduced`, draw the hardware formed (he isn't shown).
 

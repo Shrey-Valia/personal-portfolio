@@ -26,17 +26,20 @@ export function createResume(game) {
     game.warp(node);
   }
 
-  // play chips on each section that has a level
+  // play chips on each section that has a level, once per level (EduLearn
+  // shares Dublin High's)
+  const chipped = new Set();
   for (const el of resume.querySelectorAll('[data-node]')) {
     const node = el.dataset.node;
-    if (!LEVELS[node] || el.querySelector(':scope > .play-chip')) continue;
+    if (!LEVELS[node] || chipped.has(node) || el.querySelector('.play-chip')) continue;
     if (el.tagName === 'UL') continue;
+    chipped.add(node);
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'play-chip';
     b.textContent = '▶ Play this level';
     b.addEventListener('click', () => play(node));
-    const head = el.querySelector(':scope > .entry__head') || (el.tagName === 'HEADER' && el.querySelector(':scope > [data-fact]'));
+    const head = el.querySelector('.entry__head') || el.querySelector('.stop__card > h2') || el.querySelector('[data-fact="p-name"]');
     if (head) head.after(b); else el.prepend(b);
   }
 

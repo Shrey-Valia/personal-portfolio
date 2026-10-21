@@ -1,9 +1,12 @@
 /* ═══════════════════════════════════════════════════════════
-   The résumé: one block of markup, two looks.
-   · body > .resume is the portfolio page: no JS, file://, a
-     failed boot, and the page view all show it this way.
-   · .resume-dialog .resume is the in-game log on paper, where
-     each fact gets a found / not-yet-found marker.
+   The résumé: one block of markup, in timeline order, three looks.
+   · body > .resume is the page. Without JS (and on file://) it is
+     the plain résumé, every bullet showing; with JS the website
+     view lays it out as the scroll timeline (css/timeline.css).
+   · print (and "Résumé PDF") regroups it under Experience,
+     Projects and Education & honors, black on white.
+   · .resume-dialog .resume is the in-game log on paper, grouped
+     the same way, with a found / not-yet-found marker per fact.
    Fact cards clone pieces of it; game.css styles those.
    ═══════════════════════════════════════════════════════════ */
 
@@ -24,7 +27,6 @@
 }
 
 .resume__name { margin: 0; font-size: clamp(34px, 6vw, 52px); }
-
 .resume__tag { margin: 12px 0 0; max-width: 36em; font-size: 19px; }
 
 .resume__contact {
@@ -36,11 +38,11 @@
   list-style: none;
 }
 .resume__contact a { display: inline-block; padding: 6px 0; font-weight: 700; }
-
 .resume__open { margin: 8px 0 0; }
 
-.resume__section { margin-top: 56px; }
-.resume__section > h2 { margin: 0 0 20px; font-size: 26px; }
+.timeline, .resume__section { margin-top: 56px; }
+.timeline__title, .resume__section h2 { margin: 0 0 20px; font-size: 26px; }
+.timeline__title span { margin-left: 10px; color: var(--muted); font-size: 0.62em; font-weight: 500; }
 
 .entry { margin: 0 0 32px; }
 .entry__head h3 { margin: 0; font-size: 22px; }
@@ -74,71 +76,59 @@
 
 .resume__foot { margin-top: 56px; font-size: 15px; }
 
+/* the timeline's own parts are drawn only in the website view */
+.stop__scene, .print-h { display: none; }
+.year-mark {
+  margin: 40px 0 14px;
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
 /* ─── the page ─────────────────────────────────────────────── */
 
 body > .resume {
-  --gutter: 0px;
   width: min(1080px, 100% - 32px);
   padding: 64px 0 80px;
-  counter-reset: sec;
 }
-.view-page body > .resume { padding-top: 56px; }
-.view-page { scroll-padding-top: 84px; }          /* clear the sticky bar */
-
-/* hero: who, what, how to reach him. With JS it splits in two equal
-   halves: Shrey on the left, the game's island on the right (page.css) */
-body > .resume .resume__head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "portrait" "name" "contact" "links" "open" "game" "snap";
-}
-body > .resume .resume__head > [data-fact="p-name"] { grid-area: name; }
-body > .resume .resume__head > .resume__contact { grid-area: contact; }
-body > .resume .resume__head > .hero-links { grid-area: links; }
-body > .resume .resume__head > .resume__open { grid-area: open; }
-body > .resume .resume__head > .portrait { grid-area: portrait; }
-body > .resume .resume__head > .hero-game { grid-area: game; }
-body > .resume .resume__head > .snapshot { grid-area: snap; }
-body > .resume .resume__head > .play-chip { display: none; }   /* the game half covers Home */
-body > .resume.has-art .resume__head > .resume__contact { display: none; }   /* shown in full at the end */
 
 body > .resume .resume__name {
-  font-size: clamp(46px, 7vw, 76px);
+  font-size: clamp(46px, 7vw, 72px);
   line-height: 1;
   letter-spacing: -0.02em;
 }
 body > .resume .resume__tag {
-  margin-top: 22px;
+  margin-top: 18px;
   max-width: 31em;
   color: #d3d7e8;
-  font-size: 21px;
+  font-size: 20px;
   line-height: 1.5;
 }
 
 /* contact links as pills, each with its icon */
 body > .resume .resume__contact,
-body > .resume .hero-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 30px 0 0; padding: 0; list-style: none; }
+.contact__links { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 0; padding: 0; list-style: none; }
 body > .resume .resume__contact a,
-body > .resume .hero-links a,
-.contactend__links a {
+.contact__links a {
   display: inline-flex;
   align-items: center;
   gap: 9px;
+  min-height: 44px;
   padding: 8px 15px 8px 13px;
   border-radius: 999px;
   background: var(--night-2);
   box-shadow: inset 0 0 0 1.5px var(--rule);
   color: var(--text);
-  font-size: 15.5px;
+  font-size: 16px;
   text-decoration: none;
   overflow-wrap: anywhere;
 }
 body > .resume .resume__contact a:hover,
-body > .resume .hero-links a:hover,
-.contactend__links a:hover { box-shadow: inset 0 0 0 1.5px var(--sea); }
+.contact__links a:hover { box-shadow: inset 0 0 0 1.5px var(--sea); }
 body > .resume .resume__contact a::before,
-body > .resume .hero-links a::before,
-.contactend__links a::before {
+.contact__links a::before {
   content: "";
   flex: none;
   width: 16px;
@@ -156,7 +146,7 @@ body > .resume .resume__open {
   display: flex;
   align-items: baseline;
   gap: 11px;
-  margin-top: 24px;
+  margin-top: 22px;
   font-size: 16px;
   line-height: 1.45;
 }
@@ -171,37 +161,12 @@ body > .resume .resume__open::before {
   transform: translateY(-1px);
 }
 
-/* sections: a number in the gutter, the heading, the map's road dots */
-body > .resume .resume__section { margin-top: 104px; counter-increment: sec; }
-body > .resume .resume__section > h2 {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  margin: 0 0 36px;
-  font-size: 34px;
-  letter-spacing: -0.01em;
-}
-body > .resume .resume__section > h2::before {
-  content: counter(sec, decimal-leading-zero);
-  min-width: calc(var(--gutter) - 16px);
-  color: var(--sea);
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-}
-body > .resume .resume__section > h2::after {
-  content: "";
-  flex: 1;
-  align-self: center;
-  height: 4px;
-  background: linear-gradient(90deg, var(--cream) 0 4px, transparent 4px) 0 0 / 12px 4px repeat-x;
-  opacity: 0.2;
-}
+body > .resume .timeline,
+body > .resume .resume__section { margin-top: 88px; }
+body > .resume .timeline__title,
+body > .resume .resume__section h2 { margin: 0 0 28px; font-size: 32px; letter-spacing: -0.01em; }
 
-/* entries: landmark tile in the gutter, the text beside it */
-body > .resume .has-tile { position: relative; padding-left: var(--gutter); }
-body > .resume .entry { margin: 0 0 56px; }
-body > .resume .entry:last-child { margin-bottom: 0; }
+body > .resume .entry { margin: 0 0 48px; }
 body > .resume .entry__head h3 { font-size: 24px; font-weight: 600; line-height: 1.22; }
 body > .resume .entry__role { margin-top: 6px; color: var(--sea); font-size: 17px; }
 body > .resume .entry__meta {
@@ -214,7 +179,7 @@ body > .resume .entry__meta {
 }
 body > .resume .entry__list,
 body > .resume .entry__text { max-width: 44em; }
-body > .resume .entry__list { margin-top: 16px; padding: 0; list-style: none; }
+body > .resume .entry__list { margin-top: 14px; padding: 0; list-style: none; }
 body > .resume .entry__list li { position: relative; margin: 10px 0 0; padding-left: 24px; line-height: 1.6; }
 body > .resume .entry__list li::before {
   content: "";
@@ -238,41 +203,7 @@ body > .resume .skillset h3 {
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-
-/* projects: cards, landmark art on top */
-body > .resume .resume__section--cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-}
-body > .resume .resume__section--cards > h2 { grid-column: 1 / -1; margin-bottom: 12px; }
-body > .resume .resume__section--cards > .entry {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0 26px 26px;
-  border-radius: 18px;
-  background: var(--night-2);
-  box-shadow: inset 0 0 0 1.5px var(--rule);
-}
-body > .resume .resume__section--cards .entry__head { display: block; }
-body > .resume .resume__section--cards .entry__head > .entry__meta { margin-top: 6px; text-align: left; }
-body > .resume .resume__section--cards .entry__list { margin-bottom: 22px; }
-body > .resume .resume__section--cards .entry > .play-chip { margin-top: auto; }
-
-/* skills: one panel per group, packed in columns */
-body > .resume .skills { columns: 3 260px; column-gap: 16px; }
-body > .resume .skillset {
-  margin: 0 0 16px;
-  break-inside: avoid;
-  padding: 18px 20px 20px;
-  border-radius: 14px;
-  background: var(--night-2);
-  box-shadow: inset 0 0 0 1.5px var(--rule);
-}
 body > .resume .skillset h3 { color: var(--gold); }
-body > .resume .skills > .play-chip { margin: 0 0 16px; }
-
 body > .resume .chips li { font-size: 15.5px; padding: 5px 13px; }
 
 body > .resume .resume__foot {
@@ -282,30 +213,13 @@ body > .resume .resume__foot {
   color: var(--muted);
 }
 body > .resume .resume__foot p { margin: 0; max-width: 40em; }
+body > .resume .resume__foot .foot-play { margin-bottom: 10px; color: var(--text); }
+.foot-play a { font-weight: 700; }
 
-/* the level link on each section: quiet, after the reading */
-body > .resume .play-chip {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  min-height: 36px;
-  margin: 18px 0 0;
-  padding: 4px 14px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  box-shadow: inset 0 0 0 1.5px rgba(111, 214, 200, 0.45);
-  color: var(--sea);
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-}
-body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
+body > .resume .play-chip { display: none; }        /* the game is one link away, not on every card */
 
-/* arriving from a link: a brief glow on the section */
+/* arriving from a link: a brief glow, only when motion is fine */
 @media (prefers-reduced-motion: no-preference) {
-  .view-page { scroll-behavior: smooth; }
   body > .resume :target { animation: page-target 1.6s ease-out; border-radius: 14px; }
 }
 @keyframes page-target {
@@ -314,93 +228,94 @@ body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
 }
 
 @media (min-width: 760px) {
-  body > .resume.has-art { --gutter: 176px; }
-  /* role and dates share the title row */
-  body > .resume .entry__head {
+  /* without JS: role and dates share the title row */
+  html:not(.view-page) body > .resume .entry__head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     column-gap: 28px;
     align-items: baseline;
   }
-  body > .resume .entry__head > h3 { grid-row: 1; grid-column: 1; }
-  body > .resume .entry__head > .entry__meta { grid-row: 1; grid-column: 2; margin: 0; text-align: right; white-space: nowrap; }
-  body > .resume .entry__head > .entry__role { grid-column: 1 / -1; }
-  body > .resume .entry.has-tile { display: flex; flex-direction: column; }
-  body > .resume .entry > .play-chip { order: 1; }
-}
-
-@media (max-width: 899px) {
-  body > .resume .resume__section--cards { grid-template-columns: minmax(0, 1fr); }
+  html:not(.view-page) body > .resume .entry__head > h3 { grid-row: 1; grid-column: 1; }
+  html:not(.view-page) body > .resume .entry__head > .entry__meta { grid-row: 1; grid-column: 2; margin: 0; text-align: right; white-space: nowrap; }
+  html:not(.view-page) body > .resume .entry__head > .entry__role { grid-column: 1 / -1; }
 }
 
 @media (max-width: 759px) {
   body > .resume { padding-top: 40px; }
-  body > .resume .resume__section { margin-top: 80px; }
-  body > .resume .resume__section > h2 { font-size: 29px; margin-bottom: 28px; }
-  body > .resume .resume__section > h2::before { font-size: 15px; }
+  body > .resume .timeline,
+  body > .resume .resume__section { margin-top: 64px; }
+  body > .resume .timeline__title,
+  body > .resume .resume__section h2 { font-size: 28px; }
   body > .resume .entry__head h3 { font-size: 22px; }
   body > .resume .resume__tag { font-size: 18.5px; }
-  body > .resume .resume__section--cards > .entry { padding: 0 20px 22px; }
 }
 
-/* print, and "Résumé PDF": a plain black-on-white résumé of the same markup */
+/* ─── print, and "Résumé PDF" ──────────────────────────────── */
+/* the same markup as a plain résumé, regrouped by CSS order */
+
 @media print {
   @page { margin: 14mm 16mm; }
   html, body { background: #fff !important; }
   body { color: #111; font-size: 10.5pt; line-height: 1.4; }
-  .banner, .skip, .play-chip, .page-only { display: none !important; }
+  .banner, .skip, .play-chip, .page-only, .js-only, .jump, .year-mark, .timeline__title,
+  .stop__scene, .stop__chips, .stop__more, .snapshot, .tl-track, .tl-hero, .tl-vh { display: none !important; }
   body > .resume { width: auto; padding: 0; }
   body > .resume a { color: #000; text-decoration: none; }
 
   body > .resume .resume__head { display: block; }
-  body > .resume.has-art .resume__head > .resume__contact { display: flex; }
   body > .resume .resume__name { color: #000; font-size: 24pt; letter-spacing: 0; }
   body > .resume .resume__tag { max-width: none; margin-top: 4pt; color: #222; font-size: 11pt; }
   body > .resume .resume__contact { gap: 2pt 16pt; margin-top: 6pt; }
-  body > .resume .resume__contact a { padding: 0; background: none; box-shadow: none; color: #000; font-size: 10pt; font-weight: 400; }
+  body > .resume .resume__contact a { min-height: 0; padding: 0; background: none; box-shadow: none; color: #000; font-size: 10pt; font-weight: 400; }
   body > .resume .resume__contact a::before { width: 9pt; height: 9pt; background: #000; }
   body > .resume .resume__open { margin-top: 5pt; font-size: 10pt; }
   body > .resume .resume__open::before { background: #000; box-shadow: none; width: 5pt; height: 5pt; }
 
+  body > .resume .timeline { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 0; }
   body > .resume .resume__section { margin-top: 14pt; }
-  body > .resume .resume__section > h2 {
+  body > .resume .print-h,
+  body > .resume #skills h2 {
     display: block;
-    margin: 0 0 6pt;
+    margin: 14pt 0 6pt;
     padding-bottom: 2pt;
     border-bottom: 1px solid #000;
     color: #000;
     font-size: 13pt;
+    break-after: avoid;
+    page-break-after: avoid;
   }
-  body > .resume .resume__section > h2::before, body > .resume .resume__section > h2::after { display: none; }
-  body > .resume .resume__section--cards { display: block; }
-  body > .resume .resume__section--cards > .entry,
-  body > .resume .entry.has-tile { display: block; }
-  body > .resume .has-tile, body > .resume .resume__section--cards > .entry {
-    padding: 0; background: none; box-shadow: none; border-radius: 0;
-  }
+  .print-h[data-group="experience"] { order: 1; }
+  .stop[data-group="experience"] { order: 2; }
+  .print-h[data-group="projects"] { order: 3; }
+  .stop[data-group="projects"] { order: 4; }
+  .print-h[data-group="education"] { order: 5; break-before: page; page-break-before: always; }   /* heading and entries together */
+  #neu { order: 6; }
+  #droid { order: 7; }
+  #dhs { order: 8; }
+  #edulearn { order: 9; }
+
   body > .resume .entry { margin: 0 0 9pt; break-inside: avoid; }
-  body > .resume .entry__head,
-  body > .resume .resume__section--cards .entry__head {
+  body > .resume .entry__head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     column-gap: 12pt;
     align-items: baseline;
   }
   body > .resume .entry__head > h3 { grid-row: 1; grid-column: 1; font-size: 11.5pt; }
-  body > .resume .entry__head > .entry__meta,
-  body > .resume .resume__section--cards .entry__head > .entry__meta { grid-row: 1; grid-column: 2; margin: 0; text-align: right; white-space: nowrap; }
+  body > .resume .entry__head > .entry__meta { grid-row: 1; grid-column: 2; margin: 0; text-align: right; white-space: nowrap; }
   body > .resume .entry__head > .entry__role { grid-column: 1 / -1; }
   body > .resume .entry__role { margin-top: 1pt; color: #000; font-size: 10.5pt; }
   body > .resume .entry__meta { color: #333; font-size: 9.5pt; }
   body > .resume .entry__list { max-width: none; margin-top: 3pt; }
   body > .resume .entry__list li { margin: 2pt 0 0; padding-left: 11pt; line-height: 1.35; }
+  body > .resume .entry__list li.is-more { display: list-item !important; }
   body > .resume .entry__list li::before { top: 0.55em; width: 3.5pt; height: 3.5pt; background: #000; box-shadow: none; }
   body > .resume .entry__text { max-width: none; margin-top: 3pt; line-height: 1.35; }
   body > .resume .entry__block { margin-top: 4pt; }
   body > .resume .entry__label, body > .resume .skillset h3 { margin: 0 0 2pt; color: #000; font-size: 9pt; }
 
   body > .resume .skills { columns: 2; column-gap: 18pt; }
-  body > .resume .skillset { margin: 0 0 6pt; padding: 0; background: none; box-shadow: none; }
+  body > .resume .skillset { margin: 0 0 6pt; padding: 0; background: none; box-shadow: none; break-inside: avoid; }
   body > .resume .chips { gap: 0; }
   body > .resume .chips li { padding: 0; border: 0; background: none; font-size: 10pt; }
   body > .resume .chips li:not(:last-child)::after { content: ",\00a0"; }
@@ -467,9 +382,23 @@ body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
 .resume-dialog .resume__open,
 .resume-dialog .entry__meta,
 .resume-dialog .resume__foot { color: var(--paper-mut); }
-.resume-dialog .resume__section > h2 { padding-bottom: 8px; border-bottom: 2px solid var(--paper-ink); }
 .resume-dialog .chips li { background: var(--paper-2); border-color: #c9c0ac; }
-.resume-dialog .page-only { display: none; }   /* the website's extras */
+.resume-dialog .page-only, .resume-dialog .js-only, .resume-dialog .year-mark,
+.resume-dialog .timeline__title, .resume-dialog .stop__scene, .resume-dialog .tl-track { display: none !important; }
+
+/* grouped like the printed résumé */
+.resume-dialog .timeline { display: flex; flex-direction: column; margin-top: 32px; }
+.resume-dialog .print-h,
+.resume-dialog #skills h2 { display: block; margin: 28px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--paper-ink); font-size: 24px; }
+.resume-dialog .print-h[data-group="experience"] { order: 1; margin-top: 0; }
+.resume-dialog .stop[data-group="experience"] { order: 2; }
+.resume-dialog .print-h[data-group="projects"] { order: 3; }
+.resume-dialog .stop[data-group="projects"] { order: 4; }
+.resume-dialog .print-h[data-group="education"] { order: 5; }
+.resume-dialog #neu { order: 6; }
+.resume-dialog #droid { order: 7; }
+.resume-dialog #dhs { order: 8; }
+.resume-dialog #edulearn { order: 9; }
 
 /* found markers: a hollow ring until the fact is logged in-game */
 .resume-dialog [data-fact] { position: relative; }
@@ -507,7 +436,6 @@ body > .resume .play-chip:hover { background: var(--sea); color: var(--ink); }
   cursor: pointer;
 }
 .resume-dialog .play-chip:hover { background: var(--teal); color: var(--paper); }
-.resume-dialog .skills > .play-chip { margin: 0 0 14px; }
 
 @media (max-width: 600px) {
   .resume-dialog { width: 100vw; height: 100dvh; box-shadow: none; }

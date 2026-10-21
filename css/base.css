@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════
    Base: tokens, reset, and the js / no-js switch.
 
-   Without JS (or from file://, or if the game fails to boot)
-   the page is the résumé as a portfolio page. With html.js the
-   game shell fills the viewport and the résumé opens in a
-   dialog; html.js.view-page swaps back to the page, with the
-   page bar on top (js/ui/page.js).
+   Without JS (or from file://, or if the scripts fail) the page
+   is the plain résumé, with the bar. With html.js.view-page it
+   is the scroll timeline (css/timeline.css). With html.js alone
+   the game shell fills the viewport and the résumé opens in a
+   dialog (js/ui/page.js switches between them).
    ═══════════════════════════════════════════════════════════ */
 
 :root {
@@ -142,17 +142,21 @@ kbd {
 .pbtn--small { min-height: 38px; font-size: 15px; padding: 0.4em 0.9em; border-radius: 10px; }
 
 /* ─── the switch ───────────────────────────────────────────── */
+/* the website (and the plain résumé without JS) shows the bar; the game
+   view (html.js without .view-page) shows only the game shell */
 
-.game, .pagebar { display: none; }
+.game { display: none; }
+html:not(.js) .js-only { display: none !important; }
 
 .js:not(.view-page), .js:not(.view-page) body { height: 100%; overflow: hidden; background: var(--void); }
 .js:not(.view-page) .game { display: block; }
-.js:not(.view-page) body > .resume { display: none; }   /* shown in the dialog instead */
-.js.view-page .pagebar { display: flex; }
+.js:not(.view-page) body > .resume,
+.js:not(.view-page) .pagebar,
+.js:not(.view-page) .jump { display: none; }   /* the résumé shows in the dialog instead */
 
 @media print {
   html, body, .js body { height: auto !important; overflow: visible !important; }
-  .js .game, .pagebar { display: none !important; }
+  .js .game, .pagebar, .jump { display: none !important; }
   .js body > .resume { display: block !important; }
 }
 

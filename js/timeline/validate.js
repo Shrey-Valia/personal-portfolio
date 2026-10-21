@@ -20,6 +20,7 @@ function makeCanvas(w, h) {
   c.width = w; c.height = h;
   const ctx = c.getContext('2d', { willReadFrequently: true });
   ctx.imageSmoothingEnabled = false;
+  ctx.__scratch = true;
   return [c, ctx];
 }
 
@@ -33,8 +34,19 @@ export function guardText(ctx) {
   return ctx;
 }
 
+// hash a canvas's pixels (read back through a scratch canvas, so the
+// source keeps its fast path)
+let scratch = null;
 export function hashCanvas(ctx, w, h) {
-  const d = ctx.getImageData(0, 0, w, h).data;
+  let d;
+  if (!ctx.__scratch) {
+    if (!scratch) scratch = makeCanvas(1, 1);
+    const [c, x] = scratch;
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+    x.clearRect(0, 0, w, h);
+    x.drawImage(ctx.canvas, 0, 0);
+    d = x.getImageData(0, 0, w, h).data;
+  } else d = ctx.getImageData(0, 0, w, h).data;
   let x = 2166136261;
   for (let i = 0; i < d.length; i++) { x ^= d[i]; x = Math.imul(x, 16777619); }
   return (x >>> 0).toString(16);

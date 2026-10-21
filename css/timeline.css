@@ -1,107 +1,211 @@
 /* ═══════════════════════════════════════════════════════════
-   The scroll timeline (js/site/timeline.js builds it, website
-   view only). Newest first, one <li class="stop"> per place:
-   a scene box the canvas overlay draws into, then the card.
+   The website: the bar, and the scroll timeline's layout. The
+   pixel layers themselves (scene canvases, the track, the hero,
+   labels) are css/track.css; js/timeline draws them.
 
-   Desktop: date | lane | card under each scene; the path and
-   Shrey run down the lane. Phones: lane | card, scenes full
-   width above. The lane is kept clear of text so the path never
-   crosses it. Without JS, on file:// and in print none of this
-   exists: the plain grouped résumé shows instead.
+   Breakpoints set two numbers the engine reads:
+     --gp    CSS px per game px: 2 phone, 2.5 tablet, 3 desktop
+     --lane  the centre lane the path runs down beside the cards
+   Phone < 768: scenes edge to edge, the card full width under
+   each; the path runs under the cards. Tablet: the card centred
+   under its scene. Desktop ≥ 1000: cards alternate either side of
+   the lane, so the path and Shrey are always in view.
    ═══════════════════════════════════════════════════════════ */
 
-/* the overlay: one fixed canvas over the page, under the bar */
-.timeline-canvas {
-  position: fixed;
-  left: 0;
+:root { --gp: 2; --lane: 0px; }
+@media (min-width: 768px) { :root { --gp: 2.5; } }
+@media (min-width: 1000px) { :root { --gp: 3; --lane: 120px; } }
+
+/* ─── the bar ──────────────────────────────────────────────── */
+
+.pagebar {
+  position: sticky;
   top: 0;
-  z-index: 15;
-  pointer-events: none;
-}
-
-body > .resume.has-timeline { padding-top: 48px; }
-.view-page body > .resume .resume__section.is-emptied { display: none; }
-
-.timeline {
-  --lane: 120px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.stop { margin: 0 0 96px; }
-.stop:last-child { margin-bottom: 0; }
-
-/* the scene box: JS sets its exact size in whole art pixels */
-.stop__stage { display: flex; justify-content: center; width: 100%; min-width: 0; }
-.stop__scene { flex: none; max-width: 100%; }
-
-.stop__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--lane) minmax(0, 1fr);
-  margin-top: 40px;
-}
-.stop__lane { grid-column: 2; grid-row: 1; }
-
-/* the date beside the lane: what a recruiter scans down */
-.stop__when {
-  grid-column: 1;
-  grid-row: 1;
+  z-index: 20;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  margin: 20px 0 0;
-  text-align: right;
+  align-items: center;
+  gap: 28px;
+  height: 64px;
+  padding: 0 max(16px, (100% - 1080px) / 2);
+  background: rgba(14, 20, 51, 0.92);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1.5px 0 var(--rule);
 }
-.stop__date { color: var(--text); font-family: var(--display); font-weight: 600; font-size: 22px; line-height: 1.2; }
-.stop__kind {
-  color: var(--sea);
+.pagebar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  min-height: 44px;
+  color: var(--text);
   font-family: var(--display);
-  font-weight: 600;
-  font-size: 13.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 19px;
+  text-decoration: none;
+}
+.pagebar__mark:empty { display: none; }
+.pagebar__head { display: block; width: 36px; height: 30px; image-rendering: pixelated; }
+.pagebar__links { display: flex; align-items: center; gap: 22px; min-width: 0; }
+.pagebar__links a, .pagebar__jump, .pagebar__menu {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 16px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.pagebar__links a:hover, .pagebar__jump:hover, .pagebar__menu:hover { color: var(--text); box-shadow: inset 0 -2px 0 var(--gold); }
+.pagebar__jump::after { content: " ▾"; margin-left: 4px; font-size: 12px; }
+.pagebar__end { display: flex; align-items: center; gap: 14px; flex: none; margin-left: auto; }
+.pagebar__menu { color: var(--text); font-weight: 600; }
+.pagebar__menu::after { content: " ☰"; margin-left: 6px; }
+
+@media (min-width: 768px) { .pagebar__menu { display: none; } }
+@media (max-width: 767px) { .pagebar__links, .pagebar__pdf { display: none; } }
+
+/* the Jump menu: a native popover, so it works without JS too */
+.jump {
+  position: fixed;
+  inset: 72px max(12px, (100% - 1080px) / 2) auto auto;
+  width: min(360px, 100% - 24px);
+  max-height: calc(100dvh - 90px);
+  margin: 0;
+  padding: 14px 8px 12px;
+  overflow: auto;
+  border: 0;
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1.5px var(--line), 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+.jump::backdrop { background: rgba(5, 6, 12, 0.35); }
+.jump__title { margin: 0 12px 6px; color: var(--muted); font: 600 13px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.jump__list { margin: 0; padding: 0; list-style: none; }
+.jump__list a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 16px;
+  text-decoration: none;
+}
+.jump__list a:hover, .jump__list a:focus-visible { background: var(--panel-2); }
+.jump__list span { color: var(--muted); font-family: var(--display); font-weight: 600; font-size: 14px; }
+.jump__more { display: flex; align-items: center; gap: 16px; margin: 10px 12px 0; padding-top: 12px; border-top: 1.5px solid var(--line); }
+.jump__play { font-family: var(--display); font-weight: 600; }
+
+/* ─── the timeline (website view) ──────────────────────────── */
+
+.view-page body > .resume { position: relative; padding-top: 40px; }
+.view-page { scroll-padding-top: 76px; }
+.tl-vh { position: fixed; left: 0; top: 0; width: 0; height: 100vh; height: 100svh; visibility: hidden; pointer-events: none; }
+
+/* the scene box: reserved before any JS draws, so nothing shifts */
+.view-page .stop__scene {
+  display: block;
+  position: relative;
+  height: calc(var(--gp) * 100px);
+  margin: 0;
+}
+.view-page .stop__scene > .tl-labels { right: auto; bottom: auto; }
+
+/* the intro: who, what, how to reach him, then his door */
+.view-page .stop--intro { display: grid; grid-template-areas: "text" "scene" "snap"; gap: 26px; }
+.view-page .stop--intro > .intro__text { grid-area: text; }
+.view-page .stop--intro > .stop__scene { grid-area: scene; }
+.view-page .stop--intro > .snapshot { grid-area: snap; }
+@media (min-width: 1000px) {
+  .view-page .stop--intro { grid-template-areas: "text" "snap" "scene"; gap: 20px; }
+  .view-page body > .resume .resume__name { font-size: 60px; }
+  .view-page body > .resume .resume__tag { margin-top: 14px; font-size: 19px; }
+  .view-page body > .resume .resume__contact { margin-top: 20px; }
+  .view-page body > .resume .resume__open { margin-top: 16px; }
 }
 
-/* the card */
-.stop__card {
-  grid-column: 3;
-  grid-row: 1;
-  min-width: 0;
-  padding: 24px 26px 24px;
-  border-radius: 18px;
-  background: var(--night-2);
-  box-shadow: inset 0 0 0 1.5px var(--rule);
+.snapshot { display: grid; grid-template-columns: repeat(3, auto); width: fit-content; max-width: 100%; gap: 1.5px; margin: 0; overflow: hidden; border-radius: 14px; background: var(--rule); box-shadow: 0 0 0 1.5px var(--rule); }
+.snapshot__row { padding: 10px 18px 12px; background: var(--night-2); }
+.snapshot dt { color: var(--muted); font: 600 12.5px var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+.snapshot dd { margin: 4px 0 0; font-size: 16px; line-height: 1.35; }
+@media (max-width: 767px) {
+  .snapshot { grid-template-columns: 1fr; }
+  .view-page .stop--intro > .stop__scene { margin-inline: -16px; }   /* edge to edge */
 }
-body > .resume .stop__card > .entry { margin: 0; }
-body > .resume .stop__card .entry__head { display: block; }
-body > .resume .stop__card .entry__head > h3 { font-size: 23px; }
-body > .resume .stop__card .entry__head > .entry__meta { margin-top: 6px; text-align: left; white-space: normal; }
-body > .resume .stop__card .entry__text,
-body > .resume .stop__card .entry__list { max-width: none; }
-body > .resume .stop__card .play-chip { display: none; }   /* the game is one link in the bar */
 
-/* one lead line (moved first); "Show more" opens the rest */
-.stop__card:not(.is-open) .is-more { display: none; }
+.view-page .timeline { margin-top: 64px; }
+.view-page .timeline__title { margin-bottom: 8px; }
+.view-page body > .resume .resume__section { margin-top: 0; }
 
-.stop__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
-.stop__chips li {
+/* each stop: its scene, then its card */
+.view-page .stop:not(.stop--intro) { margin: 0 0 88px; }
+.view-page .stop__card {
+  position: relative;
+  z-index: 2;                         /* above the track: the path passes behind cards */
+  margin-top: 18px;
+  padding: 22px 24px 22px;
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--line), inset 3px 0 0 var(--accent, var(--sea));
+}
+.view-page body > .resume .stop .entry__head { display: block; }
+.view-page body > .resume .stop .entry__head > h3 { font-size: 23px; }
+.view-page body > .resume .stop .entry__list { margin-top: 12px; }
+.view-page body > .resume .stop .entry__list,
+.view-page body > .resume .stop .entry__text { max-width: none; }
+.view-page .stop:not(.is-open) li.is-more { display: none; }
+
+@media (max-width: 767px) {
+  .view-page .stop:not(.stop--intro) > .stop__scene { margin-inline: -16px; }
+  .view-page .stop__card { padding: 20px 18px; }
+  .view-page .stop:not(.stop--intro) { margin-bottom: 64px; }
+}
+@media (min-width: 768px) and (max-width: 999px) {
+  .view-page .stop__card { max-width: 600px; margin-inline: auto; }
+}
+@media (min-width: 1000px) {
+  .view-page .stop[data-side="right"] > .stop__card { margin-left: calc(50% + var(--lane) / 2 + 24px); }
+  .view-page .stop[data-side="left"] > .stop__card { margin-right: calc(50% + var(--lane) / 2 + 24px); }
+}
+
+/* the year a stretch of the path starts: on the free side on desktop */
+.view-page .year-mark { margin: -40px 0 14px; color: var(--muted); font-size: 16px; }
+@media (min-width: 1000px) {
+  .view-page .year-mark { width: calc(50% - var(--lane) / 2 - 24px); margin-top: -56px; text-align: right; }
+}
+
+/* chips: the card's figures, verbatim from its text */
+.stop__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.stop__chips li, .view-page .entry__award {
+  display: inline-block;
   padding: 4px 12px 5px;
   border-radius: 999px;
   background: rgba(255, 209, 102, 0.13);
   color: var(--gold);
   font-family: var(--display);
   font-weight: 600;
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.3;
 }
+/* Droid: the title first, the award as its chip (the text stays in the h3) */
+.view-page body > .resume [data-stop="droid"] .entry__head > h3 { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 10px; }
+.view-page .entry__sep { display: none; }
 
 .stop__more {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  margin: 16px 0 0;
+  margin: 14px 0 0;
   padding: 6px 16px;
   border: 0;
   border-radius: 999px;
@@ -115,60 +219,29 @@ body > .resume .stop__card .play-chip { display: none; }   /* the game is one li
 }
 .stop__more:hover { background: var(--sea); color: var(--ink); }
 
-/* the skills card: the section itself, without its section chrome */
-body > .resume .stop__card > .resume__section { margin: 0; }
-body > .resume .stop__card > .resume__section > h2 { display: block; margin: 0 0 18px; font-size: 24px; }
-body > .resume .stop__card > .resume__section > h2::before,
-body > .resume .stop__card > .resume__section > h2::after { display: none; }
-body > .resume .stop__card .skills { columns: auto; }
-body > .resume .stop__card .skillset { margin: 0 0 18px; padding: 0; background: none; box-shadow: none; }
-body > .resume .stop__card .skillset:last-child { margin-bottom: 0; }
+/* skills and contact: their sections are stops like the rest */
+.view-page body > .resume .stop__card > h2 { margin: 0 0 8px; font-size: 26px; }
+.skills__count { margin: 0 0 18px; color: var(--muted); font-size: 15px; }
+.view-page body > .resume .skillset { margin: 0 0 16px; }
+.view-page body > .resume .skillset:last-child { margin-bottom: 0; }
+.contact__lead { margin: 6px 0 0; font-size: 18px; line-height: 1.5; }
+.contact__links { margin-top: 20px; }
 
-/* the contact card: the links in full, big */
-.contact-card__title { margin: 0; font-size: 26px; }
-.contactend__lead { margin: 10px 0 0; font-size: 18px; line-height: 1.5; }
-.contactend__links { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0 0; padding: 0; list-style: none; }
-.contactend__links a { min-height: 48px; padding: 12px 20px 12px 17px; font-size: 16.5px; }
+/* each stop's accent: the card's edge */
+[data-stop="intro"] { --accent: #6fd6c8; }
+[data-stop="vincio"] { --accent: #3cc0e8; }
+[data-stop="ornl"] { --accent: #21a3a0; }
+[data-stop="handshake"] { --accent: #f07a1f; }
+[data-stop="droid"] { --accent: #a8ecff; }
+[data-stop="neu"], [data-stop="dhs"] { --accent: #e0393f; }
+[data-stop="edulearn"], [data-stop="contact"] { --accent: #ffe08a; }
+[data-stop="trading"] { --accent: #90eaa8; }
+[data-stop="skills"] { --accent: #c58c52; }
 
-/* the bookends: the intro (who, what, how to reach him, beside his
-   room) and the contact card beside the lighthouse */
-/* side by side only where the scene still gets its 288 safe art px */
-.stop--side {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
-  gap: 32px;
-}
-@media (min-width: 1100px) {
-  .stop--intro { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 40px; }
-  .stop--end { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; }
-}
-.stop--side > .stop__card { grid-column: auto; grid-row: auto; }
-.stop--intro > .stop__card { padding: 0; background: none; box-shadow: none; }
-body > .resume .stop--side .resume__head { display: block; }
-body > .resume .stop--side .resume__name { font-size: clamp(46px, 6vw, 72px); }
-body > .resume .stop--side .resume__tag { font-size: 20px; }
-
-@media (max-width: 899px) {
-  .timeline { --lane: 44px; }
-  .stop { margin-bottom: 72px; }
-  .stop__body { grid-template-columns: var(--lane) minmax(0, 1fr); margin-top: 24px; }
-  .stop__lane { grid-column: 1; grid-row: 1 / span 2; }
-  .stop__when { grid-column: 2; grid-row: 1; align-items: flex-start; margin: 0 0 10px; text-align: left; }
-  .stop__date { display: none; }                 /* the card has the dates */
-  .stop__when:not(:has(.stop__kind)) { display: none; }
-  .stop__card { grid-column: 2; grid-row: 2; padding: 20px 18px 20px; }
-  body > .resume .stop__card .entry__head > h3 { font-size: 21px; }
-
-  .stop--intro > .stop__card { padding: 0; }
-}
-
-@media (max-width: 759px) {
-  body > .resume.has-timeline { padding-top: 32px; }
-}
-
-/* print never sees the timeline (it is taken down first), but just in case */
-@media print {
-  .timeline-canvas, .stop__stage, .stop__when, .stop__chips, .stop__more { display: none !important; }
-  .stop__card .is-more { display: list-item !important; }
+/* phones: reading text at 16 px or more (eyebrow labels excepted) */
+@media (max-width: 767px) {
+  body > .resume .entry__meta, body > .resume .chips li, body > .resume .resume__foot,
+  body > .resume .resume__contact a, .contact__links a, .stop__more, .stop__chips li,
+  .view-page .entry__award, .skills__count, .jump__list a { font-size: 16px; }
+  .snapshot dt { font-size: 13px; }
 }
