@@ -100,6 +100,7 @@ Every field but `id`, `facts` and `draw` is optional.
 | `act` | 0 → 1 through the act phase; 0 before it, 1 after it |
 | `hold` | 0 → 1 through the hold phase |
 | `walk` | 0 → 1 through his walk in (phase `in`) or out (phase `out`) |
+| | The **intro** starts in `hold` at the top of the page (he never walks in), and **contact**, where the path ends, never reaches `out`: it stays in `hold` with `hold` 1 to the bottom of the page, idle loop and all |
 | `p` | the raw 0 → 1 |
 | `here` | he is in this scene (false for `before`/`after` stops) |
 | `t` | the idle clock in ms: only in `hold`, only with `idle: true`, else 0 |
