@@ -91,8 +91,27 @@ function skillsCount() {
 }
 
 // desktop: cards alternate either side of the centre lane, by stop order
+// (Contact's card sits above its scene and on Skills' side, so the last
+// stretch of path has one free side all the way down)
 function sides(resume) {
   [...resume.querySelectorAll('.stop:not(.stop--intro)')].forEach((s, i) => { s.dataset.side = i % 2 ? 'left' : 'right'; });
+  const skills = $('skills'), contact = $('contact');
+  if (skills && contact) contact.dataset.side = skills.dataset.side;
+}
+
+// the Skills headings get the scene's tier bricks, so the five lit bands map
+// to the five groups (loaded with the skills stop; nothing if it fails)
+function tierIcons() {
+  import('../timeline/stops/skills.js').then((m) => {
+    if (!m.tierIcons) return;
+    for (const [fact, c] of Object.entries(m.tierIcons())) {
+      const h = document.querySelector(`[data-fact="${fact}"] > h3`);
+      if (!h || h.querySelector('.skillset__icon')) continue;
+      c.className = 'skillset__icon';
+      c.setAttribute('aria-hidden', 'true');
+      h.prepend(c);
+    }
+  }).catch(() => {});
 }
 
 function bar() {
@@ -103,8 +122,23 @@ function bar() {
     c.className = 'pagebar__head';
     mark.appendChild(c);
   }
+  // links that only make sense with JS (the Contact stop is JS-only)
+  for (const a of document.querySelectorAll('a[data-js-href]')) a.setAttribute('href', a.dataset.jsHref);
   const jump = $('jump');
   if (jump) jump.addEventListener('click', (e) => { if (e.target.closest('a') && jump.hidePopover) jump.hidePopover(); });
+  // from tablet width up the menu opens under the "Jump to" button, not at the far edge
+  const trigger = document.querySelector('.pagebar__jump');
+  if (jump && trigger) {
+    jump.addEventListener('beforetoggle', (e) => {
+      if (e.newState !== 'open') return;
+      const wide = window.matchMedia('(min-width: 768px)').matches;
+      if (!wide) { jump.style.left = jump.style.right = ''; return; }
+      const r = trigger.getBoundingClientRect();
+      const w = Math.min(360, window.innerWidth - 24);
+      jump.style.left = Math.round(Math.max(12, Math.min(r.left - 12, window.innerWidth - w - 12))) + 'px';
+      jump.style.right = 'auto';
+    });
+  }
   const print = () => { if (jump && jump.hidePopover && jump.matches(':popover-open')) jump.hidePopover(); window.print(); };
   for (const id of ['pagebar-pdf', 'jump-pdf']) { const b = $(id); if (b) b.addEventListener('click', print); }
 }
@@ -118,4 +152,5 @@ export function decorate() {
   skillsCount();
   sides(resume);
   bar();
+  tierIcons();
 }

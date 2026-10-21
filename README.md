@@ -61,7 +61,7 @@ Run with `?debug=1` and the console prints `timeline check: 11 stops OK,
 
 | Flag | Effect |
 |---|---|
-| `?debug=1` | Timeline checks, `window.__tl` (goto, drawNow, hash); in the game an FPS counter, coverage report and `window.__game` |
+| `?debug=1` | Timeline checks, `window.__tl` (`goto(id, p)`, `drawNow({ dir, still, t })` with `t` pinning the idle clock, `hash()`, `setReduced()`); in the game an FPS counter, coverage report and `window.__game` |
 | `tools/stop.html?stop=ornl` | The stop test bench: one stop with width, p and reduced-motion controls and the checks |
 | `?level=ornl` | Boot straight into a level |
 | `?fresh=1` | Ignore saved progress for this load |
