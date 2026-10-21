@@ -1,7 +1,8 @@
 // Algorithmic trading bot (Apr–Aug 2024). He drops in on the chart's
 // baseline, steps onto the RL agent's autopilot cart, folds his arms (no
 // manual input) and rides it up a rising equity curve past an entry ▲ and
-// a higher exit ▼, to the backtest board. The figures on the board are
+// a higher exit ▼ (gold, not red: red-down reads as a loss), to the
+// backtest board. The figures on the board are
 // read from the card (p-trade-4) at build time, never typed here, and the
 // "$50,000" on the portfolio plate is read from p-trade-1.
 // Art rule: nothing here shows a price line moving down; the curve only
@@ -130,11 +131,8 @@ export default {
     const slots = [bd.y + 5, bd.y + 19];
     for (const y of slots) { b.fillStyle = C('#0c1d33'); b.fillRect(bd.x + 4, y, bd.w - 8, 11); }
 
-    // the simulated-portfolio plate under the baseline (its figure is read from p-trade-1)
+    // the simulated-portfolio plate under the baseline (drawn in draw() while its label shows)
     const plate = { x: c0 + 10, y: 86, w: 52 };
-    m.fillStyle = C('ink.0'); m.fillRect(plate.x - 1, plate.y - 1, plate.w + 2, 12);
-    m.fillStyle = C('indigo.1'); m.fillRect(plate.x, plate.y, plate.w, 10);
-    for (let i = 3; i < plate.w - 2; i += 5) { m.fillStyle = C(i % 15 === 3 ? 'gold.3' : 'gold.1'); m.fillRect(plate.x + i, plate.y + 9, 2, 1); }
 
     // the figures: read from the card, or left off if the card doesn't say them
     const t4 = factText(el, 'p-trade-4'), t1 = factText(el, 'p-trade-1');
@@ -176,9 +174,17 @@ export default {
       if (k < m.at) continue;
       const y = Math.round(curveY(B.rail, m.x));
       if (m.up) { ctx.fillStyle = C('ink.0'); ctx.fillRect(m.x - 4, y + 4, 9, 6); arrow(ctx, m.x, y + 5, true, 'green.3', 4); }
-      else { ctx.fillStyle = C('ink.0'); ctx.fillRect(m.x - 4, y - 18, 9, 6); arrow(ctx, m.x, y - 17, false, 'red.2', 4); }
+      else { ctx.fillStyle = C('ink.0'); ctx.fillRect(m.x - 4, y - 18, 9, 6); arrow(ctx, m.x, y - 17, false, 'gold.3', 4); }
     }
     cart(ctx, Math.round(cx), Math.round(cy), act > HOP_AT[0] && act < 1, k);
+
+    // the simulated-portfolio plate, only while its label is up (it gives way to the board's figures)
+    if (B.cash && act < BOARD_AT[0]) {
+      const pl = B.plate;
+      ctx.fillStyle = C('ink.0'); ctx.fillRect(pl.x - 1, pl.y - 1, pl.w + 2, 12);
+      ctx.fillStyle = C('indigo.1'); ctx.fillRect(pl.x, pl.y, pl.w, 10);
+      for (let i = 3; i < pl.w - 2; i += 5) { ctx.fillStyle = C(i % 15 === 3 ? 'gold.3' : 'gold.1'); ctx.fillRect(pl.x + i, pl.y + 9, 2, 1); }
+    }
 
     // the board: two figures land, each in its slot
     const bd = B.bd;

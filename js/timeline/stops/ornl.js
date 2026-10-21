@@ -240,8 +240,10 @@ export default {
   labels(f, B) {
     const out = [];
     const done = f.act >= RUN_AT[1];
-    out.push(done ? { text: 'Run complete ✓', x: B.win.x + B.win.w / 2, y: 10, tone: 'good' } : { text: 'Run', x: B.win.x + B.win.w / 2, y: 10, tone: 'gold' });
-    if (f.act >= BEADS_AT[1]) out.push({ text: 'Molecular self-assembly', x: B.route.exit[0], y: 88, tone: 'cyan' });
+    // pinned to the window's left edge, so the wider "Run complete ✓" never runs off a 160 px scene
+    out.push({ text: done ? 'Run complete ✓' : 'Run', x: B.win.x, y: 10, tone: done ? 'good' : 'gold', align: 'left' });
+    // off once he starts sliding down the chain, so it never covers him
+    if (f.act >= BEADS_AT[1] && f.phase !== 'out') out.push({ text: 'Molecular self-assembly', x: B.route.exit[0], y: 88, tone: 'cyan' });
     return out;
   },
 

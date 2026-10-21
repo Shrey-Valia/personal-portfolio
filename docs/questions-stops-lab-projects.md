@@ -62,9 +62,9 @@ draw ≤ 0.1 ms.
 
 ## For Shrey
 
-1. **The red ▼ exit marker on Trading.** The plan pairs a green ▲ entry with a red ▼ exit
-   (p-trade-3's entry and exit signals). I kept the ▼ but placed it above the line, higher up the
-   curve than the ▲, so it reads as a sell at a higher price, not a loss. *Recommended: keep it.*
-   The alternative is entry ▲ only.
+1. **The ▼ exit marker on Trading.** The plan pairs a green ▲ entry with a red ▼ exit
+   (p-trade-3's entry and exit signals). The ▼ sits above the line, higher up the curve than the
+   ▲, so it reads as a sell at a higher price. After the critic pass (P2-5) it's **gold**, not red,
+   because red-down read as a loss to a skimmer. The alternative is entry ▲ only.
 2. **No "Walk-forward backtests" heading in the scene.** The two-label limit leaves room for the
    two figures only. The chip under the card always shows the qualifier. *Recommended: as is.*
