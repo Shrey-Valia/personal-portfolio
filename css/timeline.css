@@ -178,10 +178,11 @@
   .view-page .stop[data-side="left"] > .stop__card { margin-right: calc(50% + var(--lane) / 2 + 24px); }
 }
 
-/* the year a stretch of the path starts: on the free side on desktop */
-.view-page .year-mark { margin: -40px 0 14px; color: var(--muted); font-size: 16px; }
+/* the year a stretch of the path starts: just its text wide, so the path
+   stays in view beside it; on the free side of the lane on desktop */
+.view-page .year-mark { width: fit-content; margin: 0 0 14px; padding-right: 8px; color: var(--muted); font-size: 16px; }
 @media (min-width: 1000px) {
-  .view-page .year-mark { width: calc(50% - var(--lane) / 2 - 24px); margin-top: -56px; text-align: right; }
+  .view-page .year-mark { width: calc(50% - var(--lane) / 2 - 24px); padding-right: 0; text-align: right; }
 }
 
 /* chips: the card's figures, verbatim from its text */
@@ -244,4 +245,18 @@
   body > .resume .resume__contact a, .contact__links a, .stop__more, .stop__chips li,
   .view-page .entry__award, .skills__count, .jump__list a { font-size: 16px; }
   .snapshot dt { font-size: 13px; }
+}
+
+/* text outside the cards that the path runs past sits above the track too,
+   on the page colour, so the path passes behind it the way it passes
+   behind every card */
+.view-page .snapshot,
+.view-page .timeline__title,
+.view-page .year-mark,
+.view-page body > .resume .resume__foot { position: relative; z-index: 2; }
+.view-page .timeline__title,
+.view-page .year-mark,
+.view-page body > .resume .resume__foot { background-color: var(--night); }
+@media (max-width: 767px) {
+  .view-page .snapshot { width: auto; }        /* full width, so it covers the centre line */
 }
