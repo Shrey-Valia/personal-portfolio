@@ -47,8 +47,10 @@ const GALLERY = 34;                  // the gallery floor round the lantern
 const STAND = 107;                   // where he stands on the gallery
 const BEACON = [121, 28];            // the lamp's centre
 
-// the act, step by step: [start, step]
-const STEPS = [[0, 'hop'], [0.14, 'land'], [0.19, 'walk'], [0.5, 'turn'], [0.53, 'climb'], [0.78, 'step'], [0.82, 'light'], [0.9, 'wave'], [1.01, 'end']];
+// the act, step by step: [start, step]. Each move gets a share of the act
+// in proportion to how far he goes (hop ~105 px, walk 89, climb 48), so he
+// keeps one pace through the short window at the end of the page.
+const STEPS = [[0, 'hop'], [0.38, 'land'], [0.4, 'walk'], [0.71, 'turn'], [0.73, 'climb'], [0.89, 'step'], [0.91, 'light'], [0.96, 'wave'], [1.01, 'end']];
 
 // where he is at act k (0–1) and how he looks; X maps core x to scene x
 function at(k, X, enter, dir = 1, still = false) {
@@ -58,9 +60,10 @@ function at(k, X, enter, dir = 1, still = false) {
   const [a, step] = STEPS[i], u = clamp((k - a) / (STEPS[i + 1][0] - a), 0, 1);
   switch (step) {
     case 'hop': {
-      // off the planks above and down onto the dock: a short rise, then the fall
-      const x = lerp(enter[0], X(LAND), u), y = DOCK * u * u - 10 * u * (1 - u);
-      const vy = (2 * DOCK * u - 10 * (1 - 2 * u)) * dir;
+      // off the planks above and down onto the dock: a short rise, then a
+      // fall that speeds up only gently, so no scroll tick jumps him far
+      const x = lerp(enter[0], X(LAND), u), y = DOCK * (0.7 * u + 0.3 * u * u) - 8 * u * (1 - u);
+      const vy = (DOCK * (0.7 + 0.6 * u) - 8 * (1 - 2 * u)) * dir;
       return { x, y, pose: vy < 0 ? 'jump' : 'fall', facing: -dir, step };
     }
     case 'land': return { x: X(LAND), y: DOCK, pose: still || u > 0.5 ? 'idle' : 'crouch', facing: 1, step };
@@ -82,7 +85,7 @@ function at(k, X, enter, dir = 1, still = false) {
 // the act at which he passes lamp i (it lights), from the walk's mapping
 const walkAt = (x) => STEPS[2][0] + (STEPS[3][0] - STEPS[2][0]) * clamp((x - LAND) / (FOOT - LAND), 0, 1);
 const LIT_AT = LAMPS.map((l) => walkAt(l.x - 3));
-const IGNITE = [0.82, 0.9];          // the beacon comes up over these acts
+const IGNITE = [STEPS[6][0], STEPS[7][0]];   // the beacon comes up while he lights it
 
 // ─── painting ─────────────────────────────────────────────────────────
 
@@ -218,8 +221,8 @@ function signArt(glyph, ramp, lit) {
 export default {
   id: 'contact',
   facts: [],
-  split: [0, 0.7, 0.999],          // no walk in; the page ends in the hold
-  key: 0.85,
+  split: [0, 0.85, 0.999],         // no walk in; most of the short window is the act; the page ends in the hold
+  key: 0.92,
   idle: true,
 
   build({ w, h }) {
