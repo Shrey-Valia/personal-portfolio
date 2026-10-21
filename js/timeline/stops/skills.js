@@ -327,31 +327,32 @@ const T9 = {
     const hx = lx - face * 3;
     const deck = h - 4;
     const [back, g] = makeCanvas(w, h);
-    // the bluff face: low contrast rock with strata and a few ledges
-    const n = noise1(17), edge = (y) => lx + free * (6 + Math.round(n(y * 0.06) * 4));
-    for (let y = 0; y < deck; y++) {
-      const e = edge(y), a = free < 0 ? 0 : e, z = free < 0 ? e : w;
-      R(g, a, y, z - a, 1, '#151c3f');
-      R(g, e - (free < 0 ? 1 : 0), y, 1, 1, '#1d2550');
+    // the bluff face: rock in flat bands that step back from a jagged,
+    // stepped edge into the page colour, so it never reads as a box
+    const n = noise1(17), jr = rng(23), edgeAt = [];
+    for (let y = 0, off = 0; y < h; ) {
+      const run = 3 + Math.floor(jr() * 5);
+      off = clamp(off + Math.floor(jr() * 5) - 2, -2, 4);
+      for (let k = 0; k < run && y < h; k++, y++) edgeAt.push(lx + free * (6 + off + Math.round(n(y * 0.03) * 6)));
     }
-    // cracks and strata that wander, so it reads as rock, not courses
+    const BANDS9 = [[3, '#232c58'], [6, '#1b234b'], [8, '#171e43'], [10, '#131a3b'], [7, '#10173a']];
+    for (let y = 0; y < deck; y++) {
+      let x = edgeAt[y];
+      const wob = Math.round(n(y * 0.11 + 40) * 3);
+      BANDS9.forEach(([bw, c], i) => {
+        const wd = bw + (i ? wob : 0), x1 = x + free * wd;
+        R(g, Math.min(x, x1), y, Math.abs(wd), 1, c);
+        x = x1;
+      });
+    }
+    // cracks that wander into the rock
     const cr = rng(31);
     for (let y = 14; y < deck - 8; y += 16 + Math.floor(cr() * 14)) {
-      const e = edge(y), len = 8 + Math.floor(cr() * 14);
-      for (let i = 0; i < len; i++) {
-        const x = e - free * (2 + i), yy = y + Math.round(Math.sin(i * 0.5 + y) * 1.5);
-        if (x >= 0 && x < w) R(g, x, yy, 1, 1, i % 5 === 4 ? '#1d2550' : '#10163a');
-      }
+      const len = 6 + Math.floor(cr() * 10);
+      for (let i = 0; i < len; i++) R(g, edgeAt[y] + free * (2 + i), y + Math.round(Math.sin(i * 0.6 + y) * 1.5), 1, 1, '#0f1534');
     }
-    for (let y = 30; y < deck - 20; y += 47) {
-      const e = edge(y);
-      R(g, e - (free < 0 ? 9 : -1), y, 9, 2, '#1d2550');
-      R(g, e - (free < 0 ? 8 : -2), y - 1, 3, 1, '#24402f'); R(g, e - (free < 0 ? 4 : -5), y - 2, 1, 2, '#24402f');
-    }
-    // far down, the sea at the bluff's foot
-    const sea = Math.max(0, deck - 40);
-    for (let y = sea; y < h; y++) R(g, 0, y, free < 0 ? lx - 8 : w, 1, y < sea + 2 ? '#1b2a5c' : '#121c44');
-    if (free > 0) R(g, 0, sea, lx + 8, h - sea, '#0e1433');
+    // the water at the bluff's foot, a few glints by the dock
+    for (let i = 0; i < 4; i++) R(g, lx + free * (10 + i * 5), deck - 3 - (i % 2) * 2, 3, 1, '#1b2a5c');
     // the ladder (drawn over the path): two twisted root strands from the
     // tree's taproot, knotted rungs, rootlets off them
     const [front, fg] = makeCanvas(w, h);
@@ -372,6 +373,21 @@ const T9 = {
     for (let y = 15; y < deck - 6; y += 13 + Math.floor(rng9() * 9)) {
       const len = 3 + Math.floor(rng9() * 4), x = free < 0 ? lx - 4 : lx + 4;
       for (let i = 0; i < len; i++) R(fg, x + free * i, y + i, 1, 1, ROOT.lo);
+    }
+    // a ledge halfway down (behind the ladder), and two knots where the
+    // strands twist round each other and send roots off across the rock
+    const mid = Math.round(deck * 0.52), le = edgeAt[mid];
+    const sa = Math.min(le + free * 14, lx + 5), sz = Math.max(le + free * 14, lx + 5);
+    R(g, sa - 1, mid - 1, sz - sa + 2, 8, 'ink.0');
+    R(g, sa, mid, sz - sa, 6, '#283260'); R(g, sa, mid, sz - sa, 1, '#3c4878'); R(g, sa, mid + 4, sz - sa, 2, '#1b234b');
+    for (let i = 0; i < 5; i++) R(g, Math.min(sa, sz) + 2 + i * 4, mid + 6 + (i % 2), 2, 2, '#171e43');
+    for (const [dx, hh, c] of [[-7, 3, '#3f7a45'], [-5, 2, '#2e5236'], [-9, 2, '#2e5236'], [2, 2, '#2e5236']]) R(g, lx - dx * free, mid - hh, 1, hh, c);
+    limb(fg, [[lx + free * 3, mid + 4], [lx + free * 9, mid + 6], [lx + free * 14, mid + 3]], 1, 1, ROOT);
+    for (const ky of [Math.round(deck * 0.28), Math.round(deck * 0.78)]) {
+      limb(fg, [[lx - 3, ky - 3], [lx, ky + 1], [lx + 3, ky - 3]], 2, 2, ROOT);
+      limb(fg, [[lx + 3, ky + 3], [lx, ky - 1], [lx - 3, ky + 3]], 2, 2, ROOT);
+      limb(fg, [[lx + free * 2, ky], [lx + free * 8, ky + 4], [lx + free * 18, ky + 2]], 1, 1, ROOT);
+      limb(fg, [[lx + free * 2, ky + 2], [lx + free * 6, ky + 10], [lx + free * 12, ky + 16]], 1, 1, ROOT);
     }
     // the dock planks at the foot, out towards the harbour
     const da = Math.min(lx - 10, to[0] - 12), dz = Math.max(lx + 10, to[0] + 12);
