@@ -24,6 +24,9 @@
     if (location.protocol === 'file:') { root.classList.add('file-proto'); return; }
     if (!('noModule' in HTMLScriptElement.prototype)) return;
     root.classList.add('js');
+    // CSS px per game px at each breakpoint, rounded as the timeline engine rounds it
+    var dpr = window.devicePixelRatio || 1;
+    [['--k2', 2], ['--k25', 2.5], ['--k3', 3]].forEach(function (g) { root.style.setProperty(g[0], String(Math.max(1, Math.round(g[1] * dpr)) / dpr)); });
     if (location.hash !== '#play' && !/[?&](play|level)\b/.test(location.search)) root.classList.add('view-page');
     setTimeout(function () {
       if (!root.classList.contains('app-ready')) root.classList.remove('js');
@@ -200,17 +203,17 @@
      scene in each .stop__scene and walks Shrey down the page.
      ════════════════════════════════════════════════════════════════════ -->
 
-<!-- the website's bar. "Résumé PDF" prints this page through the print
+<!-- the website's bar. "Save as PDF" prints this page through the print
      styles, so the PDF is always current and never carries a phone number. -->
 <nav class="pagebar" id="pagebar" aria-label="Site">
   <a class="pagebar__brand" href="#top"><span class="pagebar__mark" id="pagebar-mark" aria-hidden="true"></span>Shrey Valia</a>
   <span class="pagebar__links">
     <button class="pagebar__jump" type="button" popovertarget="jump">Jump to</button>
     <a href="#skills">Skills</a>
-    <a href="#contact">Contact</a>
+    <a href="#contact-links" data-js-href="#contact">Contact</a>
   </span>
   <span class="pagebar__end">
-    <button class="pbtn pbtn--small pagebar__pdf js-only" type="button" id="pagebar-pdf" title="Opens the print dialog: choose Save as PDF">Résumé PDF</button>
+    <button class="pbtn pbtn--small pagebar__pdf js-only" type="button" id="pagebar-pdf" title="Opens the print dialog: choose Save as PDF">Save as PDF</button>
     <button class="pagebar__menu" type="button" popovertarget="jump">Menu</button>
   </span>
 </nav>
@@ -221,15 +224,15 @@
     <li><a href="#ornl">Oak Ridge National Laboratory <span>2026</span></a></li>
     <li><a href="#handshake">Handshake AI <span>2026</span></a></li>
     <li><a href="#droid">Droid Strike Back Hackathon <span>2025</span></a></li>
-    <li><a href="#neu">Northeastern University <span>exp. 2029</span></a></li>
+    <li><a href="#neu">Northeastern University</a></li>
     <li><a href="#dhs">Dublin High School <span>2025</span></a></li>
     <li><a href="#edulearn">EduLearn Hackathon <span>2024</span></a></li>
     <li><a href="#trading">Algorithmic Trading Bot <span>2024</span></a></li>
     <li><a href="#skills">Technical skills</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#contact-links" data-js-href="#contact">Contact</a></li>
   </ol>
   <p class="jump__more js-only">
-    <button class="pbtn pbtn--small" type="button" id="jump-pdf">Résumé PDF</button>
+    <button class="pbtn pbtn--small" type="button" id="jump-pdf" title="Opens the print dialog: choose Save as PDF">Save as PDF</button>
     <a class="jump__play" href="#play">Play the game ▶</a>
   </p>
 </nav>
@@ -244,7 +247,7 @@
       </div>
       <ul class="resume__contact" id="contact-links">
         <li data-fact="c-email" data-title="Email" data-kicker="Contact"><a href="mailto:valia.s@northeastern.edu">valia.s@northeastern.edu</a></li>
-        <li data-fact="c-linkedin" data-title="LinkedIn" data-kicker="Contact"><a href="https://www.linkedin.com/in/shrey-valia-7a0041267/" rel="me">linkedin.com/in/shrey-valia-7a0041267</a></li>
+        <li data-fact="c-linkedin" data-title="LinkedIn" data-kicker="Contact"><a href="https://www.linkedin.com/in/shrey-valia-7a0041267/" rel="me"><span class="link-url">linkedin.com/in/shrey-valia-7a0041267</span></a></li>
         <li data-fact="c-github" data-title="GitHub" data-kicker="Contact"><a href="https://github.com/Shrey-Valia" rel="me">github.com/Shrey-Valia</a></li>
       </ul>
       <p class="resume__open" data-fact="c-open" data-title="Open to work" data-kicker="Contact">Open to summer 2027 internships in machine learning and software engineering.</p>
@@ -270,7 +273,7 @@
         </header>
         <ul class="entry__list" id="vincio-list">
           <li data-fact="p-vincio-1" data-title="Raw clips in, finished cut out">Built an AI video editor that turns raw clips and a written vision into a finished cut using coordinated agents.</li>
-          <li class="is-more" data-fact="p-vincio-2" data-title="Agent capabilities">Implemented agent capabilities for B-roll selection, motion graphics, transitions, and on-screen text.</li>
+          <li class="is-more" data-fact="p-vincio-2" data-title="Agent capabilities">Implemented agent capabilities for <span data-chip="">B-roll selection</span>, <span data-chip="">motion graphics</span>, transitions, and on-screen text.</li>
           <li class="is-more" data-fact="p-vincio-3" data-title="Full stack">Developed the front end and the agent layer, and contributed to database management, authentication, and agent memory.</li>
         </ul>
       </div>
@@ -286,8 +289,8 @@
         </header>
         <ul class="entry__list" id="ornl-list">
           <li data-fact="x-ornl-1" data-title="Physics-informed GNNs">Engineered physics-informed and graph neural networks (GNNs) in PyTorch and TensorFlow to model polymer growth and molecular self-assembly, working with Dr. Rajeev Kumar.</li>
-          <li class="is-more" data-fact="x-ornl-2" data-title="Models in the browser">Built the front end of an internal web tool deployed on Vercel that let scientists configure, train, and run the group’s models from the browser instead of editing scripts by hand.</li>
-          <li class="is-more" data-fact="x-ornl-3" data-title="Inverse design">Developed an inverse prediction model with the team to estimate polymer design inputs from target properties.</li>
+          <li class="is-more" data-fact="x-ornl-2" data-title="Models in the browser">Built the front end of an internal web tool <span data-chip="">deployed on Vercel</span> that let scientists configure, train, and run the group’s models from the browser instead of editing scripts by hand.</li>
+          <li class="is-more" data-fact="x-ornl-3" data-title="Inverse design">Developed an <span data-chip="">inverse prediction model</span> with the team to estimate polymer design inputs from target properties.</li>
           <li class="is-more" data-fact="x-ornl-4" data-title="Faster experiments">Automated preprocessing pipelines in pandas and NumPy and parallelized GPU training, cutting experiment turnaround.</li>
         </ul>
       </div>
@@ -303,8 +306,8 @@
         </header>
         <ul class="entry__list" id="handshake-list">
           <li data-fact="x-hs-2" data-title="Diffusion fine-tuning">Evaluated text-to-image model outputs and fine-tuned diffusion models on the resulting annotations.</li>
-          <li class="is-more" data-fact="x-hs-1" data-title="Data quality">Labeled and audited training data for generative AI models against strict quality and safety rubrics.</li>
-          <li class="is-more" data-fact="x-hs-3" data-title="Failure analysis">Diagnosed recurring model failure cases and delivered corrective feedback to improve prompt adherence.</li>
+          <li class="is-more" data-fact="x-hs-1" data-title="Data quality">Labeled and audited training data for generative AI models against strict <span data-chip="">quality and safety rubrics</span>.</li>
+          <li class="is-more" data-fact="x-hs-3" data-title="Failure analysis">Diagnosed recurring model failure cases and delivered corrective feedback to improve <span data-chip="">prompt adherence</span>.</li>
         </ul>
       </div>
     </article>
@@ -381,7 +384,7 @@
           <li data-fact="p-trade-1" data-title="Deep RL agent">Built a deep reinforcement learning agent in Python on the QuantConnect LEAN engine to trade a simulated $50,000 portfolio across multiple asset classes without manual input.</li>
           <li class="is-more" data-fact="p-trade-2" data-title="One clean dataset">Organized the project’s market data in pandas and NumPy, cleaning and time-aligning Level II order-flow and microstructure feeds into one consistent dataset for every backtest.</li>
           <li class="is-more" data-fact="p-trade-3" data-title="Q-learning and PPO">Engineered entry and exit signals from that dataset and trained policies in TensorFlow with Q-learning and PPO.</li>
-          <li class="is-more" data-fact="p-trade-4" data-title="Walk-forward results">Achieved a <span data-chip="win rate">43%</span> win rate and <span data-chip="profit factor">2.76</span> profit factor in walk-forward backtests on a custom event-driven framework.</li>
+          <li class="is-more" data-fact="p-trade-4" data-title="Walk-forward results">Achieved a <span data-chip="win rate">43%</span> win rate and <span data-chip="profit factor">2.76</span> profit factor in <span data-chip="">walk-forward backtests</span> on a custom event-driven framework.</li>
         </ul>
       </div>
     </article>

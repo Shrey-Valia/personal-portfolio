@@ -20,8 +20,7 @@ import { loadStop, runtime, transitRuntime, defaultTransit, placeLabels, heroBox
 import { placeholder } from './stops/_placeholder.js';
 import { LIST } from './stops/index.js';
 import { SCENE_H, MIN_W, MAX_W, frameOf, drawHero } from './kit.js';
-import { dwellWindows, sample, current, scrollFor } from './layout.js';
-import { guardText, checkPage, hashCanvas } from './validate.js';
+import { dwellWindows, sample, current, scrollFor, WALK_SHARE } from './layout.js';
 import { clamp, makeCanvas } from '../engine/util.js';
 
 const STILL_MS = 200;            // after this long without scrolling he stops walking
@@ -34,6 +33,9 @@ function el(tag, cls) {
 }
 
 export function createTimeline({ root, debug = false }) {
+  // the checks (validate.js) load only with ?debug=1
+  let V = null;
+  const checks = debug ? import('./validate.js').then((m) => { V = m; return m; }) : null;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reduced = motion.matches;
   let on = false, inited = false, dirty = true, raf = 0, idleTimer = 0, stillTimer = 0;
@@ -61,7 +63,7 @@ export function createTimeline({ root, debug = false }) {
       if (!s.box) continue;
       s.canvas = el('canvas', 'tl-canvas tl-scene');
       s.ctx = s.canvas.getContext('2d');
-      if (debug) guardText(s.ctx);
+      if (checks) checks.then((m) => m.guardText(s.ctx));
       s.labels = el('div', 'tl-labels');
       s.labels.setAttribute('aria-hidden', 'true');
       s.box.append(s.canvas, s.labels);
@@ -71,7 +73,7 @@ export function createTimeline({ root, debug = false }) {
     for (const g of gaps) {
       g.canvas = el('canvas', 'tl-canvas tl-gap');
       g.ctx = g.canvas.getContext('2d');
-      if (debug) guardText(g.ctx);
+      if (checks) checks.then((m) => m.guardText(g.ctx));
       track.appendChild(g.canvas);
     }
     heroEl = el('canvas', 'tl-canvas tl-hero');
@@ -183,8 +185,28 @@ export function createTimeline({ root, debug = false }) {
 
     const maxScroll = Math.max(0, document.documentElement.scrollHeight - vh);
     const first = stops[0] ? stops[0].rt.split : SPLIT, last = stops.length ? stops[stops.length - 1].rt.split : SPLIT;
-    const win = dwellWindows(stops.map((s) => ({ cy: s.cy })), { vh, maxScroll, phone, introP: (first[1] + first[2]) / 2, endP: last[2] });
-    G = { gp, dpr, scale, k, vw, vh, phone, win, maxScroll };
+    // the sticky bar covers the top of the screen; desktop walks get scroll in
+    // proportion to their length (on phones they run under the cards)
+    const bar = document.getElementById('pagebar');
+    const top = bar ? bar.getBoundingClientRect().height : 0;
+    const walks = phone ? [] : gaps.map((g) => WALK_SHARE * travel(g) * k);
+    const win = dwellWindows(stops.map((s) => ({ cy: s.cy })), { vh, top, maxScroll, phone, introP: (first[1] + first[2]) / 2, endP: last[2], walks });
+    G = { gp, dpr, scale, k, vw, vh, top, phone, win, maxScroll };
+  }
+
+  // how far he travels along a connector, in game px: the transit's hero()
+  // is a pure function of s, so sample it (cached with the build)
+  function travel(g) {
+    if (g.built.travel != null) return g.built.travel;
+    let len = 0, prev = null;
+    try {
+      for (let i = 0; i <= 48; i++) {
+        const h = g.tr.tr.hero({ s: i / 48, dir: 1, reduced: false, still: false }, g.built);
+        if (h && prev) len += Math.hypot(h.x - prev.x, h.y - prev.y);
+        prev = h || prev;
+      }
+    } catch (err) { len = g.built.h; }
+    return (g.built.travel = Math.max(g.built.h, len));
   }
 
   function fail(s, err) {
@@ -225,7 +247,7 @@ export function createTimeline({ root, debug = false }) {
     if (dirty) measure();
     const { k, vh, win } = G;
     const y = window.scrollY;
-    const cur = reduced ? current(y, stops, vh) : -1;
+    const cur = reduced ? current(y, stops, vh, G.top) : -1;
     const at = reduced ? { dwell: true, stop: cur, p: 1 } : sample(y, win);
     const t = Math.round(now - t0);
     const lo = y - vh * MARGIN, hi = y + vh * (1 + MARGIN);
@@ -308,6 +330,7 @@ export function createTimeline({ root, debug = false }) {
 
   async function report() {
     const rts = stops.map((s) => s.rt);
+    const { checkPage } = await checks;
     const r = checkPage(document, rts);
     r.problems.forEach((m) => console.error('[timeline] check:', m));
     r.notes.forEach((m) => console.warn('[timeline] note:', m));
@@ -370,18 +393,20 @@ export function createTimeline({ root, debug = false }) {
     },
     // debug: ?debug=1 exposes __tl
     goto(id, p = 0.5) { const s = stops.find((x) => x.id === id); if (!s) return false; if (dirty || !G) measure(); window.scrollTo({ top: Math.round(scrollFor(s.i, p, G.win)), behavior: 'instant' }); return true; },
-    drawNow(opts = {}) { if (opts.dir) dir = opts.dir; if (opts.still !== undefined) still = opts.still; render(performance.now()); return api.state(); },
+    // t pins the idle clock (ms), so checks can compare frames that loop on their own
+    drawNow(opts = {}) { if (opts.dir) dir = opts.dir; if (opts.still !== undefined) still = opts.still; render(opts.t != null ? t0 + opts.t : performance.now()); return api.state(); },
     state() {
       if (!G) return null;
       const y = window.scrollY;
-      return { ...(reduced ? { dwell: true, stop: current(y, stops, G.vh) } : sample(y, G.win)), y, reduced, gp: G.gp, scale: G.scale, perf: { ...perf } };
+      return { ...(reduced ? { dwell: true, stop: current(y, stops, G.vh, G.top) } : sample(y, G.win)), y, reduced, gp: G.gp, scale: G.scale, perf: { ...perf } };
     },
     // what's on screen right now: the visible canvases and where he is
     hash() {
       const seen = (c) => { const r = c.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; };
       const parts = [];
-      for (const s of stops) if (s.canvas && seen(s.canvas)) parts.push(s.id + hashCanvas(s.ctx, s.canvas.width, s.canvas.height));
-      for (const g of gaps) if (seen(g.canvas)) parts.push('g' + g.i + hashCanvas(g.ctx, g.canvas.width, g.canvas.height));
+      if (!V) return '';
+      for (const s of stops) if (s.canvas && seen(s.canvas)) parts.push(s.id + V.hashCanvas(s.ctx, s.canvas.width, s.canvas.height));
+      for (const g of gaps) if (seen(g.canvas)) parts.push('g' + g.i + V.hashCanvas(g.ctx, g.canvas.width, g.canvas.height));
       if (!heroEl.hidden) parts.push(heroEl.style.transform + heroKey);
       return parts.join('|');
     },

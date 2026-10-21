@@ -2,7 +2,8 @@
 // engine measures (docs/TIMELINE-ARCHITECTURE.md §2.4).
 //
 // Each stop gets a dwell window [a, b] in scroll position: the range over
-// which its scene's centre moves from FROM·vh down to TO·vh. Inside it,
+// which its scene's centre moves from FROM down to TO of the band of the
+// screen below the sticky bar ([top, vh]). Inside it,
 // p = (y − a) / (b − a). Between windows he is on the connector to the
 // next stop, at s = (y − b) / (a' − b). The intro's window starts at
 // scroll 0 already in its hold phase (he's at his door on load); the
@@ -13,17 +14,21 @@ import { clamp } from '../engine/util.js';
 
 export const FOCUS = { desktop: [0.8, 0.2], phone: [0.95, 0.05] };
 const MIN_WALK = 40;             // px of scroll kept for every walk between stops
+export const WALK_SHARE = 0.75;  // desktop: at least this much scroll per px he travels along a connector
 
-// scenes: [{ cy }] scene centres in document px. Returns [{ a, b }].
-export function dwellWindows(scenes, { vh, maxScroll, phone, introP, endP }) {
+// scenes: [{ cy }] scene centres in document px; walks: px of scroll each
+// gap needs at least (index i: between stop i and i + 1). Returns [{ a, b }].
+export function dwellWindows(scenes, { vh, top = 0, maxScroll, phone, introP, endP, walks = [] }) {
   const [from, to] = phone ? FOCUS.phone : FOCUS.desktop;
-  const w = scenes.map((s) => ({ a: s.cy - from * vh, b: s.cy - to * vh }));
+  const band = vh - top;
+  const w = scenes.map((s) => ({ a: s.cy - (top + from * band), b: s.cy - (top + to * band) }));
   // neighbours that overlap meet at the midpoint, with room left for the walk
   for (let i = 1; i < w.length; i++) {
-    if (w[i].a < w[i - 1].b + MIN_WALK) {
+    const need = Math.max(MIN_WALK, walks[i - 1] || 0);
+    if (w[i].a < w[i - 1].b + need) {
       const mid = (w[i].a + w[i - 1].b) / 2;
-      w[i - 1].b = Math.max(w[i - 1].a + 1, mid - MIN_WALK / 2);
-      w[i].a = mid + MIN_WALK / 2;
+      w[i - 1].b = Math.max(w[i - 1].a + 1, mid - need / 2);
+      w[i].a = Math.max(w[i - 1].b + 1, mid + need / 2);
     }
   }
   for (const x of w) { x.a = clamp(x.a, 0, maxScroll); x.b = clamp(x.b, x.a, maxScroll); }
@@ -60,10 +65,11 @@ export function sample(y, win) {
   return { dwell: true, stop: n - 1, p: end != null ? end : 1 };
 }
 
-// reduced motion: the stop whose scene centre is nearest the middle of the screen
-export function current(y, scenes, vh) {
+// reduced motion: the stop whose scene centre is nearest the middle of the
+// screen below the bar
+export function current(y, scenes, vh, top = 0) {
   let best = 0, d = Infinity;
-  scenes.forEach((s, i) => { const e = Math.abs(s.cy - (y + vh / 2)); if (e < d) { d = e; best = i; } });
+  scenes.forEach((s, i) => { const e = Math.abs(s.cy - (y + top + (vh - top) / 2)); if (e < d) { d = e; best = i; } });
   return best;
 }
 

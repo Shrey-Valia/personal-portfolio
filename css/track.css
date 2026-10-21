@@ -34,7 +34,7 @@
 .tl-hero[hidden] { display: none; }
 
 /* labels over a scene: real text, never canvas text */
-.tl-labels { position: absolute; inset: 0; pointer-events: none; }
+.tl-labels { position: absolute; inset: 0; pointer-events: none; -webkit-user-select: none; user-select: none; }
 .tl-label {
   position: absolute;
   padding: 1px 7px 2px;

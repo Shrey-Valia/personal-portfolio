@@ -12,9 +12,12 @@
    the lane, so the path and Shrey are always in view.
    ═══════════════════════════════════════════════════════════ */
 
-:root { --gp: 2; --lane: 0px; }
-@media (min-width: 768px) { :root { --gp: 2.5; } }
-@media (min-width: 1000px) { :root { --gp: 3; --lane: 120px; } }
+:root { --gp: 2; --lane: 0px; --k: var(--k2, 2); }
+@media (min-width: 768px) { :root { --gp: 2.5; --k: var(--k25, 2.5); } }
+@media (min-width: 1000px) { :root { --gp: 3; --lane: 120px; --k: var(--k3, 3); } }
+/* --k is what the engine will actually use, round(--gp × dpr) / dpr; the
+   head script in index.html sets --k2/--k25/--k3 so the reserved scene
+   height already matches at fractional DPR (no shift when JS runs) */
 
 /* ─── the bar ──────────────────────────────────────────────── */
 
@@ -87,6 +90,8 @@
   box-shadow: inset 0 0 0 1.5px var(--line), 0 18px 50px rgba(0, 0, 0, 0.5);
 }
 .jump::backdrop { background: rgba(5, 6, 12, 0.35); }
+/* tablet and up: under the "Jump to" button (cards.js places it exactly) */
+@media (min-width: 768px) { .jump { inset: 72px auto auto max(12px, (100% - 1080px) / 2 + 150px); } }
 .jump__title { margin: 0 12px 6px; color: var(--muted); font: 600 13px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 .jump__list { margin: 0; padding: 0; list-style: none; }
 .jump__list a {
@@ -116,7 +121,7 @@
 .view-page .stop__scene {
   display: block;
   position: relative;
-  height: calc(var(--gp) * 100px);
+  height: calc(var(--k) * 100px);
   margin: 0;
 }
 .view-page .stop__scene > .tl-labels { right: auto; bottom: auto; }
@@ -187,6 +192,7 @@
 
 /* chips: the card's figures, verbatim from its text */
 .stop__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.stop__chips li::first-letter { text-transform: uppercase; }   /* "walk-forward backtests" → "Walk-forward…" */
 .stop__chips li, .view-page .entry__award {
   display: inline-block;
   padding: 4px 12px 5px;
@@ -263,3 +269,11 @@
 @media (min-width: 768px) {
   .view-page .timeline__title { width: fit-content; padding-right: 12px; }   /* clear of the centre line */
 }
+
+/* Contact: the card goes above its scene, so the page ends on the lit
+   beacon in full view, then the footer */
+.view-page #contact { display: flex; flex-direction: column; }
+.view-page #contact > .stop__card { order: -1; margin: 0 0 18px; }
+
+/* the Skills headings carry the scene's tier bricks */
+.skillset__icon { display: inline-block; width: 24px; height: 24px; margin-right: 8px; vertical-align: -7px; image-rendering: pixelated; }
