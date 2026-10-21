@@ -3,8 +3,10 @@
 // sweatpants, white sneakers, black backpack.
 //
 // Frames are composed from parts (head / torso / legs) so the animation
-// stays consistent, then outlined. Authored at 14×22; the outline makes
-// 16×24. All colours live in LEGEND: retune him there.
+// stays consistent, then outlined twice (ink, then a light rim). Authored
+// at 14×22; the outlines make 18×26. All colours live in LEGEND: retune
+// him there. The parts and build() are exported so the website's pose
+// pack (js/timeline/poses.js) composes from the same pieces.
 
 import { compileMap, outline, frame } from '../sprite.js';
 
@@ -19,11 +21,11 @@ export const LEGEND = {
   n: 'shoe.1', N: 'shoe.0',
 };
 
-const RIM = 'slate.3';
-const BLANK = '..............';
+export const RIM = 'slate.3';
+export const BLANK = '..............';
 
 // rounded, textured top; the sides fade from dark to skin around the ear
-const HEAD = [
+export const HEAD = [
   '.....hhhhh....',
   '....hhHHHhhh..',
   '...hhHHhhHhhh.',
@@ -34,10 +36,10 @@ const HEAD = [
   '....Fsssssmsd.',
   '.....ddsssdd..',
 ];
-const HEAD_BLINK = HEAD.map((r, i) => (i === 5 ? '...fFdssssdSs.' : r));
-const HEAD_HURT = HEAD.map((r, i) => (i === 5 ? '...fFdssseeSs.' : i === 7 ? '....FsssssmmS.' : r));
+export const HEAD_BLINK = HEAD.map((r, i) => (i === 5 ? '...fFdssssdSs.' : r));
+export const HEAD_HURT = HEAD.map((r, i) => (i === 5 ? '...fFdssseeSs.' : i === 7 ? '....FsssssmmS.' : r));
 
-const T_IDLE = [
+export const T_IDLE = [
   '...vbb.dsd....',
   '..vbbBkkKKkk..',
   '..vbbBkkKKgk..',
@@ -45,7 +47,7 @@ const T_IDLE = [
   '..vbbBkkdskk..',
   '...vbbjkkkkj..',
 ];
-const T_FWD = [
+export const T_FWD = [
   '...vbb.dsd....',
   '..vbbBkkkKKk..',
   '..vbbBkkkkKKd.',
@@ -53,7 +55,7 @@ const T_FWD = [
   '..vbbBkkkkkk..',
   '...vbbjkkkkj..',
 ];
-const T_BACK = [
+export const T_BACK = [
   '...vbb.dsd....',
   '..vbbKKkkkkk..',
   '..vbKKkkkkgk..',
@@ -61,7 +63,7 @@ const T_BACK = [
   '..vbbBkkkkkk..',
   '...vbbjkkkkj..',
 ];
-const T_UP = [
+export const T_UP = [
   '...vbb.dsd.ss.',
   '..vbbBkkkKKd..',
   '..vbbBkkkKKk..',
@@ -70,7 +72,7 @@ const T_UP = [
   '...vbbjkkkkj..',
 ];
 
-const L_STAND = [
+export const L_STAND = [
   '.....qqpppP...',
   '.....qq.ppP...',
   '.....qq.ppP...',
@@ -79,7 +81,7 @@ const L_STAND = [
   '....nnn.nnnn..',
   '....NNN.NNNN..',
 ];
-const L_RUN1 = [
+export const L_RUN1 = [
   '.....qqpppP...',
   '....qqq.pppP..',
   '...qqq...ppPp.',
@@ -88,7 +90,7 @@ const L_RUN1 = [
   '.nnq.......nnn',
   '.NN........NNN',
 ];
-const L_RUN2 = [
+export const L_RUN2 = [
   '.....qqpppP...',
   '.....qqpppPP..',
   '.....qq..pPPp.',
@@ -97,7 +99,7 @@ const L_RUN2 = [
   '....nnn.......',
   '....NNN.......',
 ];
-const L_RUN3 = [
+export const L_RUN3 = [
   '.....qqpppP...',
   '....pppPqqq...',
   '...pPp...qqq..',
@@ -106,7 +108,7 @@ const L_RUN3 = [
   '.nnp.......NNN',
   '.NN........NNN',
 ];
-const L_RUN4 = [
+export const L_RUN4 = [
   '.....qqpppP...',
   '.....qqppPq...',
   '......qppPqq..',
@@ -115,7 +117,7 @@ const L_RUN4 = [
   '......nnnn....',
   '......NNNN....',
 ];
-const L_JUMP = [
+export const L_JUMP = [
   '.....qqpppP...',
   '....qqq.pppP..',
   '...qqq...ppPP.',
@@ -124,7 +126,7 @@ const L_JUMP = [
   BLANK,
   BLANK,
 ];
-const L_FALL = [
+export const L_FALL = [
   '.....qqpppP...',
   '....qqq.ppPP..',
   '....qq...ppP..',
@@ -134,7 +136,7 @@ const L_FALL = [
   BLANK,
 ];
 
-const CROUCH = [
+export const CROUCH = [
   BLANK, BLANK, BLANK, BLANK,
   ...HEAD,
   '...vbb.dsd....',
@@ -148,99 +150,7 @@ const CROUCH = [
   '...NNN...NNNN.',
 ];
 
-// ─── poses for the website's scenes ──────────────────────────────────
-// Built from the same parts. Arms that reach in front of him need room,
-// so these frames are two columns wider on his facing side (the hitbox
-// anchor is unchanged, so they line up with the frames above). Each arm
-// is a patch of [row, col, pixels] over head + torso + legs.
-
-const WIDE = 2;
-const widen = (rs) => rs.map((r) => r + '.'.repeat(WIDE));
-function patch(rs, marks) {
-  const out = rs.slice();
-  for (const [r, c, s] of marks) out[r] = out[r].slice(0, c) + s + out[r].slice(c + s.length);
-  return out;
-}
-// a torso with the front hand hidden (the arm is patched in instead)
-const T_ARM = T_IDLE.map((r, i) => (i === 4 ? '..vbbBkkKkkk..' : r));
-
-// back view, for climbing: hair all round, the pack square in the middle
-const HEAD_BACK = [
-  '.....hhhhh....',
-  '....hhHHHhhh..',
-  '...hhHhhhHhh..',
-  '...hhhhhhhhh..',
-  '...fhhhhhhhf..',
-  '...ffhhhhhff..',
-  '..sfFFhhhFFfs.',
-  '...FFFfffFFF..',
-  '.....ddddd....',
-];
-const T_BACK_VIEW = [
-  '..kkk.dsd.kkk.',
-  '..kkvvvvvvkk..',
-  '..kkvbbbBvkk..',
-  '..kkvbBBBvkk..',
-  '..kkvbbbBvkk..',
-  '...jvvvvvvj...',
-];
-const L_CLIMB1 = [
-  '....qqqpppP...',
-  '....qqq.ppP...',
-  '....qqq.ppP...',
-  '....qqq.nnn...',
-  '....qqq.NNN...',
-  '...nnnn.......',
-  '...NNNN.......',
-];
-const L_CLIMB2 = [
-  '....qqqpppP...',
-  '....qqq.ppP...',
-  '....qqq.ppP...',
-  '....nnn.ppP...',
-  '....NNN.ppP...',
-  '.......nnnn...',
-  '.......NNNN...',
-];
-// seated: thighs forward, shins down to the floor
-const L_SIT = [
-  '.....qqpppppppP.',
-  '.....qqqppppppP.',
-  '............pP..',
-  '............pP..',
-  '............pP..',
-  '...........nnnn.',
-  '...........NNNN.',
-];
-// sliding: sat back on the slope, front leg out
-const L_SLIDE = [
-  '.....qqppppPPP..',
-  '....qqqq...ppPP.',
-  '...qqq.......nnn',
-  '..nnn........NNN',
-  '..NNN...........',
-];
-
-// [row, col, pixels]: rows 0–8 head, 9–14 torso, 15–21 legs
-const ARM = {
-  // raised beside his face, hand open; two positions make the wave
-  wave1: [[9, 11, 'kk'], [8, 13, 'd'], [7, 14, 'd'], [6, 15, 'd'], [4, 14, 'ss'], [5, 14, 'ss']],
-  wave2: [[9, 11, 'kk'], [8, 13, 'd'], [7, 14, 'd'], [6, 14, 'd'], [5, 14, 'd'], [3, 13, 'ss'], [4, 13, 'ss']],
-  // straight out in front at shoulder height
-  point: [[10, 12, 'kdds']],
-  // forearms forward at desk height; the fingers move between frames
-  type1: [[11, 11, 'k'], [12, 12, 'dd'], [13, 13, 'ss']],
-  type2: [[11, 11, 'k'], [12, 12, 'dd'], [12, 14, 'ss']],
-  // both hands in front of his chest, holding something
-  hold: [[10, 11, 'kk'], [11, 12, 'dss'], [12, 12, 'dss']],
-  // up over his head, as if to catch or lift something
-  lift: [[9, 11, 'kk'], [8, 13, 'd'], [7, 14, 'd'], [6, 14, 'd'], [5, 14, 'd'], [4, 14, 'd'], [2, 13, 'ss'], [3, 13, 'ss']],
-};
-// climbing (back view): one hand up on a rung, then the other
-const CLIMB1 = [[0, 1, 'ss'], [1, 1, 'ss'], [2, 1, 'd'], [3, 1, 'd'], [4, 1, 'd'], [5, 1, 'k'], [6, 1, 'k'], [7, 1, 'k'], [8, 1, 'k'], [10, 12, 'dss']];
-const CLIMB2 = [[0, 12, 'ss'], [1, 12, 'ss'], [2, 12, 'd'], [3, 12, 'd'], [4, 12, 'd'], [5, 12, 'k'], [6, 13, 'k'], [7, 12, 'k'], [8, 12, 'k'], [10, 0, 'ssd']];
-
-function build(rowsArr) {
+export function build(rowsArr) {
   if (rowsArr.length !== 22) throw new Error('hero frame must be 22 rows, got ' + rowsArr.length);
   // hitbox is 10×20: its origin sits 3 px right and 3 px down from the canvas corner
   // ink outline, then a soft light rim: black shirt and hair stay readable on night scenes
@@ -249,30 +159,7 @@ function build(rowsArr) {
 
 export function buildHero() {
   const f = (head, torso, legs) => build([...head, ...torso, ...legs]);
-  // a wide pose: the standing body plus an arm patch, optionally other legs
-  const arm = (marks, legs = L_STAND, head = HEAD) => {
-    const legsW = legs[0].length > 14 ? legs : widen(legs);
-    return build(patch([...widen(head), ...widen(T_ARM), ...legsW], marks));
-  };
-  const crouchLegs = (legs) => [BLANK, BLANK, BLANK, ...HEAD, ...T_FWD.slice(0, 5), ...legs].map((r) => r.padEnd(16, '.'));
   return {
-    // website scenes (wider frames; same anchor)
-    wave: [arm(ARM.wave1), arm(ARM.wave2)],
-    point: [arm(ARM.point)],
-    typing: [arm(ARM.type1), arm(ARM.type2)],
-    hold: [arm(ARM.hold)],
-    lift: [arm(ARM.lift)],
-    sit: [arm([], L_SIT)],
-    sitTyping: [arm(ARM.type1, L_SIT), arm(ARM.type2, L_SIT)],
-    climb: [
-      build(patch(widen([...HEAD_BACK, ...T_BACK_VIEW, ...L_CLIMB1]), CLIMB1)),
-      build(patch(widen([...HEAD_BACK, ...T_BACK_VIEW, ...L_CLIMB2]), CLIMB2)),
-    ],
-    slide: [build(crouchLegs(L_SLIDE))],
-    cheer: [build(patch(widen([...HEAD, ...T_ARM, ...L_STAND]), [...ARM.lift, [9, 2, 'k'], [8, 1, 'd'], [7, 0, 'd'], [5, 0, 's'], [6, 0, 'd']]))],
-
-    // the game
-
     idle: [
       f(HEAD, T_IDLE, L_STAND),
       build([BLANK, ...HEAD, ...T_IDLE.slice(0, 5), ...L_STAND]),

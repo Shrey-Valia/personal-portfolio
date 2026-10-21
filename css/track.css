@@ -1,0 +1,59 @@
+/* ═══════════════════════════════════════════════════════════
+   The timeline's pixel layers (js/timeline): scene canvases,
+   the track (path connectors and the travelling hero) and the
+   HTML labels over scenes. Canvases are backed at game-pixel
+   size and scaled up whole, so every game pixel is a square of
+   device pixels. Layer order: scenes 0, track 1, cards 2.
+   ═══════════════════════════════════════════════════════════ */
+
+.tl-canvas {
+  display: block;
+  image-rendering: crisp-edges;      /* older Safari */
+  image-rendering: pixelated;
+}
+
+/* the track covers <main>; its children sit in page coordinates */
+.tl-track {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tl-track > .tl-canvas { position: absolute; }
+
+/* the hero while he travels (and wherever he overhangs a scene) */
+.tl-hero {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+.tl-hero[hidden] { display: none; }
+
+/* labels over a scene: real text, never canvas text */
+.tl-labels { position: absolute; inset: 0; pointer-events: none; }
+.tl-label {
+  position: absolute;
+  padding: 1px 7px 2px;
+  border-radius: 999px;
+  background: rgba(11, 13, 23, 0.86);
+  color: var(--text);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.tl-label--center { transform: translateX(-50%); }
+.tl-label--right { transform: translateX(-100%); }
+.tl-label--good { color: #90eaa8; }
+.tl-label--bad { color: #ff8f7f; }
+.tl-label--gold { color: var(--gold); }
+.tl-label--cyan { color: #a8ecff; }
+
+@media print {
+  .tl-track, .tl-hero, .tl-labels, .tl-canvas { display: none !important; }
+}

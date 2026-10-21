@@ -1,186 +1,217 @@
 # Building a stop
 
-The website is a scroll timeline, newest first. Each stop is a **scene box**
-(pixel art the canvas draws) above a **card** (the résumé's own HTML, moved
-in). As you scroll, Shrey walks the path down the page; when the reading line
-(40 % of the way down the viewport) enters a scene, that scene's action
-plays with the scroll, and runs backwards when you scroll up.
+The website is a scroll timeline, newest first. Each stop is a pixel
+**scene** (a canvas in the page flow) above a **card** (the résumé's own
+HTML). As you scroll, Shrey walks the path down the page. When a stop is
+the active one, its `p` runs from 0 to 1 with the scroll: the engine walks
+him in, your action follows the scrollbar, the result holds, and he walks
+out. Scrolling back up plays all of it in reverse.
 
-The engine (`js/site/timeline.js`) owns the layout, the scroll, the path
-between stops and Shrey on it. **A stop only draws its own scene.**
+What to draw is in `docs/TIMELINE-SCENES.md` (one section per stop). The
+mechanics are in `docs/TIMELINE-ARCHITECTURE.md` §2–3. This file is the
+contract between your stop and the engine.
 
-## Files
+## Your footprint
 
 ```
-js/site/stops/<id>.js     your stop: you own it outright
-js/themes/<id>.js         the level's theme: you may add `export` to pure helpers, nothing else
+js/timeline/stops/<id>.js           your stop (replace the placeholder file)
+docs/questions-stops-<group>.md     questions and requests for the kit or markup
 ```
 
-`js/site/stops/index.js` already imports every stop; don't touch it, the
-engine, or anyone else's stop. If you need a pose that `js/art/sprites/hero.js`
-doesn't have, ask for it in the shared notes rather than editing that file.
+Nothing else. Don't edit `stops/index.js` (the frozen list), `kit.js`,
+`api.js`, `hero.js`, `palette.js`, `index.html` or CSS; ask in your
+questions doc and the engine owner adds it (additively).
 
-## The stop
+**Imports allowed:** `../kit.js`, `../../art/palette.js`, `../../art/sprite.js`,
+`../../art/draw.js`, `../../engine/util.js`. **Banned:** anything in
+`js/game`, `js/themes`, `js/ui`, and `font.js`. To reuse a level's art,
+read its theme file and *copy* the drawing code into your module, turning
+per-tick fields into functions of `f.act` and `f.hold` (e.g. a bridge's
+`fill` becomes `fill = ease.outCubic(f.act)`). (`js/site/` is the first
+draft's engine; it is removed in M2. Ignore it.)
 
-Each file calls `registerStop()` once. The fields come in two groups.
-
-**The card (content: leave these alone)**
-
-| field | what it is |
-|---|---|
-| `id`, `order` | unique id; position on the timeline (lower is higher up) |
-| `node` | a selector for the résumé element(s) moved into the card, or a function returning built nodes |
-| `factIds` | the facts the card holds (checked in `?debug=1`) |
-| `kind`, `when`, `nav`, `lead`, `chips`, `head`, `layout`, `places`, `anchor` | the card's label, date, bar link, lead line, highlight chips, heading, bookend layout, game place ids, link target |
-
-**The scene (yours)**
-
-| field | default | what it is |
-|---|---|---|
-| `build(art)` | — | called once before first use; prebuild canvases here (`art` is the game's art: `art.hero`, `art.items`, `art.actors`, `art.mapBase`) |
-| `draw(ctx, state)` | required | draws the scene; see below |
-| `size` | `[320, 160]` | design size in art pixels; height is fixed |
-| `keyPose` | `0.5` | the `p` shown with reduced motion (and for deep links) |
-| `leave` | `'walk'` | the move to the next stop: `walk`, `hop`, `slide`, `climb` |
-| `loop` | `false` | frames per second for an idle animation (`true` = 30), only while on screen |
-| `enter`, `exit` | `true` | `false` when he starts or ends inside this scene (the intro, the last stop) |
-
-## `draw(ctx, state)`
-
-The context is already set up the game's way: `ctx.setTransform(rs, …)` is
-applied, so you draw in **art pixels** from the scene's top-left, `ctx.W` is
-the scene width, and image smoothing is off. Fill the whole box every time
-(it is cleared first).
-
-`state`:
-
-| key | |
-|---|---|
-| `p` | 0 → 1 as the reading line crosses the box top → bottom. Scenes above the reading line are drawn at 1 (done), scenes below it at 0 (not started). |
-| `t` | time in 60 fps frames, **0 unless `loop` is set** |
-| `w`, `h` | the box in art px. `h` is your `size[1]`; `w` runs from 288 (narrow phones) to `size[0] × 1.25` (max 400) |
-| `floor` | the default ground line, `h − 18` |
-| `path` | `{ in, out }`: x where the path enters the top and leaves the bottom (`null` when it doesn't). Leave an opening there; on phones it is near the left edge, on desktop near the centre. |
-| `hero` | `null` unless Shrey is in this scene; otherwise see below |
-| `reduced` | the visitor prefers reduced motion |
-
-**Rules for `draw`:** it is a pure function of `p` (and `t` when looping):
-no `Math.random()`, no `Date`, no state carried from the last frame, no DOM.
-That is what makes scrolling back up play the action backwards. Keep it
-under about 2 ms (build static layers once in `build()` and `drawImage` them).
-Critical content stays inside the **central 288 px**; backgrounds fill all of `w`.
-
-### Placing Shrey
-
-When `hero` isn't null he's yours to place. Call
-`hero.place(pose, x, y, facing)` and the engine draws him on top of the
-scene, unclipped, so he can step in through the top edge and drop out of
-the bottom. (x, y) is where his feet meet the ground. If something in the
-scene must be in front of him (a desk, a podium rail), draw him yourself
-with `drawHero(ctx, pose, x, y, facing)` and don't call `place`.
-
-`hero` has `in` and `out` (the [x, y] where the path meets your box),
-`floor`, `enters`/`exits`, `dir` (`-1` while scrolling up) and `moving`.
-
-The standard visit does the boring part: hop down from `in`, walk to a
-spot, act, walk to `out`, drop out of the bottom.
+## The module
 
 ```js
-import { registerStop, visit, span, drawHero } from '../api.js';
+// js/timeline/stops/ornl.js
+import { pose, STD, handAt, drawPath, routeDone, routePoints, sky, fadeEdges, ledge, coreX, FLOOR } from '../kit.js';
+import { col } from '../../art/palette.js';
+import { makeCanvas, ease } from '../../engine/util.js';
 
-draw(ctx, { p, hero, w, h, floor }) {
-  // … the scene at p …
-  if (!hero) return;
-  const v = visit(p, hero, 120, { arrive: 0.25, depart: 0.8 });
-  // v.phase is 'enter' | 'act' | 'leave'; v.k runs 0 → 1 through 'act'
-  const pose = v.phase === 'act' ? (v.k < 0.5 ? 'typing.' + Math.floor(v.k * 12) : 'point') : v.pose;
-  hero.place(pose, v.x, v.y, v.phase === 'act' ? 1 : v.facing);
+export default {
+  id: 'ornl',                                     // == file name == data-stop
+  facts: ['x-ornl', 'x-ornl-1', 'x-ornl-2', 'x-ornl-3', 'x-ornl-4'],   // exactly the list's
+
+  // split: [0.15, 0.55, 0.85],                   // optional: where act, hold and out start
+  // key: 0.7,                                    // optional: the p shown with reduced motion
+  // idle: true,                                  // optional: f.t ticks (≤ 8 fps) during hold
+
+  poses() { return { press: [pose({ torso: 'T_FWD', patch: [[10, 12, 'kdds']], hand: [10, 15] })] }; },
+
+  build({ w, h, el }) {                           // once per width; el = the stop's element (read only)
+    const [back, b] = makeCanvas(w, h);
+    sky(b, w, FLOOR, ['indigo.0']);
+    ledge(b, 0, FLOOR, w, 'steel');
+    return { back, desk: coreX(w) + 40, route: { enter: [w / 2, 0], via: [[w / 2, FLOOR]], act: [coreX(w) + 40, FLOOR], exit: [w / 2, h] } };
+  },
+
+  draw(ctx, f, built) {                           // pure in (f, built)
+    ctx.drawImage(built.back, 0, 0);
+    drawPath(ctx, routePoints(built.route), { done: routeDone(built.route, f) });
+    const fill = ease.outCubic(f.act);            // the RUN bar follows the scrollbar
+    /* … */
+    f.drawHero();                                 // he goes here in the layer order
+    /* front props */
+    fadeEdges(ctx, f.w, f.h);
+  },
+
+  hero(f, built) {                                // act and hold only; null → idle at route.act
+    return { pose: f.act < 1 ? 'press' : 'type', frame: Math.floor(f.act * 8) % 2, x: built.desk, y: FLOOR, facing: 1 };
+  },
+
+  labels(f) {                                     // optional HTML labels over the scene
+    return f.act >= 1 ? [{ text: 'Run complete ✓', x: 100, y: 12, tone: 'good' }] : [{ text: 'Run', x: 100, y: 12 }];
+  },
+
+  // transit: { build, draw, hero },              // optional: the themed move to the next stop
+};
+```
+
+Every field but `id`, `facts` and `draw` is optional.
+
+### The scene
+
+- **100 game px tall, 160–240 wide.** The engine picks the width from the
+  screen; `build` is called once per width. Keep his mark, the main
+  mechanism and its labels inside the **centred 160 px** (`coreX(w)` is
+  its left edge). The wings hold only secondary props.
+- The engine backs the canvas at game-pixel size and scales it up whole
+  (2 CSS px per game px on phones, 2.5 on tablets, 3 on desktop). Draw in
+  game pixels; never set a transform or scale.
+- Draw the whole box every frame (it is cleared first). Build static
+  layers once in `build` and `drawImage` them.
+- No frames. End with `fadeEdges(ctx, f.w, f.h)` so the scene steps into
+  the page colour and reads as the path widening.
+
+### `f`, the state you draw from
+
+| | |
+|---|---|
+| `phase` | `before` (not reached; p 0) · `in` · `act` · `hold` · `out` · `after` (passed; p 1) |
+| `act` | 0 → 1 through the act phase; 0 before it, 1 after it |
+| `hold` | 0 → 1 through the hold phase |
+| `walk` | 0 → 1 through his walk in (phase `in`) or out (phase `out`) |
+| `p` | the raw 0 → 1 |
+| `here` | he is in this scene (false for `before`/`after` stops) |
+| `t` | the idle clock in ms: only in `hold`, only with `idle: true`, else 0 |
+| `reduced` | reduced motion: you get the hold phase at `key`; draw the finished state, nothing loops |
+| `dir` | -1 while the visitor scrolls up (he faces the way he moves) |
+| `still` | the visitor stopped scrolling |
+| `w`, `h` | the scene size |
+| `drawHero()` | draws him at this point in your layer order |
+
+**`draw` must be a pure function of `f` and `built`:** no `Math.random()`,
+no `Date`, no state kept between calls, no DOM. That is what makes
+scrolling back up play the scene backwards. Use `rng(seed)` from util in
+`build` if you need noise. Aim for `build` ≤ 4 ms at 240 px and `draw` ≤ 1 ms.
+
+### His route and his poses
+
+`build` returns `route`: `enter` (on the **top edge**, y 0, within 8 px of
+the centre), `via` (points on the way in), `act` (his mark), `leave` (points
+on the way out), `exit` (on the **bottom edge**, y = h, within 8 px of the
+centre). Default: straight down the middle to `[w/2, FLOOR]`. The engine
+walks him along it in the `in` and `out` phases: mostly vertical legs are
+drops (jump, fall, a crouch on landing), steep downhill legs are slides,
+the rest are walks with the run cycle from distance travelled.
+
+In `act` and `hold`, `hero(f, built)` places him: `{ pose, frame, x, y, facing }`,
+where (x, y) is the point between his feet. Return `null` for idle at
+`route.act`. While any part of his frame overhangs the scene's edge (he's
+stepping in through the top or out through the bottom), the engine draws
+him on the track layer instead of in your canvas, so don't rely on layering
+at the edges.
+
+**STD poses** (`'name'`, frame by number): `idle` (2), `blink`, `run` (4),
+`jump`, `fall`, `crouch`, `skid`, `hurt`, `victory`, `lookDown`, `slide`,
+`wave` (2), `point`, `type` (2), `carry` (both hands in front), `lift`
+(hand overhead), `crossArms`, `speak` (2, mouth open then closed, hand at
+chest), `climb` (2), `hang` (hands over his head, legs dangling), `hangOne`.
+He is 18 × 26 (20 wide when an arm reaches forward), facing right.
+
+**Custom poses** go in `poses()`: `pose({ head, torso, legs, patch, hand })`.
+Parts are names from hero.js (`HEAD`, `HEAD_BLINK`, `T_IDLE`, `T_FWD`,
+`T_BACK`, `T_UP`, `L_STAND`, `L_RUN1`–`L_RUN4`, `L_JUMP`, `L_FALL`) or rows in
+hero.js's `LEGEND` (head 9 rows, torso 6, legs 7, 14 wide). `patch` is a
+list of `[row, col, pixels]` over the 22-row frame (rows 0–8 head, 9–14
+torso, 15–21 legs); columns 14–15 widen the frame on his facing side.
+`hand: [row, col]` marks his hand. Names are local to your stop.
+
+**Props in his hand:** `handAt(pose, frame, facing, local)` gives the hand
+as `[x, y]` from his feet; draw the prop at `hero.x + x, hero.y + y`.
+Scene-only overlays (Omi pendant, mortarboard, diploma, stamp) are yours.
+
+### Labels
+
+`labels(f, built)` returns `[{ text, x, y, tone, align }]`: real HTML over
+the scene (aria-hidden; the card carries the meaning). x/y are game px,
+the label's top edge, centred on x unless `align` is `'left'` or `'right'`.
+Tones: `plain`, `good`, `bad`, `gold`, `cyan`. At most two at once, at most
+four words each, and every one is résumé wording or a literal UI word.
+**There is no canvas text anywhere**: drawing text on a scene throws.
+
+### The move to the next stop (`transit`)
+
+The engine draws a default connector from your exit down to the next
+stop's entrance (switchbacks in the lane on desktop, nearly straight under
+the card on phones). To theme it (a cage lift, slider steps, a zipline),
+export `transit` and it replaces the default for the gap *below your stop*:
+
+```js
+transit: {
+  build({ w, h, dy, from, to, side }) { return { /* cached art, the polyline */ }; },
+  draw(ctx, g, built) { /* the hardware, as a function of g.s */ },
+  hero(g, built) { return { pose, frame, x, y, facing }; },
 }
 ```
 
-`span(p, a, b)` maps `p` to 0 → 1 over a window, for staging beats.
-
-**Poses** (`'name'` or `'name.frame'`): `idle`, `blink`, `run` (4), `jump`,
-`fall`, `skid`, `crouch`, `hurt`, `victory`, plus for scenes `wave` (2),
-`point`, `typing` (2), `hold`, `lift` (hands overhead), `sit`, `sitTyping`
-(2), `climb` (2, back view), `slide`, `cheer`. He is about 18 × 26 px (20
-wide when an arm reaches forward), facing right by default.
-
-## Reduced motion
-
-Every scene is drawn at `p = keyPose`, nothing loops, and Shrey stands in
-whichever scene is nearest the reading line. Pick a `keyPose` where the
-scene says the bullet on its own: the finished cut, the lit beacon, him on
-the podium. Check it with `__timeline.setReduced(true)`.
-
-## Reusing a level's art
-
-The level themes already draw all ten places. To reuse a helper, add
-`export` in front of it in `js/themes/<id>.js` (e.g.
-`export function drawClip(…)`) and import it in your stop. Don't change what
-it does; the level still uses it. Theme files register their kits, backdrops
-and set pieces on import, and the levels already import them all.
-
-To use a whole **set piece**, build it in a fake level:
-
-```js
-import { createLevelShim } from '../shim.js';
-
-let lv, bar;
-build() {
-  lv = createLevelShim({ w: 320, h: 160 });           // or { rows, kit } for real tiles
-  bar = lv.add('runbar', 4, 6, { len: 6, fact: 'x-ornl-2' });   // tile coords, the level's spec
-},
-draw(ctx, { p, w }) {
-  bar.fill = span(p, 0.3, 0.7);                       // set its state from p…
-  lv.camera.x = 0;                                    // …frame it…
-  lv.drawAll(ctx);                                    // …and draw (back(), objects, enemies, draw())
-}
-```
-
-The shim has platforms, enemies, objects, `state.built`, `game.progress`
-(every fact logged unless you pass `found: [...]`), `game.content`, a hero
-stub (off-screen until you move `lv.hero`), a camera whose `shake` does
-nothing, and silent sound, particles and UI. A piece's `finish()` is
-disabled (in a level it ends the level). **Don't scrub with `update()`**:
-many pieces use `Math.random()` there. Set the fields that `draw()` reads
-from `p` instead. `?debug=1` builds every set piece the levels use through
-the shim and logs any that fail.
-
-## The path between stops
-
-`leave` picks how he gets to the next stop. To add a move (a zipline, the
-Northeastern streetcar), call `registerMove('<id>.zipline', { shape, at,
-draw })` from your stop file; see `js/site/path.js` for the four built in.
-Prefix the name with your stop id.
+The connector canvas is `w` wide (96 game px on desktop, 64 on phones),
+centred on the page's centre line, and `h` (= `dy`) tall: `from` is your
+exit on its top edge, `to` the next entrance on its bottom edge. `side` is
+where the card sits beside it on desktop (`1` right, `-1` left, `0` the card
+covers the middle, as on phones): keep hardware on the free side. `g` is
+`{ s, dir, reduced, still }`, with `s` 0 → 1 along the move. Pure in `g`;
+with `reduced`, draw the hardware formed (he isn't shown).
 
 ## Testing
 
-Serve the folder (`python3 tools/serve.py 4190`) and open `?debug=1`:
+Serve the folder (`python3 tools/serve.py 4190`) and open
+**`/tools/stop.html?stop=<id>`**, the test bench. It runs your stop through
+the same runtime as the page:
 
-- the console shows `[timeline] 11 stops, 34 facts on the timeline`, the
-  level-shim line, and any problem with your stop (unknown fact, duplicate
-  id, a draw that threw: the scene shows a blank panel and logs once)
-- the page shows the reading line, each box's id and `p`, and the frame cost
-- `__timeline.goto('<id>', 0.4)` scrolls so the reading line is at that `p`;
-  step through `p` by hand to check every beat both ways
-- `__timeline.drawNow({ dir: -1, moving: true })` draws a frame immediately
-  (a hidden tab defers animation frames and scroll events), here as if
-  scrolling up
-- `__timeline.state()` and `__timeline.layout()` show where everything is
-- check desktop 1280 × 800 and phone 375 × 812 (scenes are 2 CSS px per art
-  px on desktop, 1 on phones), and `setReduced(true)`
+- **Width** 160–240, **p**, and **He is** (here / not yet / gone)
+- **Scale** phone 2 / tablet 2.5 / desktop 3, **Reduced motion**,
+  **Scrolling up**, **Not scrolling**, **Idle clock**, and the **160 core** outline
+- **Play down and back** sweeps p 0 → 1 → 0
+- **Move to the next stop** previews your `transit` (or the default) with an `s` slider
+- **Run checks**: widths 160 and 240, p 0 to 1 in tenths, reduced on and off,
+  before and after, route rules, labels, no canvas text, and determinism
+  (p 0.37 → 0.9 → 0.37 must draw the same pixels). It must say OK.
+
+On the page, `?debug=1` runs the same checks for every stop plus the page
+checks (11 stops in order, 34/34 facts each claimed once).
 
 ## Rules
 
-- **Depict the real bullet.** The action shows what that line of the card
-  says, nothing more. Shrey reads visuals as claims.
-- **No invented numbers or words.** Any figure or label in the scene is in
-  the card. If the card doesn't say it, the scene doesn't either.
-- **Readable.** Canvas text goes through `drawText()` (never under 13 CSS
-  px; on phones that is 13 art px, so keep labels to a word or two). Sentence
-  case. Flat colours, no dithering.
-- **Original art.** No Nintendo shapes or music cues, no company logos
-  (names as text are fine), no `>_` blocks.
-- **A key pose** that works without motion.
-- **Unique names**: your stop id, and anything you register prefixed with it.
+- **Depict the real bullet.** One claim per scene, at most two beats, a
+  clear before and after. Shrey reads visuals as claims.
+- **No invented numbers or words.** Counts come from markup in `build`
+  (`el.querySelectorAll('[data-credit]').length`); figures only from the
+  card. If the card doesn't say it, the scene doesn't either.
+- **Readable.** Flat colours, no dithering, labels short. One-off colours are
+  `'#hex'` values (quantized by `col()`); never add a palette ramp.
+- **Original art.** No Nintendo shapes or cues, no company logos (names as
+  text are fine), no `>_` blocks, no `?` glyphs, coins or stars.
+- **Reduced motion** shows the finished state, readable without motion.
+- If your stop throws, the page logs `[timeline] stop "<id>" failed` and
+  shows the placeholder instead; it never takes the page down.
