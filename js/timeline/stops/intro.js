@@ -155,12 +155,15 @@ function paintBack(w, h) {
   cloud(g, X(-30), 97, 22, 3);
 
   // his house sits on a lump of the golden hills, adrift above the clouds;
-  // a valley oak on a smaller one in the left wing
+  // a valley oak on a smaller one in the left wing, only when the wing
+  // has room for all of it (never a sliver at the edge)
   island(g, X(-4), X(80), 83, 15, 21);
-  island(g, X(-36), X(-8), 77, 7, 9);
-  const ox = X(-22);
-  R(g, ox - 2, 66, 4, 12, 'ink.0'); R(g, ox - 1, 66, 2, 11, '#3d2a24');
-  for (const [dx, dy, r, c] of [[0, 62, 8, 'ink.0'], [-7, 66, 5, 'ink.0'], [7, 65, 6, 'ink.0'], [0, 62, 7, '#1f3326'], [-7, 66, 4, '#1f3326'], [7, 65, 5, '#1f3326'], [-2, 59, 4, '#2a4430'], [5, 61, 3, '#2a4430']]) disc(g, ox + dx, dy, r, c);
+  const ox = Math.round(X(0) / 2) - 2;
+  if (ox - 14 >= 2) {
+    island(g, ox - 14, ox + 14, 77, 7, 9);
+    R(g, ox - 2, 66, 4, 12, 'ink.0'); R(g, ox - 1, 66, 2, 11, '#3d2a24');
+    for (const [dx, dy, r, c] of [[0, 62, 8, 'ink.0'], [-7, 66, 5, 'ink.0'], [7, 65, 6, 'ink.0'], [0, 62, 7, '#1f3326'], [-7, 66, 4, '#1f3326'], [7, 65, 5, '#1f3326'], [-2, 59, 4, '#2a4430'], [5, 61, 3, '#2a4430']]) disc(g, ox + dx, dy, r, c);
+  }
   cloud(g, X(80), 96, 26, 0);
 
   paintHouse(g, X);

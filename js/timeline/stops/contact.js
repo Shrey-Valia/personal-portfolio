@@ -328,23 +328,34 @@ function beacon(ctx, x, y, glow, beam, angle) {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   const warm = (a) => `rgba(255,214,120,${(a * glow).toFixed(3)})`;
-  for (const [r, a] of [[16, 0.06], [10, 0.08], [6, 0.12]]) { ctx.fillStyle = warm(a); ctx.beginPath(); ctx.arc(x + 0.5, y, r, 0, Math.PI * 2); ctx.fill(); }
+  for (const [r, a] of [[22, 0.07], [14, 0.11], [8, 0.2]]) { ctx.fillStyle = warm(a); ctx.beginPath(); ctx.arc(x + 0.5, y, r, 0, Math.PI * 2); ctx.fill(); }
   if (beam > 0) {
     const dx = Math.cos(angle), toward = Math.sin(angle);
-    const len = 84 * Math.abs(dx) * beam;
-    if (len > 6) {
-      // three widths, each fading out in three steps along its length
-      for (const [spread, a] of [[14, 0.06], [9, 0.07], [4, 0.1]]) {
-        for (const [k0, k1, fall] of [[0, 0.5, 1], [0.5, 0.78, 0.6], [0.78, 1, 0.3]]) {
-          const x0 = x + dx * len * k0, x1 = x + dx * len * k1, s0 = lerp(3, spread, k0), s1 = lerp(3, spread, k1);
-          ctx.fillStyle = warm(a * fall * (1 + 0.6 * Math.max(0, toward)));
-          ctx.beginPath(); ctx.moveTo(x0, y - s0); ctx.lineTo(x1, y - s1); ctx.lineTo(x1, y + s1); ctx.lineTo(x0, y + s0); ctx.fill();
-        }
+    // foreshortened as it turns, but never shorter than a third
+    const len = 92 * (0.32 + 0.68 * Math.abs(dx)) * beam, dirx = dx < 0 ? -1 : 1;
+    const boost = 1 + 0.5 * Math.max(0, toward);
+    // three widths, each fading out in three steps along its length
+    for (const [spread, a] of [[15, 0.1], [10, 0.13], [5, 0.2]]) {
+      for (const [k0, k1, fall] of [[0, 0.5, 1], [0.5, 0.78, 0.65], [0.78, 1, 0.35]]) {
+        const x0 = x + dirx * len * k0, x1 = x + dirx * len * k1, s0 = lerp(3, spread, k0), s1 = lerp(3, spread, k1);
+        ctx.fillStyle = warm(a * fall * boost);
+        ctx.beginPath(); ctx.moveTo(x0, y - s0); ctx.lineTo(x1, y - s1); ctx.lineTo(x1, y + s1); ctx.lineTo(x0, y + s0); ctx.fill();
       }
     }
-    const flash = Math.pow(Math.max(0, toward), 8);
-    if (flash > 0.05) { ctx.fillStyle = warm(0.2 * flash); ctx.beginPath(); ctx.arc(x + 0.5, y, 8 + flash * 8, 0, Math.PI * 2); ctx.fill(); }
+    // its bright core, and the light it throws on the water
+    ctx.fillStyle = warm(0.45);
+    ctx.fillRect(Math.round(Math.min(x, x + dirx * len * 0.7)), y - 1, Math.round(len * 0.7), 2);
+    if (Math.abs(dx) > 0.35) {
+      for (let row = 0; row < 4; row++) {
+        const wy = HORIZON + 4 + row * 5, cx = x + dirx * len * (0.55 + row * 0.1);
+        ctx.fillStyle = warm(0.4 - row * 0.07);
+        ctx.fillRect(Math.round(cx - 6 + row * 2), wy, 9 - row, 1);
+        ctx.fillRect(Math.round(cx + 5), wy + 2, 4, 1);
+      }
+    }
+    const flash = Math.pow(Math.max(0, toward), 6);
+    if (flash > 0.05) { ctx.fillStyle = warm(0.32 * flash); ctx.beginPath(); ctx.arc(x + 0.5, y, 9 + flash * 9, 0, Math.PI * 2); ctx.fill(); }
   }
   ctx.restore();
-  R(ctx, x - 2, y - 3, 5, 6, '#ffffff');
+  R(ctx, x - 3, y - 4, 7, 8, '#ffffff');
 }
