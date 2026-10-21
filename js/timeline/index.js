@@ -89,13 +89,11 @@ export function createTimeline({ root, debug = false }) {
 
   async function swapIn(s) {
     const rt = await loadStop(s.id);
-    if (!(rt.mod.placeholder && s.rt.mod.placeholder)) {
-      s.rt = rt; s.built = null; s.key = '';
-      const g = gaps[s.i];
-      if (g) { g.tr = null; g.key = ''; }
-      dirty = true;
-      schedule();
-    }
+    s.rt = rt; s.built = null; s.key = '';           // the stop's own module, even if it's still a placeholder
+    const g = gaps[s.i];
+    if (g) { g.tr = null; g.key = ''; }
+    dirty = true;
+    schedule();
     s.loaded = true;
     if (debug && stops.every((x) => x.loaded)) report();
   }
@@ -241,7 +239,7 @@ export function createTimeline({ root, debug = false }) {
       const active = at.dwell && at.stop === s.i;
       const past = at.dwell ? s.i < at.stop : s.i <= at.gap;
       const p = active ? at.p : past ? 1 : 0;
-      const f = s.rt.frame({ p, active, reduced, t, dir, still, w: s.built.w, h: SCENE_H });
+      const f = s.rt.frame({ p, active, reduced, t, dir, still, end: s.i === stops.length - 1, w: s.built.w, h: SCENE_H });
       const key = `${f.phase}|${f.p.toFixed(4)}|${f.t}|${active ? dir + '' + still : ''}|${reduced}|${s.built.w}`;
       if (key !== s.key) {
         let r;

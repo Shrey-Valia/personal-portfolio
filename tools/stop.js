@@ -87,7 +87,8 @@ function draw() {
   const ctx = guardText(canvas.getContext('2d'));
   const active = state.who === 'here';
   const p = active ? state.p : state.who === 'before' ? 0 : 1;
-  const f = rt.frame({ p, active, reduced: state.reduced, t: state.idle ? state.t : 0, dir: state.up ? -1 : 1, still: state.still, w, h });
+  const end = state.id === STOP_IDS[STOP_IDS.length - 1];          // the path ends here: no walk out
+  const f = rt.frame({ p, active, reduced: state.reduced, t: state.idle ? state.t : 0, dir: state.up ? -1 : 1, still: state.still, end, w, h });
   let r;
   try { r = rt.render(ctx, b, f); } catch (err) { $('readout').textContent = 'draw threw: ' + err.message; console.error(err); return; }
 
