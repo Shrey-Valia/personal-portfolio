@@ -294,8 +294,7 @@ function oak(a, x, y) {
 const DUST = ['#ecd09a', '#dcb57a', '#c99d66', '#b08656', '#94704a', '#7a5e42'].map(col);
 
 const T5 = {
-  build({ w, h, from = [Math.round(w / 2), 0], to = [Math.round(w / 2), h], side = 0, lane }) {
-    if (lane == null) lane = side ? 20 : 0;
+  build({ w, h, from = [Math.round(w / 2), 0], to = [Math.round(w / 2), h], side = 0, lane = 0 }) {
     const fd = side ? -side : -1;                                   // the free side, away from the card
     const fx = from[0], tx = to[0];
     const xFree = Math.round(w / 2 + fd * Math.min(w / 2 - 10, 32));

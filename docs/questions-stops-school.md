@@ -4,7 +4,7 @@ Files: `js/timeline/stops/neu.js`, `dhs.js`, `edulearn.js`. Each stop's
 `transit` carries him to the next stop: T5 (neu → dhs), T6 (dhs →
 edulearn), T7 (edulearn → trading).
 
-Checked: the bench checks pass for all three (widths 160/240, p sweep,
+Checked (also after merging timeline-core 68c8081 and 0b45d40): the bench checks pass for all three (widths 160/240, p sweep,
 reduced motion, before/after, determinism, no canvas text, transits). On
 `/?debug=1` the console reads `timeline check: 11 stops OK, 34/34 facts`
 with 0 errors. At 1280×800 and 375×812, 24 sampled scroll positions across
@@ -13,12 +13,9 @@ away and back. Warm `build` takes 1–3 ms at 240 px and `draw` about 0.1 ms.
 
 ## For the engine (timeline-core)
 
-1. **`lane` never reaches a transit.** M2 added `lane` to `transit.build`,
-   and `index.js` passes it to `transitRuntime(...).build`. But
-   `api.js:195` forwards only `{ w, h, dy, from, to, side }`, so a stop's
-   transit gets `lane` as `undefined`. I work around it in all three
-   transits with `lane ?? (side ? 20 : 0)`. Fix: add `lane` to that call.
-   It's additive.
+1. ~~**`lane` never reaches a transit.**~~ Fixed in timeline-core 0b45d40
+   (merged here). T5 now takes `lane` straight from the engine (20 beside a
+   desktop card, 0 on phones). T6 and T7 don't use it.
 2. **Optional: props that ride with him off the scene.** He leaves
    Northeastern holding his book stack, and Dublin High wearing his cap
    and holding his diploma. These overlays are drawn in the scene canvas,
